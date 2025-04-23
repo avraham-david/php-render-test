@@ -117,12 +117,7 @@
       transition: background-color 0.2s ease;
     }
 
-    .input-area button:disabled {
-      background-color: #c1c1c1;
-      cursor: not-allowed;
-    }
-
-    .input-area button:hover:not(:disabled) {
+    .input-area button:hover {
       background-color: #128c7e;
     }
 
@@ -176,7 +171,7 @@
         <option value="main-ai">מודל 1</option>
         <option value="gemini25">מודל 2</option>
       </select>
-      <button id="sendBtn" onclick="sendMessage()" disabled>📨</button>
+      <button id="sendBtn" onclick="sendMessage()">📨</button>
     </div>
   </div>
 
@@ -201,7 +196,6 @@
       conversationHistory.push({ role: 'user', content: userText });
       input.value = '';
       input.focus();
-      toggleSendButton();
 
       showTypingIndicator('ai');
 
@@ -238,7 +232,11 @@
       });
     }
 
-    // פונקציות נוספות (כמו appendMessage, toggleSendButton, clearChat וכו') נשארו כפי שהיו
+    function toggleSendButton() {
+      const input = document.getElementById('userInput');
+      const button = document.getElementById('sendBtn');
+      button.disabled = input.value.trim() === '';
+    }
   </script>
 </body>
 </html>
