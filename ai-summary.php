@@ -57,6 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 } else {
     http_response_code(405);
-echo 'האתר פתוח! נסו את הסקריפט!';
+echo 'דף זה נועד למפתח בלבד';
 }
 ?>
