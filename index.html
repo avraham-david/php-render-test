@@ -1,1 +1,53 @@
-this test 23
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>שלח טקסט ל-AI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      text-align: center;
+      margin-top: 50px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+      width: 300px;
+    }
+  </style>
+</head>
+<body>
+  <h1>שליחת טקסט ל-AI</h1>
+  <input type="text" id="textInput" placeholder="הקלד טקסט כאן" />
+  <br />
+  <button onclick="sendToAI()">שלח</button>
+
+  <script>
+    function sendToAI() {
+      const text = document.getElementById('textInput').value.trim();
+      if (text === '') return;
+
+      fetch('https://php-render-test.onrender.com/main-ai.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.text) {
+          alert(data.text);
+        } else {
+          console.error("לא התקבלה תשובה תקינה מהשרת.");
+        }
+      })
+      .catch(error => {
+        console.error("שגיאה בבקשת fetch:", error);
+      });
+    }
+  </script>
+</body>
+</html>
