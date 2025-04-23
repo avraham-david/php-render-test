@@ -81,6 +81,7 @@
 
     .input-area {
       display: flex;
+      align-items: center;
       padding: 10px;
       background-color: #f9f9f9;
       border-top: 1px solid #ccc;
@@ -94,6 +95,14 @@
       border-radius: 10px;
       border: 1px solid #ccc;
       outline: none;
+    }
+
+    .input-area select {
+      margin-right: 10px;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 14px;
     }
 
     .input-area button {
@@ -131,12 +140,6 @@
     .download-btn { left: 40px; }
     .darkmode-btn { left: 70px; }
 
-    .model-select {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-    }
-
     .typing {
       display: flex;
       gap: 4px;
@@ -166,13 +169,13 @@
     <button class="clear-btn" onclick="clearChat()">🧹</button>
     <button class="download-btn" onclick="downloadSummary()">⬇️</button>
     <button class="darkmode-btn" onclick="toggleDarkMode()">🌙</button>
-    <select class="model-select" id="modelSelector">
-      <option value="main">מודל 1</option>
-      <option value="gemini">מודל 2</option>
-    </select>
     <div id="chat"></div>
     <div class="input-area">
       <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton()"></textarea>
+      <select id="modelSelect">
+        <option value="main-ai">מודל 1</option>
+        <option value="gemini25">מודל 2</option>
+      </select>
       <button id="sendBtn" onclick="sendMessage()" disabled>📨</button>
     </div>
   </div>
@@ -184,13 +187,12 @@
     let conversationHistory = [];
     let aiTypingEl = null;
 
-    function getSelectedModelUrl() {
-      const model = document.getElementById('modelSelector').value;
-      return model === 'gemini' ? 'https://php-render-test.onrender.com/gemini25.php' : 'https://php-render-test.onrender.com/main-ai.php';
-    }
-
     function sendMessage() {
       const input = document.getElementById('userInput');
+      const model = document.getElementById('modelSelect').value;
+      const endpoint = model === 'gemini25' 
+        ? 'https://php-render-test.onrender.com/gemini25.php' 
+        : 'https://php-render-test.onrender.com/main-ai.php';
       const userText = input.value.trim();
       if (userText === '') return;
 
@@ -207,7 +209,7 @@
         `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
       ).join('\n');
 
-      fetch(getSelectedModelUrl(), {
+      fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: formattedHistory })
