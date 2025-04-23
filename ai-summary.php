@@ -14,7 +14,8 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 $apiKey = 'AIzaSyBuVkI5yIDoXejGN_4E5gawGlTxk_Mkq4M'; 
-$systemInstruction = "תפקידך הוא סיכום בלבד.אתה מקבל את פרטי הדף מסכם אותם בצורה הברורה ביותר כולל עיקרי הדברים ומחזיר אותם";
+$systemInstruction = "תפקידך הוא לסכם דפי אינטרנט בלבד. אתה מקבל את תוכן הדף ומחזיר סיכום ברור, תמציתי ומדויק הכולל את עיקרי הדברים, הרעיונות המרכזיים, והנקודות החשובות ביותר. אל תכלול מידע טכני שולי או פרטים לא רלוונטיים. הסיכום חייב להיות בעברית בלבד, ומיועד לאפשר לקורא להבין את מהות הדף מבלי לקרוא את כולו.";
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
