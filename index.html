@@ -55,6 +55,7 @@
       border: 1px solid #b8e8b0;
       align-self: flex-end;
       border-bottom-right-radius: 0;
+      font-family: 'Segoe UI', sans-serif;
     }
 
     .ai {
@@ -62,6 +63,12 @@
       border: 1px solid #ddd;
       align-self: flex-start;
       border-bottom-left-radius: 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .ai::before {
+      content: "🤖 ";
+      font-size: 18px;
     }
 
     .timestamp {
@@ -161,7 +168,7 @@
     <div id="chat"></div>
     <div class="input-area">
       <textarea id="userInput" rows="2" placeholder="הקלד הודעה..."></textarea>
-      <button onclick="sendMessage()">שלח</button>
+      <button onclick="sendMessage()">✉️</button>
     </div>
   </div>
 
@@ -198,10 +205,10 @@
     }
 
     function showTypingIndicator(sender) {
-      if (aiTypingEl) return;
+      removeTypingIndicator();
       aiTypingEl = document.createElement('div');
       aiTypingEl.className = 'message ' + sender;
-      aiTypingEl.innerHTML = 'מקליד...';
+      aiTypingEl.innerHTML = `<span class="typing"><span class="dot">•</span><span class="dot">•</span><span class="dot">•</span></span>`;
       document.getElementById('chat').appendChild(aiTypingEl);
       document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
     }
