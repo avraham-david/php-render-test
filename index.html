@@ -20,6 +20,7 @@
       flex-direction: column;
       background-color: #ffffff;
       border: 1px solid #ccc;
+      position: relative;
     }
 
     #chat {
@@ -88,7 +89,7 @@
 
     .input-area button {
       margin-right: 10px;
-      padding: 10px;
+      padding: 10px 20px;
       font-size: 16px;
       background-color: #25d366;
       color: white;
@@ -120,12 +121,16 @@
     <div id="chat"></div>
     <div class="input-area">
       <textarea id="userInput" rows="2" placeholder="הקלד הודעה..."></textarea>
-      <button onclick="sendMessage()">✈️</button>
+      <button onclick="sendMessage()">שלח</button>
     </div>
   </div>
 
+  <audio id="sendSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_37e2f07d7e.mp3?filename=message-pop-alert-1-189853.mp3"></audio>
+  <audio id="receiveSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0e2ce4a24d.mp3?filename=notification-132111.mp3"></audio>
+
   <script>
     let conversationHistory = [];
+    let aiTypingEl = null;
 
     function formatTime() {
       const now = new Date();
@@ -139,6 +144,12 @@
       msg.innerHTML = text + `<div class="timestamp">${formatTime()}</div>`;
       chat.appendChild(msg);
       chat.scrollTop = chat.scrollHeight;
+
+      if (sender === 'user') {
+        document.getElementById('sendSound').play();
+      } else if (sender === 'ai') {
+        document.getElementById('receiveSound').play();
+      }
     }
 
     function clearChat() {
@@ -146,18 +157,34 @@
       document.getElementById('chat').innerHTML = '';
     }
 
+    function showTypingIndicator(sender) {
+      if (aiTypingEl) return;
+      aiTypingEl = document.createElement('div');
+      aiTypingEl.className = 'message ' + sender;
+      aiTypingEl.innerHTML = 'מקליד...';
+      document.getElementById('chat').appendChild(aiTypingEl);
+      document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      if (aiTypingEl) {
+        aiTypingEl.remove();
+        aiTypingEl = null;
+      }
+    }
+
     function sendMessage() {
       const input = document.getElementById('userInput');
       const userText = input.value.trim();
       if (userText === '') return;
 
+      removeTypingIndicator();
       appendMessage(userText, 'user');
       conversationHistory.push({ role: 'user', content: userText });
       input.value = '';
       input.focus();
 
-      // הצגת "מקליד..."
-      appendMessage('מקליד...', 'ai');
+      showTypingIndicator('ai');
 
       const formattedHistory = conversationHistory.map(e =>
         `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
@@ -170,8 +197,7 @@
       })
       .then(response => response.json())
       .then(data => {
-        const chat = document.getElementById('chat');
-        chat.removeChild(chat.lastChild); // הסר "מקליד..."
+        removeTypingIndicator();
 
         if (data && data.text) {
           appendMessage(data.text, 'ai');
@@ -181,6 +207,7 @@
         }
       })
       .catch(error => {
+        removeTypingIndicator();
         console.error("שגיאה בבקשת fetch:", error);
       });
     }
@@ -189,6 +216,10 @@
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
+      } else {
+        showTypingIndicator('user');
+        clearTimeout(window.typingTimeout);
+        window.typingTimeout = setTimeout(removeTypingIndicator, 1000);
       }
     });
   </script>
