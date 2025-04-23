@@ -65,15 +65,15 @@
       border-bottom-right-radius: 0;
     }
 
+    .container.dark-mode .message.user {
+      background-color: #2e7d32;
+    }
+
     .message.ai {
       background-color: #fff;
       border: 1px solid #ddd;
       align-self: flex-start;
       border-bottom-left-radius: 0;
-    }
-
-    .container.dark-mode .message.user {
-      background-color: #2e7d32;
     }
 
     .container.dark-mode .message.ai {
@@ -136,17 +136,27 @@
 
     .download-btn {
       background-color: #4CAF50;
-      padding: 10px 20px;
+      padding: 12px 20px;
       color: white;
       border: none;
       border-radius: 18px;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 20px;
       align-self: center;
+      font-size: 18px;
+      transition: background-color 0.3s ease;
     }
 
     .download-btn:hover {
       background-color: #45a049;
+    }
+
+    .container.dark-mode .download-btn {
+      background-color: #3c763d;
+    }
+
+    .container.dark-mode .download-btn:hover {
+      background-color: #357a38;
     }
   </style>
 </head>
@@ -187,9 +197,7 @@
       input.value = '';
       input.focus();
 
-      const formattedHistory = conversationHistory.map(e =>
-        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
-      ).join('\n');
+      const formattedHistory = conversationHistory.map(e => e.content).join('\n'); // הסרה של ה-"AI" ו-"משתמש"
 
       fetch('https://php-render-test.onrender.com/main-ai.php', {
         method: 'POST',
@@ -219,7 +227,7 @@
 
     function downloadChat() {
       const chatContent = conversationHistory.map(msg => {
-        return `${msg.role === 'user' ? 'משתמש' : 'AI'}: ${msg.content}\n`;
+        return `${msg.content}\n`; // הסרה של "משתמש" ו-"AI"
       }).join('');
       const blob = new Blob([chatContent], { type: 'text/plain' });
       const link = document.createElement('a');
