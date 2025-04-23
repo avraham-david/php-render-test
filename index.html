@@ -5,8 +5,8 @@
   <title>צ'אט עם AI</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #e5ddd5;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
       margin: 0;
       padding: 0;
       direction: rtl;
@@ -18,7 +18,7 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
-      background-color: #fff;
+      background-color: #ffffff;
       border: 1px solid #ccc;
     }
 
@@ -26,29 +26,38 @@
       flex: 1;
       padding: 10px;
       overflow-y: auto;
-      background-color: #dcf8c6;
+      background-color: #f6f7f9;
       display: flex;
       flex-direction: column;
     }
 
     .message {
-      max-width: 70%;
-      padding: 10px;
-      margin: 5px;
+      max-width: 75%;
+      padding: 10px 14px;
+      margin: 6px;
       border-radius: 10px;
       word-wrap: break-word;
       font-size: 15px;
       position: relative;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(5px);}
+      to {opacity: 1; transform: translateY(0);}
     }
 
     .user {
-      background-color: #dcf8c6;
+      background-color: #d4f8c6;
+      border: 1px solid #b8e8b0;
       align-self: flex-end;
       border-bottom-right-radius: 0;
     }
 
     .ai {
       background-color: #ffffff;
+      border: 1px solid #ddd;
       align-self: flex-start;
       border-bottom-left-radius: 0;
     }
@@ -56,14 +65,14 @@
     .timestamp {
       font-size: 11px;
       color: gray;
-      margin-top: 3px;
+      margin-top: 4px;
       text-align: left;
     }
 
     .input-area {
       display: flex;
       padding: 10px;
-      background-color: #f0f0f0;
+      background-color: #f9f9f9;
       border-top: 1px solid #ccc;
     }
 
@@ -74,30 +83,44 @@
       resize: none;
       border-radius: 10px;
       border: 1px solid #ccc;
+      outline: none;
     }
 
     .input-area button {
       margin-right: 10px;
-      padding: 10px 20px;
+      padding: 10px;
       font-size: 16px;
       background-color: #25d366;
       color: white;
       border: none;
       border-radius: 10px;
       cursor: pointer;
+      transition: background-color 0.2s ease;
     }
 
     .input-area button:hover {
       background-color: #128c7e;
     }
+
+    .clear-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: transparent;
+      border: none;
+      font-size: 16px;
+      color: #888;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <button class="clear-btn" onclick="clearChat()">🧹</button>
     <div id="chat"></div>
     <div class="input-area">
       <textarea id="userInput" rows="2" placeholder="הקלד הודעה..."></textarea>
-      <button onclick="sendMessage()">שלח</button>
+      <button onclick="sendMessage()">✈️</button>
     </div>
   </div>
 
@@ -106,7 +129,7 @@
 
     function formatTime() {
       const now = new Date();
-      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return now.toLocaleString('he-IL', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
     }
 
     function appendMessage(text, sender) {
@@ -116,6 +139,11 @@
       msg.innerHTML = text + `<div class="timestamp">${formatTime()}</div>`;
       chat.appendChild(msg);
       chat.scrollTop = chat.scrollHeight;
+    }
+
+    function clearChat() {
+      conversationHistory = [];
+      document.getElementById('chat').innerHTML = '';
     }
 
     function sendMessage() {
@@ -128,7 +156,9 @@
       input.value = '';
       input.focus();
 
-      // שלח את כל ההיסטוריה כדי לשמור הקשר
+      // הצגת "מקליד..."
+      appendMessage('מקליד...', 'ai');
+
       const formattedHistory = conversationHistory.map(e =>
         `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
       ).join('\n');
@@ -140,6 +170,9 @@
       })
       .then(response => response.json())
       .then(data => {
+        const chat = document.getElementById('chat');
+        chat.removeChild(chat.lastChild); // הסר "מקליד..."
+
         if (data && data.text) {
           appendMessage(data.text, 'ai');
           conversationHistory.push({ role: 'ai', content: data.text });
@@ -152,7 +185,6 @@
       });
     }
 
-    // שליחה עם אנטר
     document.getElementById('userInput').addEventListener('keydown', function (e) {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
