@@ -20,7 +20,6 @@
       flex-direction: column;
       background-color: #ffffff;
       border: 1px solid #ccc;
-      position: relative;
     }
 
     #chat {
@@ -30,8 +29,6 @@
       background-color: #f6f7f9;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
-      scroll-behavior: smooth;
     }
 
     .message {
@@ -43,20 +40,13 @@
       font-size: 15px;
       position: relative;
       box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from {opacity: 0; transform: translateY(5px);}
-      to {opacity: 1; transform: translateY(0);}
     }
 
     .user {
-      background-color: #dcf8c6;
+      background-color: #d4f8c6;
       border: 1px solid #b8e8b0;
       align-self: flex-end;
       border-bottom-right-radius: 0;
-      font-family: 'Segoe UI', sans-serif;
     }
 
     .ai {
@@ -64,12 +54,6 @@
       border: 1px solid #ddd;
       align-self: flex-start;
       border-bottom-left-radius: 0;
-      font-family: 'Courier New', monospace;
-    }
-
-    .ai::before {
-      content: "🤖 ";
-      font-size: 18px;
     }
 
     .timestamp {
@@ -105,156 +89,37 @@
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      transition: background-color 0.2s ease;
     }
 
-    .input-area button:disabled {
-      background-color: #c1c1c1;
-      cursor: not-allowed;
-    }
-
-    .input-area button:hover:not(:disabled) {
+    .input-area button:hover {
       background-color: #128c7e;
-    }
-
-    .clear-btn, .download-btn, .darkmode-btn {
-      position: absolute;
-      top: 10px;
-      background: transparent;
-      border: none;
-      font-size: 16px;
-      color: #888;
-      cursor: pointer;
-    }
-
-    .clear-btn { left: 10px; }
-    .download-btn { left: 40px; }
-    .darkmode-btn { left: 70px; }
-
-    .typing {
-      display: flex;
-      gap: 4px;
-    }
-    .typing .dot {
-      width: 8px;
-      height: 8px;
-      background: #aaa;
-      border-radius: 50%;
-      animation: bounce 1.2s infinite ease-in-out;
-    }
-    .typing .dot:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    .typing .dot:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-
-    @keyframes bounce {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1); }
-    }
-
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: #1e1e1e;
-        color: #e0e0e0;
-      }
-      .container {
-        background-color: #2a2a2a;
-        border-color: #444;
-      }
-      .input-area {
-        background-color: #333;
-        border-top-color: #555;
-      }
-      .input-area textarea {
-        background-color: #444;
-        color: #fff;
-        border-color: #555;
-      }
-      .input-area button {
-        background-color: #128c7e;
-      }
-      #chat {
-        background-color: #1e1e1e;
-      }
-      .user {
-        background-color: #056162;
-        border-color: #034b4c;
-        color: #fff;
-      }
-      .ai {
-        background-color: #2f2f2f;
-        border-color: #444;
-        color: #fff;
-      }
-      .timestamp {
-        color: #aaa;
-      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <button class="clear-btn" onclick="clearChat()">🧹</button>
-    <button class="download-btn" onclick="downloadSummary()">⬇️</button>
-    <button class="darkmode-btn" onclick="toggleDarkMode()">🌙</button>
     <div id="chat"></div>
     <div class="input-area">
-      <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton()"></textarea>
-      <button id="sendBtn" onclick="sendMessage()" disabled>📨</button>
+      <textarea id="userInput" rows="2" placeholder="הקלד הודעה..."></textarea>
+      <button onclick="sendMessage()">שלח</button>
     </div>
   </div>
 
-  <audio id="sendSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_37e2f07d7e.mp3?filename=message-pop-alert-1-189853.mp3"></audio>
-  <audio id="receiveSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0e2ce4a24d.mp3?filename=notification-132111.mp3"></audio>
-
   <script>
     let conversationHistory = [];
-    let aiTypingEl = null;
 
     function formatTime() {
       const now = new Date();
-      return now.toLocaleString('he-IL', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
     function appendMessage(text, sender) {
       const chat = document.getElementById('chat');
       const msg = document.createElement('div');
       msg.className = 'message ' + sender;
-      msg.innerHTML = text + <div class="timestamp">${formatTime()}</div>;
+      msg.innerHTML = text + `<div class="timestamp">${formatTime()}</div>`;
       chat.appendChild(msg);
       chat.scrollTop = chat.scrollHeight;
-
-      if (sender === 'user') {
-        document.getElementById('sendSound').play();
-      } else if (sender === 'ai') {
-        document.getElementById('receiveSound').play();
-      }
-    }
-
-    function clearChat() {
-      conversationHistory = [];
-      document.getElementById('chat').innerHTML = '';
-    }
-
-    function showTypingIndicator(sender) {
-      removeTypingIndicator();
-      aiTypingEl = document.createElement('div');
-      aiTypingEl.className = 'message ' + sender;
-      aiTypingEl.innerHTML = <span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>;
-      document.getElementById('chat').appendChild(aiTypingEl);
-      document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-
-      clearTimeout(window.typingTimeout);
-      window.typingTimeout = setTimeout(removeTypingIndicator, 3000);
-    }
-
-    function removeTypingIndicator() {
-      if (aiTypingEl) {
-        aiTypingEl.remove();
-        aiTypingEl = null;
-      }
     }
 
     function sendMessage() {
@@ -262,17 +127,13 @@
       const userText = input.value.trim();
       if (userText === '') return;
 
-      removeTypingIndicator();
       appendMessage(userText, 'user');
       conversationHistory.push({ role: 'user', content: userText });
       input.value = '';
       input.focus();
-      toggleSendButton();
-
-      showTypingIndicator('ai');
 
       const formattedHistory = conversationHistory.map(e =>
-        ${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}
+        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
       ).join('\n');
 
       fetch('https://php-render-test.onrender.com/main-ai.php', {
@@ -282,55 +143,22 @@
       })
       .then(response => response.json())
       .then(data => {
-        removeTypingIndicator();
-
         if (data && data.text) {
-          const imageMatch = data.text.match(/<img[^>]*src=["']([^"']+)["'][^>]*>/);
-          if (imageMatch) {
-            const imageUrl = imageMatch[1];
-            const textOnly = data.text.replace(/<img[^>]*>/, '').trim();
-            if (textOnly) appendMessage(textOnly, 'ai');
-            appendMessage(<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">, 'ai');
-          } else {
-            appendMessage(data.text, 'ai');
-          }
+          appendMessage(data.text, 'ai');
           conversationHistory.push({ role: 'ai', content: data.text });
         } else {
           console.error("לא התקבלה תשובה תקינה מהשרת.");
         }
       })
       .catch(error => {
-        removeTypingIndicator();
         console.error("שגיאה בבקשת fetch:", error);
       });
-    }
-
-    function toggleSendButton() {
-      const btn = document.getElementById('sendBtn');
-      const input = document.getElementById('userInput').value.trim();
-      btn.disabled = input === '';
-    }
-
-    function downloadSummary() {
-      const summary = conversationHistory.map(e => ${e.role === 'user' ? '👤' : '🤖'} ${e.content}).join('\n');
-      const blob = new Blob([summary], { type: 'text/plain;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'chat_summary.txt';
-      link.click();
-    }
-
-    function toggleDarkMode() {
-      const html = document.documentElement;
-      html.classList.toggle('dark-mode');
     }
 
     document.getElementById('userInput').addEventListener('keydown', function (e) {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
-      } else {
-        showTypingIndicator('user');
       }
     });
   </script>
