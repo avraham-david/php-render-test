@@ -2,7 +2,7 @@
 // --- התחלת קוד PHP ---
 
 // !!! החלף במפתח ה-API האמיתי שלך !!!
-define('GEMINI_API_KEY', 'AIzaSyBuVkI5yIDoXejGN_4E5gawGlTxk_Mkq4M');
+define('GEMINI_API_KEY', 'AIzaSyBuVkI5yIDoXejGN_4E5gawGlTxk_Mkq4M'); // <-- ודא שהמפתח שלך כאן!
 
 $response_text = ''; // לאתחול משתנה התשובה
 $error_message = ''; // לאתחול משתנה השגיאה
@@ -16,9 +16,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty(trim($_POST['prompt']))) {
     if (GEMINI_API_KEY === 'YOUR_API_KEY_HERE' || GEMINI_API_KEY === '') {
         $error_message = "שגיאה קריטית: מפתח API של Gemini אינו מוגדר בקוד ה-PHP.";
     } else {
-        // הגדר את כתובת ה-API של Gemini (שימוש ב-gemini-pro לדוגמה)
-       $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=' . GEMINI_API_KEY;
-
+        // --- שינוי כאן: שימוש ב-v1 וב-gemini-pro ---
+        // הגדר את כתובת ה-API של Gemini (שימוש ב-v1 היציב ובמודל gemini-pro)
+        $api_url = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' . GEMINI_API_KEY;
+        // ---------------------------------------------
 
         // הכן את הנתונים לשליחה בפורמט JSON
         $data = [
@@ -29,9 +30,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty(trim($_POST['prompt']))) {
                     ]
                 ]
             ],
-            // ניתן להוסיף כאן הגדרות נוספות כמו safetySettings ו-generationConfig לפי הצורך
-            // 'safetySettings' => [ ... ],
-            // 'generationConfig' => [ ... ]
+            // מומלץ להוסיף הגדרות בטיחות בסיסיות כדי להימנע מחסימות מיותרות
+            // אם אתה נתקל בחסימות תוכן, נסה להגביר את הרמה (למשל מ-BLOCK_MEDIUM_AND_ABOVE ל-BLOCK_LOW_AND_ABOVE או BLOCK_NONE)
+            'safetySettings' => [
+                [
+                    'category' => 'HARM_CATEGORY_HARASSMENT',
+                    'threshold' => 'BLOCK_MEDIUM_AND_ABOVE',
+                ],
+                [
+                    'category' => 'HARM_CATEGORY_HATE_SPEECH',
+                    'threshold' => 'BLOCK_MEDIUM_AND_ABOVE',
+                ],
+                [
+                    'category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                    'threshold' => 'BLOCK_MEDIUM_AND_ABOVE',
+                ],
+                [
+                    'category' => 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                    'threshold' => 'BLOCK_MEDIUM_AND_ABOVE',
+                ],
+            ],
+             // ניתן להוסיף גם generationConfig אם רוצים לשלוט בטמפרטורה, max tokens וכו'
+            // 'generationConfig' => [
+            //     'temperature' => 0.9,
+            //     'topK' => 1,
+            //     'topP' => 1,
+            //     'maxOutputTokens' => 2048,
+            //     'stopSequences' => [],
+            // ],
         ];
         $json_data = json_encode($data);
 
@@ -45,10 +71,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty(trim($_POST['prompt']))) {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // החזר את התוצאה כמחרוזת במקום להדפיס
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json', // הגדר את סוג התוכן כ-JSON
-            'Content-Length: ' . strlen($json_data) // מומלץ להוסיף את אורך התוכן
+            'Accept: application/json'        // מומלץ להוסיף Accept header
         ]);
-        // curl_setopt($ch, CURLOPT_TIMEOUT, 30); // הגדר זמן קצוב (timeout) בשניות (אופציונלי)
-        // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // לשימוש מקומי בלבד אם יש בעיות SSL (לא מומלץ לפרודקשן!)
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60); // הגדל זמן קצוב ל-60 שניות (למקרה שתגובות ארוכות)
+        // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // השאר בהערה אלא אם יש בעיות SSL ספציפיות בסביבה מקומית (לא מומלץ!)
 
         // בצע את הבקשה וקבל את התגובה
         $api_response = curl_exec($ch);
@@ -71,26 +97,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty(trim($_POST['prompt']))) {
             if ($json_error !== JSON_ERROR_NONE) {
                 $error_message = "שגיאה בפענוח JSON מה-API: " . json_last_error_msg();
                 // מומלץ לרשום ללוג את התגובה הגולמית במקרה כזה
-                // error_log("Gemini API Raw Response (JSON Error): " . $api_response);
-            } elseif (isset($decoded_response->error)) {
-                 // שגיאה ספציפית מה-API של Gemini
-                $api_error_msg = isset($decoded_response->error->message) ? $decoded_response->error->message : 'שגיאה לא ידועה מה-API';
-                $error_message = "שגיאת API של Gemini: (" . (isset($decoded_response->error->code) ? $decoded_response->error->code : 'N/A') . ") " . htmlspecialchars($api_error_msg);
+                 error_log("Gemini API Raw Response (JSON Error): " . $api_response);
+                 $error_message .= "<br><pre style='white-space: pre-wrap; word-wrap: break-word;'>" . htmlspecialchars($api_response) . "</pre>"; // הצג את התגובה הגולמית לניפוי שגיאות
+            } elseif ($http_code >= 400) { // בדוק אם קוד ה-HTTP מצביע על שגיאה (4xx או 5xx)
+                 $api_error_msg = 'שגיאה לא ידועה מה-API';
+                 if (isset($decoded_response->error->message)) {
+                     $api_error_msg = $decoded_response->error->message;
+                 } elseif (is_string($api_response)) {
+                     // נסה להציג את גוף התגובה אם אין מבנה error סטנדרטי
+                     $api_error_msg = $api_response;
+                 }
+                 $error_message = "שגיאת API של Gemini: (" . $http_code . ") " . htmlspecialchars($api_error_msg);
+                 error_log("Gemini API Error (" . $http_code . "): " . $api_response); // רשום ללוג
             } elseif (isset($decoded_response->candidates[0]->content->parts[0]->text)) {
                 // הצלחה! קבל את הטקסט שנוצר
                 $response_text = $decoded_response->candidates[0]->content->parts[0]->text;
             } elseif (isset($decoded_response->candidates[0]->finishReason) && $decoded_response->candidates[0]->finishReason != 'STOP') {
                 // מקרה בו התגובה נחסמה (למשל עקב תוכן לא בטוח) או הופסקה מסיבה אחרת
                  $error_message = "התגובה נחסמה או הופסקה על ידי ה-API. סיבה: " . htmlspecialchars($decoded_response->candidates[0]->finishReason);
-                if (isset($decoded_response->promptFeedback->blockReason)) {
-                    $error_message .= " (סיבת חסימת השאילתה: " . htmlspecialchars($decoded_response->promptFeedback->blockReason) . ")";
-                }
+                 if (isset($decoded_response->promptFeedback->blockReason)) {
+                     $error_message .= " (סיבת חסימת השאילתה: " . htmlspecialchars($decoded_response->promptFeedback->blockReason) . ")";
+                 } elseif (isset($decoded_response->candidates[0]->safetyRatings)) {
+                    // נסה לספק מידע נוסף מדירוגי הבטיחות
+                    $error_message .= ". דירוגי בטיחות:";
+                    foreach($decoded_response->candidates[0]->safetyRatings as $rating) {
+                         $error_message .= " " . htmlspecialchars($rating->category) . ": " . htmlspecialchars($rating->probability) . ";";
+                    }
+                 }
             }
             else {
                 // מבנה תגובה לא צפוי
                 $error_message = "שגיאה: התקבלה תגובה במבנה לא צפוי מה-API.";
                 // מומלץ לרשום ללוג את התגובה המלאה
-                // error_log("Unexpected Gemini API Response Structure: " . $api_response);
+                 error_log("Unexpected Gemini API Response Structure: " . $api_response);
+                 $error_message .= "<br><pre style='white-space: pre-wrap; word-wrap: break-word;'>" . htmlspecialchars($api_response) . "</pre>"; // הצג את התגובה הגולמית לניפוי שגיאות
             }
         }
     }
@@ -105,7 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty(trim($_POST['prompt']))) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>שאל את ג'מיני</title>
+    <title>שאל את ג'מיני (v1)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -174,6 +214,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty(trim($_POST['prompt']))) {
              white-space: pre-wrap; /* Preserve line breaks and spaces */
              word-wrap: break-word; /* Break long words */
              font-size: 1.05em;
+             /* הוספתי קצת ריפוד פנימי */
+             padding: 10px 0;
         }
         .error-message {
             color: #d9534f; /* Red color for errors */
@@ -184,14 +226,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty(trim($_POST['prompt']))) {
             border-radius: 4px;
             font-weight: bold;
         }
+        /* סגנון להצגת תגובות גולמיות בניפוי שגיאות */
+        .error-message pre {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #eee;
+            border: 1px dashed #ccc;
+            font-size: 0.9em;
+            color: #555;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>שאל את ג'מיני</h1>
+        <h1>שאל את ג'מיני (v1)</h1>
 
         <?php if (!empty($error_message)): ?>
             <div class="error-message">
+                <?php /* השתמש ב-echo ישירות כי השגיאה כבר עברה htmlspecialchars ב-PHP */ ?>
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
