@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>צ'אט עם AI</title>
+  <!-- הוספת FontAwesome לאייקונים -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
     body {
       font-family: 'Roboto', sans-serif;
@@ -37,10 +39,11 @@
       display: flex;
       flex-direction: column;
       background-color: #f6f7f9;
+      transition: background-color 0.3s ease;
     }
 
     .container.dark-mode #chat {
-      background-color: #1e1e1e;
+      background-color: #1e1e1e; /* רקע כהה בצ'אט במצב כהה */
     }
 
     .message {
@@ -158,16 +161,71 @@
     .container.dark-mode .download-btn:hover {
       background-color: #357a38;
     }
+
+    /* סמלים במקום כפתורים */
+    .icon-btn {
+      background-color: transparent;
+      border: none;
+      color: inherit;
+      font-size: 24px;
+      cursor: pointer;
+      margin-left: 10px;
+      transition: color 0.3s;
+    }
+
+    .icon-btn:hover {
+      color: #25d366;
+    }
+
+    .container.dark-mode .icon-btn:hover {
+      color: #4CAF50;
+    }
+
+    .dark-mode-toggle {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: transparent;
+      border: 2px solid #fff;
+      color: white;
+      padding: 10px;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 10;
+      transition: background-color 0.3s ease;
+    }
+
+    .container.dark-mode .dark-mode-toggle {
+      border-color: #121212;
+      color: #121212;
+    }
+
+    .dark-mode-toggle:hover {
+      background-color: #3c763d;
+    }
+
+    .container.dark-mode .dark-mode-toggle:hover {
+      background-color: #ffffff;
+      color: #121212;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+      <i class="fas fa-moon"></i>
+    </button>
     <div id="chat"></div>
     <div class="input-area">
       <textarea id="userInput" rows="2" placeholder="הקלד הודעה..."></textarea>
-      <button onclick="sendMessage()">שלח</button>
+      <button onclick="sendMessage()">
+        <i class="fas fa-paper-plane"></i>
+      </button>
     </div>
-    <button class="download-btn" onclick="downloadChat()">הורד את השיחה</button>
+    <button class="download-btn" onclick="downloadChat()">
+      <i class="fas fa-download"></i> הורד את השיחה
+    </button>
   </div>
 
   <script>
@@ -197,7 +255,7 @@
       input.value = '';
       input.focus();
 
-      const formattedHistory = conversationHistory.map(e => e.content).join('\n'); // הסרה של ה-"AI" ו-"משתמש"
+      const formattedHistory = conversationHistory.map(e => e.content).join('\n');
 
       fetch('https://php-render-test.onrender.com/main-ai.php', {
         method: 'POST',
@@ -227,7 +285,7 @@
 
     function downloadChat() {
       const chatContent = conversationHistory.map(msg => {
-        return `${msg.content}\n`; // הסרה של "משתמש" ו-"AI"
+        return `${msg.content}\n`;
       }).join('');
       const blob = new Blob([chatContent], { type: 'text/plain' });
       const link = document.createElement('a');
@@ -236,13 +294,9 @@
       link.click();
     }
 
-    // Toggle Dark Mode on body
     function toggleDarkMode() {
       document.body.classList.toggle('dark-mode');
     }
-
-    // Initialize with dark mode enabled (optional)
-    // toggleDarkMode(); // Uncomment this line to start with dark mode enabled
   </script>
 </body>
 </html>
