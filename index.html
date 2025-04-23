@@ -81,7 +81,6 @@
 
     .input-area {
       display: flex;
-      align-items: center;
       padding: 10px;
       background-color: #f9f9f9;
       border-top: 1px solid #ccc;
@@ -97,14 +96,6 @@
       outline: none;
     }
 
-    .input-area select {
-      margin-right: 10px;
-      padding: 8px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-    }
-
     .input-area button {
       margin-right: 10px;
       padding: 10px 20px;
@@ -117,7 +108,12 @@
       transition: background-color 0.2s ease;
     }
 
-    .input-area button:hover {
+    .input-area button:disabled {
+      background-color: #c1c1c1;
+      cursor: not-allowed;
+    }
+
+    .input-area button:hover:not(:disabled) {
       background-color: #128c7e;
     }
 
@@ -157,6 +153,52 @@
       0%, 80%, 100% { transform: scale(0); }
       40% { transform: scale(1); }
     }
+
+    /* מצב לילה */
+    .dark-mode {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .container {
+      background-color: #2a2a2a;
+      border-color: #444;
+    }
+
+    .dark-mode .input-area {
+      background-color: #333;
+      border-top-color: #555;
+    }
+
+    .dark-mode .input-area textarea {
+      background-color: #444;
+      color: #fff;
+      border-color: #555;
+    }
+
+    .dark-mode .input-area button {
+      background-color: #128c7e;
+    }
+
+    .dark-mode #chat {
+      background-color: #1e1e1e;
+    }
+
+    .dark-mode .user {
+      background-color: #056162;
+      border-color: #034b4c;
+      color: #fff;
+    }
+
+    .dark-mode .ai {
+      background-color: #2f2f2f;
+      border-color: #444;
+      color: #fff;
+    }
+
+    .dark-mode .timestamp {
+      color: #aaa;
+    }
   </style>
 </head>
 <body>
@@ -167,11 +209,7 @@
     <div id="chat"></div>
     <div class="input-area">
       <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton()"></textarea>
-      <select id="modelSelect">
-        <option value="main-ai">מודל 1</option>
-        <option value="gemini25">מודל 2</option>
-      </select>
-      <button id="sendBtn" onclick="sendMessage()">📨</button>
+      <button id="sendBtn" onclick="sendMessage()" disabled>📨</button>
     </div>
   </div>
 
@@ -182,12 +220,52 @@
     let conversationHistory = [];
     let aiTypingEl = null;
 
+    function formatTime() {
+      const now = new Date();
+      return now.toLocaleString('he-IL', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+    }
+
+    function appendMessage(text, sender) {
+      const chat = document.getElementById('chat');
+      const msg = document.createElement('div');
+      msg.className = 'message ' + sender;
+      msg.innerHTML = text + `<div class="timestamp">${formatTime()}</div>`;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+
+      if (sender === 'user') {
+        document.getElementById('sendSound').play();
+      } else if (sender === 'ai') {
+        document.getElementById('receiveSound').play();
+      }
+    }
+
+    function clearChat() {
+      conversationHistory = [];
+      document.getElementById('chat').innerHTML = '';
+    }
+
+    function showTypingIndicator(sender) {
+      removeTypingIndicator();
+      aiTypingEl = document.createElement('div');
+      aiTypingEl.className = 'message ' + sender;
+      aiTypingEl.innerHTML = `<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+      document.getElementById('chat').appendChild(aiTypingEl);
+      document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+
+      clearTimeout(window.typingTimeout);
+      window.typingTimeout = setTimeout(removeTypingIndicator, 3000);
+    }
+
+    function removeTypingIndicator() {
+      if (aiTypingEl) {
+        aiTypingEl.remove();
+        aiTypingEl = null;
+      }
+    }
+
     function sendMessage() {
       const input = document.getElementById('userInput');
-      const model = document.getElementById('modelSelect').value;
-      const endpoint = model === 'gemini25' 
-        ? 'https://php-render-test.onrender.com/gemini25.php' 
-        : 'https://php-render-test.onrender.com/main-ai.php';
       const userText = input.value.trim();
       if (userText === '') return;
 
@@ -196,14 +274,15 @@
       conversationHistory.push({ role: 'user', content: userText });
       input.value = '';
       input.focus();
+      toggleSendButton();
 
       showTypingIndicator('ai');
 
       const formattedHistory = conversationHistory.map(e =>
-        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
+        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}` 
       ).join('\n');
 
-      fetch(endpoint, {
+      fetch('https://php-render-test.onrender.com/main-ai.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: formattedHistory })
@@ -211,6 +290,7 @@
       .then(response => response.json())
       .then(data => {
         removeTypingIndicator();
+        
         if (data && data.text) {
           const imageMatch = data.text.match(/<img[^>]*src=["']([^"']+)["'][^>]*>/);
           if (imageMatch) {
@@ -233,10 +313,33 @@
     }
 
     function toggleSendButton() {
-      const input = document.getElementById('userInput');
-      const button = document.getElementById('sendBtn');
-      button.disabled = input.value.trim() === '';
+      const btn = document.getElementById('sendBtn');
+      const input = document.getElementById('userInput').value.trim();
+      btn.disabled = input === '';
     }
+
+    function downloadSummary() {
+      const summary = conversationHistory.map(e => `${e.role === 'user' ? '👤' : '🤖'} ${e.content}`).join('\n');
+      const blob = new Blob([summary], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'chat_summary.txt';
+      link.click();
+    }
+
+    function toggleDarkMode() {
+      const html = document.documentElement;
+      html.classList.toggle('dark-mode');
+    }
+
+    document.getElementById('userInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      } else {
+        showTypingIndicator('user');
+      }
+    });
   </script>
 </body>
 </html>
