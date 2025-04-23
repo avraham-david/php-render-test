@@ -14,7 +14,7 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 $apiKey = 'AIzaSyBahgGefZmQHDm4G_VIFD1TBNK6DWeTrYM'; 
-$systemInstruction = ""
+$systemInstruction = "ענה תמיד בעברית בלבד, בצורה הכי מדויקת, תמציתית, קצרה וברורה ככל האפשר. אל תוסיף הסברים מיותרים או הקדמות, רק את התשובה הישירה ביותר.";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
@@ -55,6 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 } else {
     http_response_code(405);
-echo 'האתר פתוח! נסו את הסקריפט!';
+echo 'verision 1.0.0';
 }
 ?>
