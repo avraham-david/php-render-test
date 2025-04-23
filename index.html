@@ -16,7 +16,7 @@
 
     /* מצב כהה */
     body.dark-mode {
-      background-color: #2a2a2a;
+      background-color: #121212;
       color: #e4e4e4; /* טקסט בהיר במצב כהה */
     }
 
@@ -42,30 +42,31 @@
     }
 
     .container.dark-mode #chat {
-      background-color: #444; /* צבע רקע כהה לאזור השיחה */
+      background-color: #1d1f1f; /* צבע רקע כהה לאזור השיחה */
     }
 
     .message {
       max-width: 75%;
-      padding: 10px 14px;
-      margin: 6px;
-      border-radius: 15px;
+      padding: 12px 16px;
+      margin: 8px 0;
+      border-radius: 18px;
       word-wrap: break-word;
-      font-size: 15px;
+      font-size: 16px;
       position: relative;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      background-color: #e1ffc7;
+      color: #333;
+      align-self: flex-start;
       transition: background-color 0.3s ease;
-      color: #333; /* צבע טקסט רגיל */
     }
 
     .container.dark-mode .message {
-      background-color: #555; /* צבע רקע כהה להודעות */
+      background-color: #444; /* צבע רקע כהה להודעות */
       color: #e4e4e4; /* טקסט בהיר בהודעות */
     }
 
     .user {
       background-color: #d4f8c6;
-      border: 1px solid #b8e8b0;
       align-self: flex-end;
       border-bottom-right-radius: 0;
     }
@@ -102,10 +103,10 @@
 
     .input-area textarea {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       font-size: 16px;
       resize: none;
-      border-radius: 10px;
+      border-radius: 18px;
       border: 1px solid #ccc;
       outline: none;
       background-color: #fff;
@@ -119,13 +120,13 @@
     }
 
     .input-area button {
-      margin-right: 10px;
-      padding: 10px 20px;
+      margin-left: 10px;
+      padding: 12px 20px;
       font-size: 16px;
       background-color: #25d366;
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 18px;
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
@@ -144,36 +145,20 @@
       100% { opacity: 1; }
     }
 
-    .emoji {
-      font-size: 1.5em;
-      margin-left: 5px;
+    /* כפתור למעבר בין מצב כהה לבהיר */
+    .dark-mode-toggle {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      color: #888;
+      font-size: 24px;
+      transition: color 0.3s ease;
     }
 
-    .message-header {
-      font-weight: bold;
-      color: #777;
-      margin-bottom: 5px;
+    .dark-mode-toggle:hover {
+      color: #25d366;
     }
 
-    .container.dark-mode .message-header {
-      color: #ccc; /* צבע בהיר לכותרות במצב כהה */
-    }
-
-    .input-area button.dark-mode {
-      background-color: #555;
-    }
-
-    /* כרטיס שיחה עם כותרת */
-    .message-card {
-      padding: 10px;
-      background-color: #f0f2f5;
-      margin: 10px 0;
-      border-radius: 10px;
-    }
-
-    .container.dark-mode .message-card {
-      background-color: #333;
-    }
   </style>
 </head>
 <body>
@@ -182,7 +167,7 @@
     <div class="input-area">
       <textarea id="userInput" rows="2" placeholder="הקלד הודעה..."></textarea>
       <button onclick="sendMessage()">שלח</button>
-      <button onclick="toggleDarkMode()">🌙</button> <!-- כפתור למעבר בין מצב בהיר לכהה -->
+      <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button> <!-- כפתור למעבר בין מצב כהה לבהיר -->
     </div>
   </div>
 
@@ -207,14 +192,10 @@
     function appendMessage(text, sender) {
       const chat = document.getElementById('chat');
       const msg = document.createElement('div');
-      msg.className = 'message ' + sender + ' message-card';
-      
-      // הוספת אייקונים או סמלים
-      const emoji = sender === 'ai' ? '🤖' : '😊'; 
-      
+      msg.className = 'message ' + sender;
+
       msg.innerHTML = `
-        <div class="message-header">${sender === 'ai' ? 'AI' : 'משתמש'}</div>
-        <div class="message-text">${text} <span class="emoji">${emoji}</span></div>
+        <div class="message-text">${text}</div>
         <div class="timestamp">${formatTime()}</div>
       `;
       chat.appendChild(msg);
@@ -232,7 +213,7 @@
       input.focus();
 
       const formattedHistory = conversationHistory.map(e =>
-        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
+        `${e.role === 'user' ? '' : ''}: ${e.content}`
       ).join('\n');
 
       // שליחת בקשה ל-AI
