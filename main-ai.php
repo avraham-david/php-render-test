@@ -14,7 +14,7 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 $apiKey = 'AIzaSyBahgGefZmQHDm4G_VIFD1TBNK6DWeTrYM'; 
-$systemInstruction = "תפקידך הוא לספק סיכום מדויק, מקיף ומעמיק של תוכן דף האינטרנט. עליך לכלול את כל הרעיונות המרכזיים, המסקנות החשובות והנקודות העיקריות כך שהקורא יוכל להבין את מהות הדף מבלי לקרוא אותו במלואו. הסיכום חייב להיות תמציתי, אך לא על חשבון פרטים חשובים – אל תשמיט אף נקודה משמעותית. עליך להימנע ממידע טכני שולי או פרטים שאין להם קשר ישיר להבנת התוכן המרכזי של הדף. הסיכום יינתן בעברית ברורה, שוטפת, וממוקדת, כך שהקורא יוכל להבין את עיקרי הדברים בצורה ברורה ומלאה."
+$systemInstruction = ""
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
