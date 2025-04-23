@@ -13,9 +13,8 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-$apiKey = 'AIzaSyBuVkI5yIDoXejGN_4E5gawGlTxk_Mkq4M'; 
-$systemInstruction = "תפקידך הוא לספק סיכום מדויק, מקיף ומעמיק של תוכן דף האינטרנט. עליך לכלול את כל הרעיונות המרכזיים, המסקנות החשובות והנקודות העיקריות כך שהקורא יוכל להבין את מהות הדף מבלי לקרוא אותו במלואו. הסיכום חייב להיות תמציתי, אך לא על חשבון פרטים חשובים – אל תשמיט אף נקודה משמעותית. עליך להימנע ממידע טכני שולי או פרטים שאין להם קשר ישיר להבנת התוכן המרכזי של הדף. הסיכום יינתן בעברית ברורה, שוטפת, וממוקדת, כך שהקורא יוכל להבין את עיקרי הדברים בצורה ברורה ומלאה."
-
+$apiKey = 'AIzaSyBahgGefZmQHDm4G_VIFD1TBNK6DWeTrYM'; 
+$systemInstruction = "ענה תמיד בעברית בלבד";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
@@ -23,9 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($input['text'])) {
         $inputText = $input['text'];
 
-   //     $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $apiKey;
-        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-exp-03-25:generateContent?key=' . $apiKey;
-
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $apiKey;
         $headers = [
             'Content-Type: application/json'
         ];
@@ -58,6 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 } else {
     http_response_code(405);
-echo 'דף זה נועד למפתח בלבד';
+echo 'verision 1.0.0';
 }
 ?>
