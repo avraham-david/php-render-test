@@ -12,7 +12,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-$apiKey = 'AIzaSyBuVkI5yIDoXejGN_4E5gawGlTxk_Mkq4M'; 
+$apiKey = 'AIzaSyBuVkI5yIDoXejGN_4E5gawGlTxk_Mkq4M';
 $systemInstruction = "עליך לענות בעברית בלבד. אם המשתמש מבקש לסכם או לתרגם את הדף שהוא נמצא בו, ציית. אחרת, אל תתייחס לפרטי הדף שהוא מביא איתו בשאלה.";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -58,12 +58,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $imageData = base64_encode(file_get_contents($image['tmp_name']));
 
             $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-exp-03-25:generateContent?key=' . $apiKey;
+
+            // כאן נוסיף את ה-Base64 לתוך מבנה המתאים ל-Gemini API
             $postData = json_encode([
                 'contents' => [
                     [
                         'parts' => [
-                            ['image' => $imageData],
-                            ['instruction' => $systemInstruction]
+                            ['inlineData' => [
+                                'mimeType' => $image['type'],
+                                'data' => $imageData
+                            ]],
+                            ['text' => $systemInstruction]
                         ]
                     ]
                 ]
