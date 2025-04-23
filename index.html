@@ -2,44 +2,147 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8">
-  <title>שלח טקסט ל-AI</title>
+  <title>צ'אט עם AI</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #e5ddd5;
+      margin: 0;
+      padding: 0;
       direction: rtl;
-      text-align: center;
-      margin-top: 50px;
     }
-    input, button {
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #fff;
+      border: 1px solid #ccc;
+    }
+
+    #chat {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      background-color: #dcf8c6;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      max-width: 70%;
+      padding: 10px;
+      margin: 5px;
+      border-radius: 10px;
+      word-wrap: break-word;
+      font-size: 15px;
+      position: relative;
+    }
+
+    .user {
+      background-color: #dcf8c6;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
+    }
+
+    .ai {
+      background-color: #ffffff;
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+    }
+
+    .timestamp {
+      font-size: 11px;
+      color: gray;
+      margin-top: 3px;
+      text-align: left;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-top: 1px solid #ccc;
+    }
+
+    .input-area textarea {
+      flex: 1;
       padding: 10px;
       font-size: 16px;
-      margin: 10px;
-      width: 300px;
+      resize: none;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+
+    .input-area button {
+      margin-right: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #25d366;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .input-area button:hover {
+      background-color: #128c7e;
     }
   </style>
 </head>
 <body>
-  <h1>שליחת טקסט ל-AI</h1>
-  <input type="text" id="textInput" placeholder="הקלד טקסט כאן" />
-  <br />
-  <button onclick="sendToAI()">שלח</button>
+  <div class="container">
+    <div id="chat"></div>
+    <div class="input-area">
+      <textarea id="userInput" rows="2" placeholder="הקלד הודעה..."></textarea>
+      <button onclick="sendMessage()">שלח</button>
+    </div>
+  </div>
 
   <script>
-    function sendToAI() {
-      const text = document.getElementById('textInput').value.trim();
-      if (text === '') return;
+    let conversationHistory = [];
+
+    function formatTime() {
+      const now = new Date();
+      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function appendMessage(text, sender) {
+      const chat = document.getElementById('chat');
+      const msg = document.createElement('div');
+      msg.className = 'message ' + sender;
+      msg.innerHTML = text + `<div class="timestamp">${formatTime()}</div>`;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('userInput');
+      const userText = input.value.trim();
+      if (userText === '') return;
+
+      appendMessage(userText, 'user');
+      conversationHistory.push({ role: 'user', content: userText });
+      input.value = '';
+      input.focus();
+
+      // שלח את כל ההיסטוריה כדי לשמור הקשר
+      const formattedHistory = conversationHistory.map(e =>
+        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
+      ).join('\n');
 
       fetch('https://php-render-test.onrender.com/main-ai.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ text })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: formattedHistory })
       })
       .then(response => response.json())
       .then(data => {
         if (data && data.text) {
-          alert(data.text);
+          appendMessage(data.text, 'ai');
+          conversationHistory.push({ role: 'ai', content: data.text });
         } else {
           console.error("לא התקבלה תשובה תקינה מהשרת.");
         }
@@ -48,6 +151,14 @@
         console.error("שגיאה בבקשת fetch:", error);
       });
     }
+
+    // שליחה עם אנטר
+    document.getElementById('userInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
   </script>
 </body>
 </html>
