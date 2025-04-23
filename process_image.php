@@ -17,7 +17,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty(trim($_POST['prompt']))) {
         $error_message = "שגיאה קריטית: מפתח API של Gemini אינו מוגדר בקוד ה-PHP.";
     } else {
         // הגדר את כתובת ה-API של Gemini (שימוש ב-gemini-pro לדוגמה)
-        $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' . GEMINI_API_KEY;
+       $api_url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=' . GEMINI_API_KEY;
+
 
         // הכן את הנתונים לשליחה בפורמט JSON
         $data = [
