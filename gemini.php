@@ -14,7 +14,7 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 $apiKey = 'AIzaSyBuVkI5yIDoXejGN_4E5gawGlTxk_Mkq4M'; 
-$systemInstruction = "על התשובה להיות בעברית בלבד.הפעל שיקול דעת לגבי אורך התשובה"+"אם אתה מקבל את פרטי הדף הנוכחי של המשתמש אל תתיחס אליהם ללא הוראה מפורשת כגון סכם דף זה/תרגם דף זה";
+$systemInstruction = "על התשובה להיות בעברית בלבד.הפעל שיקול דעת לגבי אורך התשובה" . "אם אתה מקבל את פרטי הדף הנוכחי של המשתמש אל תתיחס אליהם ללא הוראה מפורשת כגון סכם דף זה/תרגם דף זה";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
