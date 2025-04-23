@@ -2,7 +2,6 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>צ'אט עם AI</title>
   <style>
     body {
@@ -11,12 +10,14 @@
       margin: 0;
       padding: 0;
       direction: rtl;
-      transition: background-color 0.3s, color 0.3s;
+      transition: background-color 0.3s ease;
+      color: #333; /* צבע טקסט בהיר שיתאים למצב בהיר */
     }
 
+    /* מצב כהה */
     body.dark-mode {
-      background-color: #121212;
-      color: white;
+      background-color: #2a2a2a;
+      color: #e4e4e4; /* טקסט בהיר במצב כהה */
     }
 
     .container {
@@ -28,13 +29,6 @@
       background-color: #ffffff;
       border: 1px solid #ccc;
       border-radius: 10px;
-      overflow: hidden;
-      transition: background-color 0.3s;
-    }
-
-    .container.dark-mode {
-      background-color: #1f1f1f;
-      border-color: #444;
     }
 
     #chat {
@@ -44,23 +38,29 @@
       background-color: #f6f7f9;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      transition: background-color 0.3s ease;
     }
 
-    .chat.dark-mode {
-      background-color: #2a2a2a;
+    .container.dark-mode #chat {
+      background-color: #444; /* צבע רקע כהה לאזור השיחה */
     }
 
     .message {
       max-width: 75%;
       padding: 10px 14px;
       margin: 6px;
-      border-radius: 10px;
+      border-radius: 15px;
       word-wrap: break-word;
       font-size: 15px;
       position: relative;
-      opacity: 0;
-      animation: fadeIn 0.3s forwards;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease;
+      color: #333; /* צבע טקסט רגיל */
+    }
+
+    .container.dark-mode .message {
+      background-color: #555; /* צבע רקע כהה להודעות */
+      color: #e4e4e4; /* טקסט בהיר בהודעות */
     }
 
     .user {
@@ -77,11 +77,6 @@
       border-bottom-left-radius: 0;
     }
 
-    .ai.dark-mode {
-      background-color: #444;
-      border-color: #666;
-    }
-
     .timestamp {
       font-size: 11px;
       color: gray;
@@ -89,17 +84,20 @@
       text-align: left;
     }
 
+    .container.dark-mode .timestamp {
+      color: #bbb; /* צבע בהיר להחזרת timestamp במצב כהה */
+    }
+
     .input-area {
       display: flex;
       padding: 10px;
       background-color: #f9f9f9;
       border-top: 1px solid #ccc;
-      position: relative;
-      transition: background-color 0.3s;
     }
 
-    .input-area.dark-mode {
+    .container.dark-mode .input-area {
       background-color: #333;
+      border-top: 1px solid #555;
     }
 
     .input-area textarea {
@@ -111,17 +109,17 @@
       border: 1px solid #ccc;
       outline: none;
       background-color: #fff;
-      color: black;
+      color: #333;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    .input-area.dark-mode textarea {
-      background-color: #444;
-      color: white;
-      border-color: #666;
+    .container.dark-mode .input-area textarea {
+      background-color: #555;
+      color: #fff;
     }
 
     .input-area button {
-      margin-left: 10px;
+      margin-right: 10px;
       padding: 10px 20px;
       font-size: 16px;
       background-color: #25d366;
@@ -129,59 +127,53 @@
       border: none;
       border-radius: 10px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
 
     .input-area button:hover {
       background-color: #128c7e;
     }
 
-    /* Loading spinner */
-    .loading {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      animation: spin 1s linear infinite;
-    }
-
-    .typing {
-      font-style: italic;
-      color: gray;
-    }
-
-    /* Dark mode toggle */
-    .dark-mode-btn {
-      background-color: #333;
-      color: white;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-left: auto;
-      margin-top: 10px;
-    }
-
-    .dark-mode-btn:hover {
-      background-color: #444;
+    /* אנימציה למעבר בין הודעות */
+    .message {
+      animation: fadeIn 0.5s ease-in-out;
     }
 
     @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
+      0% { opacity: 0; }
+      100% { opacity: 1; }
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .emoji {
+      font-size: 1.5em;
+      margin-left: 5px;
     }
 
+    .message-header {
+      font-weight: bold;
+      color: #777;
+      margin-bottom: 5px;
+    }
+
+    .container.dark-mode .message-header {
+      color: #ccc; /* צבע בהיר לכותרות במצב כהה */
+    }
+
+    .input-area button.dark-mode {
+      background-color: #555;
+    }
+
+    /* כרטיס שיחה עם כותרת */
+    .message-card {
+      padding: 10px;
+      background-color: #f0f2f5;
+      margin: 10px 0;
+      border-radius: 10px;
+    }
+
+    .container.dark-mode .message-card {
+      background-color: #333;
+    }
   </style>
 </head>
 <body>
@@ -190,14 +182,22 @@
     <div class="input-area">
       <textarea id="userInput" rows="2" placeholder="הקלד הודעה..."></textarea>
       <button onclick="sendMessage()">שלח</button>
-      <div id="loading" class="loading"></div>
+      <button onclick="toggleDarkMode()">🌙</button> <!-- כפתור למעבר בין מצב בהיר לכהה -->
     </div>
-    <button class="dark-mode-btn" onclick="toggleDarkMode()">מצב כהה</button>
-    <button onclick="downloadConversation()">הורד שיחה</button>
   </div>
 
   <script>
     let conversationHistory = [];
+    let isDarkMode = false;
+
+    // פונקציה להחלפת מצב כהה/בהיר
+    function toggleDarkMode() {
+      isDarkMode = !isDarkMode;
+      document.body.classList.toggle('dark-mode', isDarkMode);
+      document.querySelectorAll('.message').forEach(msg => {
+        msg.classList.toggle('dark-mode', isDarkMode);
+      });
+    }
 
     function formatTime() {
       const now = new Date();
@@ -207,28 +207,18 @@
     function appendMessage(text, sender) {
       const chat = document.getElementById('chat');
       const msg = document.createElement('div');
-      msg.className = 'message ' + sender;
-      msg.innerHTML = text + `<div class="timestamp">${formatTime()}</div>`;
+      msg.className = 'message ' + sender + ' message-card';
+      
+      // הוספת אייקונים או סמלים
+      const emoji = sender === 'ai' ? '🤖' : '😊'; 
+      
+      msg.innerHTML = `
+        <div class="message-header">${sender === 'ai' ? 'AI' : 'משתמש'}</div>
+        <div class="message-text">${text} <span class="emoji">${emoji}</span></div>
+        <div class="timestamp">${formatTime()}</div>
+      `;
       chat.appendChild(msg);
       chat.scrollTop = chat.scrollHeight;
-      setTimeout(() => msg.style.opacity = 1, 10);
-    }
-
-    function showTypingIndicator() {
-      const chat = document.getElementById('chat');
-      const typingIndicator = document.createElement('div');
-      typingIndicator.className = 'message ai typing';
-      typingIndicator.innerHTML = 'מקליד...';
-      chat.appendChild(typingIndicator);
-      chat.scrollTop = chat.scrollHeight;
-      return typingIndicator;
-    }
-
-    function removeTypingIndicator() {
-      const typingIndicator = document.querySelector('.typing');
-      if (typingIndicator) {
-        typingIndicator.remove();
-      }
     }
 
     function sendMessage() {
@@ -241,17 +231,11 @@
       input.value = '';
       input.focus();
 
-      // Show loading spinner
-      const loading = document.getElementById('loading');
-      loading.style.display = 'block';
-
-      // Show typing indicator
-      const typingIndicator = showTypingIndicator();
-
       const formattedHistory = conversationHistory.map(e =>
         `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
       ).join('\n');
 
+      // שליחת בקשה ל-AI
       fetch('https://php-render-test.onrender.com/main-ai.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -259,10 +243,6 @@
       })
       .then(response => response.json())
       .then(data => {
-        // Hide loading spinner
-        loading.style.display = 'none';
-        removeTypingIndicator();
-
         if (data && data.text) {
           appendMessage(data.text, 'ai');
           conversationHistory.push({ role: 'ai', content: data.text });
@@ -271,30 +251,11 @@
         }
       })
       .catch(error => {
-        loading.style.display = 'none';
-        removeTypingIndicator();
         console.error("שגיאה בבקשת fetch:", error);
       });
     }
 
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark-mode');
-      document.querySelector('.container').classList.toggle('dark-mode');
-      document.querySelector('.input-area').classList.toggle('dark-mode');
-    }
-
-    function downloadConversation() {
-      const conversationText = conversationHistory.map(e =>
-        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
-      ).join('\n\n');
-
-      const blob = new Blob([conversationText], { type: 'text/plain' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'conversation.txt';
-      link.click();
-    }
-
+    // כפתור שלח עם enter
     document.getElementById('userInput').addEventListener('keydown', function (e) {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
