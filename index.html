@@ -23,6 +23,22 @@
       position: relative;
     }
 
+    #loader {
+      height: 3px;
+      background: linear-gradient(90deg, #25d366, #128c7e);
+      animation: loadingBar 1.5s linear infinite;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+    .hidden { display: none; }
+
+    @keyframes loadingBar {
+      0% { background-position: 0% }
+      100% { background-position: 100% }
+    }
+
     #chat {
       flex: 1;
       padding: 10px;
@@ -56,7 +72,6 @@
       border: 1px solid #b8e8b0;
       align-self: flex-end;
       border-bottom-right-radius: 0;
-      font-family: 'Segoe UI', sans-serif;
     }
 
     .ai {
@@ -70,13 +85,6 @@
     .ai::before {
       content: "🤖 ";
       font-size: 18px;
-    }
-
-    .timestamp {
-      font-size: 11px;
-      color: gray;
-      margin-top: 4px;
-      text-align: left;
     }
 
     .input-area {
@@ -114,30 +122,17 @@
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      transition: background-color 0.2s ease;
     }
 
-    .input-area button:hover {
-      background-color: #128c7e;
+    .input-area button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
     }
-
-    .clear-btn, .download-btn, .darkmode-btn {
-      position: absolute;
-      top: 10px;
-      background: transparent;
-      border: none;
-      font-size: 16px;
-      color: #888;
-      cursor: pointer;
-    }
-
-    .clear-btn { left: 10px; }
-    .download-btn { left: 40px; }
-    .darkmode-btn { left: 70px; }
 
     .typing {
       display: flex;
       gap: 4px;
+      padding: 8px;
     }
     .typing .dot {
       width: 8px;
@@ -146,25 +141,22 @@
       border-radius: 50%;
       animation: bounce 1.2s infinite ease-in-out;
     }
-    .typing .dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing .dot:nth-child(3) { animation-delay: 0.4s; }
+    .typing .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .typing .dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
 
     @keyframes bounce {
       0%, 80%, 100% { transform: scale(0); }
       40% { transform: scale(1); }
     }
-
-    .darkmode {
-      background-color: #333;
-      color: #fff;
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <button class="clear-btn" onclick="clearChat()">🧹</button>
-    <button class="download-btn" onclick="downloadSummary()">⬇️</button>
-    <button class="darkmode-btn" onclick="toggleDarkMode()">🌙</button>
+    <div id="loader" class="hidden"></div>
     <div id="chat"></div>
     <div class="input-area">
       <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton()"></textarea>
@@ -182,13 +174,21 @@
   <script>
     let conversationHistory = [];
     let aiTypingEl = null;
-    let userTypingEl = null;
-    let darkMode = false;
-    let userTypingTimeout;
 
-    function formatTime() {
-      const now = new Date();
-      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    function toggleSendButton() {
+      const input = document.getElementById('userInput');
+      const button = document.getElementById('sendBtn');
+      button.disabled = input.value.trim() === '';
+    }
+
+    function appendMessage(text, role) {
+      const chat = document.getElementById('chat');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message ' + role;
+      messageDiv.innerHTML = text;
+      chat.appendChild(messageDiv);
+      chat.scrollTop = chat.scrollHeight;
+      document.getElementById(role === 'user' ? 'sendSound' : 'receiveSound').play();
     }
 
     function showTypingIndicator(role) {
@@ -201,7 +201,7 @@
       messageDiv.appendChild(typing);
       chat.appendChild(messageDiv);
       chat.scrollTop = chat.scrollHeight;
-      if (role === 'ai') aiTypingEl = messageDiv;
+      aiTypingEl = messageDiv;
     }
 
     function removeTypingIndicator() {
@@ -211,60 +211,51 @@
       }
     }
 
-    function showUserTypingIndicator() {
-      const chat = document.getElementById('chat');
-      if (!userTypingEl) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message user';
-        const typing = document.createElement('div');
-        typing.className = 'typing';
-        typing.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-        messageDiv.appendChild(typing);
-        userTypingEl = messageDiv;
-        chat.appendChild(userTypingEl);
-        chat.scrollTop = chat.scrollHeight;
-      }
-      clearTimeout(userTypingTimeout);
-      userTypingTimeout = setTimeout(removeUserTypingIndicator, 1500);
+    function showLoader() {
+      document.getElementById('loader').classList.remove('hidden');
     }
 
-    function removeUserTypingIndicator() {
-      if (userTypingEl) {
-        userTypingEl.remove();
-        userTypingEl = null;
-      }
+    function hideLoader() {
+      document.getElementById('loader').classList.add('hidden');
     }
 
-    function appendMessage(text, role, model = '') {
+    function typeMessage(text, role, modelName) {
       const chat = document.getElementById('chat');
       const messageDiv = document.createElement('div');
       messageDiv.className = 'message ' + role;
-      let extra = '';
-      if (role === 'ai') extra = `<div class="timestamp">${formatTime()} | מודל: ${model}</div>`;
-      else extra = `<div class="timestamp">${formatTime()}</div>`;
-      messageDiv.innerHTML = text + extra;
       chat.appendChild(messageDiv);
-      chat.scrollTop = chat.scrollHeight;
-      document.getElementById(role === 'user' ? 'sendSound' : 'receiveSound').play();
+
+      let i = 0;
+      const fullText = modelName ? `<strong>${modelName}</strong><br>${text}` : text;
+      const speed = 5; // מילי-שניות בין תווים
+
+      const interval = setInterval(() => {
+        messageDiv.innerHTML = fullText.slice(0, i++);
+        chat.scrollTop = chat.scrollHeight;
+        if (i > fullText.length) {
+          clearInterval(interval);
+          document.getElementById('receiveSound').play();
+        }
+      }, speed);
     }
 
     function sendMessage() {
       const input = document.getElementById('userInput');
       const model = document.getElementById('modelSelect').value;
-      const endpoint = model === 'gemini25' 
-        ? 'https://php-render-test.onrender.com/gemini25.php' 
+      const endpoint = model === 'gemini25'
+        ? 'https://php-render-test.onrender.com/gemini25.php'
         : 'https://php-render-test.onrender.com/main-ai.php';
+      const modelName = model === 'gemini25' ? 'מודל Gemini 2' : 'מודל Main AI';
       const userText = input.value.trim();
       if (userText === '') return;
 
-      removeTypingIndicator();
-      removeUserTypingIndicator();
       appendMessage(userText, 'user');
       conversationHistory.push({ role: 'user', content: userText });
       input.value = '';
       input.focus();
 
       showTypingIndicator('ai');
+      showLoader();
 
       const formattedHistory = conversationHistory.map(e =>
         `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
@@ -278,45 +269,25 @@
       .then(response => response.json())
       .then(data => {
         removeTypingIndicator();
+        hideLoader();
         if (data && data.text) {
           const imageMatch = data.text.match(/<img[^>]*src=["']([^"']+)["'][^>]*>/);
-          const textOnly = data.text.replace(/<img[^>]*>/, '').trim();
-          if (textOnly) appendMessage(textOnly, 'ai', model);
           if (imageMatch) {
             const imageUrl = imageMatch[1];
-            appendMessage(`<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">`, 'ai', model);
+            const textOnly = data.text.replace(/<img[^>]*>/, '').trim();
+            if (textOnly) typeMessage(textOnly, 'ai', modelName);
+            typeMessage(`<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">`, 'ai', modelName);
+          } else {
+            typeMessage(data.text, 'ai', modelName);
           }
           conversationHistory.push({ role: 'ai', content: data.text });
         }
       })
       .catch(error => {
         removeTypingIndicator();
+        hideLoader();
         console.error("שגיאה בבקשת fetch:", error);
       });
-    }
-
-    function toggleSendButton() {
-      const input = document.getElementById('userInput');
-      const button = document.getElementById('sendBtn');
-      button.disabled = input.value.trim() === '';
-      if (input.value.trim() !== '') showUserTypingIndicator();
-      else removeUserTypingIndicator();
-    }
-
-    function downloadSummary() {
-      const summary = conversationHistory.map(msg => `${msg.role === 'user' ? 'משתמש' : 'AI'}: ${msg.content}`).join('\n');
-      const blob = new Blob([summary], { type: 'text/plain' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'סיכום_שיחה.txt';
-      link.click();
-    }
-
-    function toggleDarkMode() {
-      darkMode = !darkMode;
-      document.body.classList.toggle('darkmode', darkMode);
-      const btn = document.querySelector('.darkmode-btn');
-      btn.textContent = darkMode ? '☀️' : '🌙';
     }
   </script>
 </body>
