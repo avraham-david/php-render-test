@@ -54,16 +54,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // אם יש תמונה בלבד
         if ($image) {
+            $imageBase64 = base64_encode(file_get_contents($image['tmp_name'])); // המרת התמונה ל-base64
             $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-exp-03-25:generateContent?key=' . $apiKey;
+
             $data = [
-                'image' => new CURLFile($image['tmp_name'], $image['type'], $image['name']),
+                'image' => $imageBase64,  // שלח את התמונה כ-base64
                 'instruction' => $systemInstruction,
             ];
+
+            $headers = [
+                'Content-Type: application/json',
+            ];
+
+            $postData = json_encode($data);
 
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             $response = curl_exec($ch);
             curl_close($ch);
 
