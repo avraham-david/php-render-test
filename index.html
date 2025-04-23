@@ -82,11 +82,6 @@
       font-family: 'Courier New', monospace;
     }
 
-    .ai::before {
-      content: "🤖 ";
-      font-size: 18px;
-    }
-
     .input-area {
       display: flex;
       align-items: center;
@@ -159,10 +154,10 @@
     <div id="loader" class="hidden"></div>
     <div id="chat"></div>
     <div class="input-area">
-      <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton()"></textarea>
+      <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton(); showUserTyping();"></textarea>
       <select id="modelSelect">
-        <option value="main-ai">מודל 1</option>
-        <option value="gemini25">מודל 2</option>
+        <option value="main-ai">מודל ראשי</option>
+        <option value="gemini25">מודל תמונות</option>
       </select>
       <button id="sendBtn" onclick="sendMessage()" disabled>📨</button>
     </div>
@@ -174,6 +169,7 @@
   <script>
     let conversationHistory = [];
     let aiTypingEl = null;
+    let userTypingShown = false;
 
     function toggleSendButton() {
       const input = document.getElementById('userInput');
@@ -181,7 +177,21 @@
       button.disabled = input.value.trim() === '';
     }
 
+    function showUserTyping() {
+      const input = document.getElementById('userInput').value.trim();
+      if (!userTypingShown && input.length > 0) {
+        showTypingIndicator('user');
+        userTypingShown = true;
+      }
+      if (userTypingShown && input.length === 0) {
+        removeTypingIndicator();
+        userTypingShown = false;
+      }
+    }
+
     function appendMessage(text, role) {
+      removeTypingIndicator();
+      userTypingShown = false;
       const chat = document.getElementById('chat');
       const messageDiv = document.createElement('div');
       messageDiv.className = 'message ' + role;
@@ -226,8 +236,8 @@
       chat.appendChild(messageDiv);
 
       let i = 0;
-      const fullText = modelName ? `<strong>${modelName}</strong><br>${text}` : text;
-      const speed = 5; // מילי-שניות בין תווים
+      const fullText = text + `<br><div style='font-size: 12px; color: gray; margin-top: 6px;'>התגובה נוצרה על ידי: <strong>${modelName}</strong></div>`;
+      const speed = 5;
 
       const interval = setInterval(() => {
         messageDiv.innerHTML = fullText.slice(0, i++);
@@ -245,7 +255,7 @@
       const endpoint = model === 'gemini25'
         ? 'https://php-render-test.onrender.com/gemini25.php'
         : 'https://php-render-test.onrender.com/main-ai.php';
-      const modelName = model === 'gemini25' ? 'מודל Gemini 2' : 'מודל Main AI';
+      const modelName = model === 'gemini25' ? 'מודל תמונות (Gemini)' : 'מודל ראשי (AI)';
       const userText = input.value.trim();
       if (userText === '') return;
 
