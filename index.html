@@ -31,6 +31,7 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
+      scroll-behavior: smooth;
     }
 
     .message {
@@ -107,19 +108,50 @@
       transition: background-color 0.2s ease;
     }
 
-    .input-area button:hover {
+    .input-area button:disabled {
+      background-color: #c1c1c1;
+      cursor: not-allowed;
+    }
+
+    .input-area button:hover:not(:disabled) {
       background-color: #128c7e;
     }
 
-    .clear-btn {
+    .clear-btn, .download-btn, .darkmode-btn {
       position: absolute;
       top: 10px;
-      left: 10px;
       background: transparent;
       border: none;
       font-size: 16px;
       color: #888;
       cursor: pointer;
+    }
+
+    .clear-btn { left: 10px; }
+    .download-btn { left: 40px; }
+    .darkmode-btn { left: 70px; }
+
+    .typing {
+      display: flex;
+      gap: 4px;
+    }
+    .typing .dot {
+      width: 8px;
+      height: 8px;
+      background: #aaa;
+      border-radius: 50%;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+    .typing .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .typing .dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
     }
 
     @media (prefers-color-scheme: dark) {
@@ -165,10 +197,12 @@
 <body>
   <div class="container">
     <button class="clear-btn" onclick="clearChat()">🧹</button>
+    <button class="download-btn" onclick="downloadSummary()">⬇️</button>
+    <button class="darkmode-btn" onclick="toggleDarkMode()">🌙</button>
     <div id="chat"></div>
     <div class="input-area">
-      <textarea id="userInput" rows="2" placeholder="הקלד הודעה..."></textarea>
-      <button onclick="sendMessage()">✉️</button>
+      <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton()"></textarea>
+      <button id="sendBtn" onclick="sendMessage()" disabled>📨</button>
     </div>
   </div>
 
@@ -208,9 +242,12 @@
       removeTypingIndicator();
       aiTypingEl = document.createElement('div');
       aiTypingEl.className = 'message ' + sender;
-      aiTypingEl.innerHTML = `<span class="typing"><span class="dot">•</span><span class="dot">•</span><span class="dot">•</span></span>`;
+      aiTypingEl.innerHTML = `<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
       document.getElementById('chat').appendChild(aiTypingEl);
       document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+
+      clearTimeout(window.typingTimeout);
+      window.typingTimeout = setTimeout(removeTypingIndicator, 3000);
     }
 
     function removeTypingIndicator() {
@@ -230,6 +267,7 @@
       conversationHistory.push({ role: 'user', content: userText });
       input.value = '';
       input.focus();
+      toggleSendButton();
 
       showTypingIndicator('ai');
 
@@ -247,7 +285,15 @@
         removeTypingIndicator();
 
         if (data && data.text) {
-          appendMessage(data.text, 'ai');
+          const imageMatch = data.text.match(/<img[^>]*src=["']([^"']+)["'][^>]*>/);
+          if (imageMatch) {
+            const imageUrl = imageMatch[1];
+            const textOnly = data.text.replace(/<img[^>]*>/, '').trim();
+            if (textOnly) appendMessage(textOnly, 'ai');
+            appendMessage(`<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">`, 'ai');
+          } else {
+            appendMessage(data.text, 'ai');
+          }
           conversationHistory.push({ role: 'ai', content: data.text });
         } else {
           console.error("לא התקבלה תשובה תקינה מהשרת.");
@@ -259,14 +305,32 @@
       });
     }
 
+    function toggleSendButton() {
+      const btn = document.getElementById('sendBtn');
+      const input = document.getElementById('userInput').value.trim();
+      btn.disabled = input === '';
+    }
+
+    function downloadSummary() {
+      const summary = conversationHistory.map(e => `${e.role === 'user' ? '👤' : '🤖'} ${e.content}`).join('\n');
+      const blob = new Blob([summary], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'chat_summary.txt';
+      link.click();
+    }
+
+    function toggleDarkMode() {
+      const html = document.documentElement;
+      html.classList.toggle('dark-mode');
+    }
+
     document.getElementById('userInput').addEventListener('keydown', function (e) {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
       } else {
         showTypingIndicator('user');
-        clearTimeout(window.typingTimeout);
-        window.typingTimeout = setTimeout(removeTypingIndicator, 1000);
       }
     });
   </script>
