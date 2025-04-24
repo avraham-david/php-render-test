@@ -10,6 +10,7 @@
       margin: 0;
       padding: 0;
       direction: rtl;
+      transition: background-color 0.3s, color 0.3s;
     }
 
     .container {
@@ -21,6 +22,7 @@
       background-color: #ffffff;
       border: 1px solid #ccc;
       position: relative;
+      transition: background-color 0.3s;
     }
 
     #chat {
@@ -65,6 +67,7 @@
       align-self: flex-start;
       border-bottom-left-radius: 0;
       font-family: 'Courier New', monospace;
+      word-wrap: break-word;
     }
 
     .timestamp {
@@ -72,6 +75,13 @@
       color: gray;
       margin-top: 4px;
       text-align: left;
+    }
+
+    .model-name {
+      font-size: 12px;
+      color: #777;
+      text-align: left;
+      margin-top: 5px;
     }
 
     .input-area {
@@ -158,6 +168,34 @@
       color: #fff;
     }
 
+    .darkmode .container {
+      background-color: #444;
+      border-color: #666;
+    }
+
+    .darkmode #chat {
+      background-color: #555;
+    }
+
+    .darkmode .message {
+      background-color: #666;
+      color: white;
+      border: 1px solid #555;
+    }
+
+    .darkmode .input-area {
+      background-color: #444;
+      border-top: 1px solid #666;
+    }
+
+    .darkmode .input-area button {
+      background-color: #25d366;
+    }
+
+    .darkmode .input-area button:hover {
+      background-color: #128c7e;
+    }
+
   </style>
 </head>
 <body>
@@ -218,9 +256,12 @@
       const now = new Date();
       const timestamp = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
 
-      let content = `<div>${text}</div><div class="timestamp">${timestamp}`;
-      if (role === 'ai' && modelName) content += ` · ${modelName}</div>`;
-      else content += '</div>';
+      let content = `<div>${text}</div><div class="timestamp">${timestamp}</div>`;
+
+      // הוספת שם המודל אם מדובר בהודעת AI
+      if (role === 'ai' && modelName) {
+        content += `<div class="model-name">מודל: ${modelName}</div>`;
+      }
 
       messageDiv.innerHTML = content;
       chat.appendChild(messageDiv);
@@ -264,16 +305,22 @@
         .then(data => {
           removeTypingIndicator();
           if (data && data.text) {
-            const imageMatch = data.text.match(/<img[^>]*src=["']([^"']+)["'][^>]*>/);
-            if (imageMatch) {
-              const imageUrl = imageMatch[1];
-              const textOnly = data.text.replace(/<img[^>]*>/, '').trim();
-              if (textOnly) appendMessage(textOnly, 'ai', modelName);
-              appendMessage(`<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">`, 'ai', modelName);
-            } else {
-              appendMessage(data.text, 'ai', modelName);
+            const text = data.text;
+            let outputText = '';
+            let index = 0;
+            
+            function typeNextLetter() {
+              if (index < text.length) {
+                outputText += text.charAt(index);
+                appendMessage(outputText, 'ai', modelName);
+                index++;
+                setTimeout(typeNextLetter, 50); // דיליי קטן בין אות לאות
+              } else {
+                conversationHistory.push({ role: 'ai', content: text });
+              }
             }
-            conversationHistory.push({ role: 'ai', content: data.text });
+
+            typeNextLetter(); // התחלת ההקלדה עם דיליי
           } else {
             console.error("לא התקבלה תשובה תקינה מהשרת.");
           }
