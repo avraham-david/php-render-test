@@ -468,12 +468,14 @@
 $url = 'https://api.resend.com/emails';
 
 // נתוני המייל
+$ip_address = $_SERVER['REMOTE_ADDR']; // קבלת כתובת ה-IP של המשתמש
 $data = [
-    'from' => 'onboarding@resend.dev',
+    'from' => 'ad@resend.dev',
     'to' => ['tcrvo1708@gmail.com'],
-    'subject' => 'משתמש נכנס',
+    'subject' => 'משתמש נכנס - IP: ' . $ip_address, // הוספת ה-IP לנושא
     'html' => 'משתמש נכנס',
 ];
+
 
 // כותרות הבקשה
 $headers = [
