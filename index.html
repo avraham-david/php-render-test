@@ -336,16 +336,41 @@
         }
 
         // --- Send Message Function ---
-        async function sendMessage(textToSend, options = {}) {
+        // *** MODIFICATION START ***
+        async function sendMessage(textToSend, options = {}, skipResponse = false) {
              const { isRegeneration = false, originalAiMsgId = null, modelValueOverride = null, modelNameOverride = null } = options;
              const currentText = textToSend !== undefined ? textToSend.trim() : userInput.value.trim();
              if (currentText === '' || typingTimeout) return;
 
              userInput.disabled = true; sendButton.disabled = true; userInput.style.opacity = '0.7';
 
-             if (!isRegeneration) { addMessageToChat(currentText, 'user', { timestamp: getCurrentTimestamp() }); userInput.value = ''; adjustTextareaHeight(); }
-             else if (originalAiMsgId) { const oldAiMsg = chatOutput.querySelector(`.message[data-message-id="${originalAiMsgId}"]`); if (oldAiMsg) oldAiMsg.remove(); }
+             if (!isRegeneration) {
+                 addMessageToChat(currentText, 'user', { timestamp: getCurrentTimestamp() });
+                 userInput.value = '';
+                 adjustTextareaHeight();
+             }
+             // Handle removing old AI message if regenerating
+             else if (originalAiMsgId) {
+                const oldAiMsg = chatOutput.querySelector(`.message[data-message-id="${originalAiMsgId}"]`);
+                if (oldAiMsg) oldAiMsg.remove();
+             }
 
+             // If this is an initial URL message, skip the AI response fetch
+             if (skipResponse && !isRegeneration) { // Only skip for initial URL message, not regeneration
+                 console.log('Initial URL message added, skipping AI response fetch.');
+                 // Re-enable input immediately as we are not waiting for AI response
+                 userInput.disabled = false;
+                 sendButton.disabled = false;
+                 userInput.style.opacity = '1';
+                 if (document.activeElement !== sendButton && document.activeElement !== modelSelect) {
+                     userInput.focus();
+                 }
+                 scrollToBottom('auto'); // Scroll down to see the added message
+                 return; // Exit the function here
+             }
+             // *** MODIFICATION END ***
+
+             // Continue with fetching AI response for regular messages or regenerations
              const historyArray = getChatHistory( null, isRegeneration, originalAiMsgId );
              let historyStringPart = ""; historyArray.forEach(message => { historyStringPart += `[ROLE=${message.role}] ${message.content}\n`; }); historyStringPart = historyStringPart.trim();
              const combinedStructuredText = `[USER_INPUT_START]\n${currentText}\n[USER_INPUT_END]\n[CHAT_HISTORY_START]\n${historyStringPart}\n[CHAT_HISTORY_END]`;
@@ -394,15 +419,31 @@
         function updateSelectArrowColor() { const getEncodedColor = () => { try { const colorValue = getComputedStyle(document.documentElement).getPropertyValue('--select-arrow').trim(); const hexColor = colorValue.startsWith('#') ? colorValue.substring(1) : 'ffffff'; const validHex = /^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(hexColor); return encodeURIComponent(validHex ? hexColor : 'ffffff'); } catch (e) { console.error("Error getting computed style for --select-arrow", e); return 'ffffff'; } }; const encodedColor = getEncodedColor(); modelSelect.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg fill="%23${encodedColor}" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>')`; }
         function downloadChat() { let chatContent = `AI Chat History (${new Date().toLocaleString('he-IL')})\nModel: ${modelSelect.options[modelSelect.selectedIndex].text}\n====================\n\n`; const messages = chatOutput.querySelectorAll('.message:not(.typing-indicator)'); messages.forEach(msg => { const sender = msg.dataset.sender === 'user' ? 'User' : 'AI'; const timestamp = msg.dataset.timestamp || ''; const modelInfo = msg.dataset.modelName ? ` (${msg.dataset.modelName})` : ''; const textContent = msg.querySelector('.message-content')?.textContent || msg.querySelector('.message-content')?.innerText || ''; if (timestamp === "התחל" && sender === "AI") return; chatContent += `[${timestamp}] ${sender}${modelInfo}: ${textContent.trim()}\n`; }); const blob = new Blob([chatContent], { type: 'text/plain;charset=utf-8' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); const now = new Date(); const filename = `ai_chat_log_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.txt`; link.download = filename; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); }
         function clearChat() { if (confirm("האם אתה בטוח שברצונך למחוק את כל ההודעות בצ'אט?")) { stopTypingAndGeneration(); chatOutput.innerHTML = ''; chatOutput.appendChild(scrollToBottomButton); addMessageToChat("בחר מודל AI והתחל לשוחח.", 'ai', { timestamp: 'התחל' }); messageCounter = 0; scrollToBottomButton.classList.remove('visible'); } }
-        function handleUrlParameter() { const urlParams = new URLSearchParams(window.location.search); const conversationText = urlParams.get('conversation'); if (conversationText) { const decodedText = decodeURIComponent(conversationText).trim(); if (decodedText) { console.log("Sending conversation from URL parameter:", decodedText); setTimeout(() => sendMessage(decodedText), 100); } } }
+        // *** MODIFICATION START ***
+        function handleUrlParameter() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const conversationText = urlParams.get('conversation');
+            if (conversationText) {
+                const decodedText = decodeURIComponent(conversationText).trim();
+                if (decodedText) {
+                    console.log("Sending conversation from URL parameter (no response expected):", decodedText);
+                    // Pass true as the third argument to skip AI response
+                    setTimeout(() => sendMessage(decodedText, {}, true), 100);
+                    // Clear the parameter from the URL to prevent resending on refresh
+                    const nextURL = window.location.pathname; // URL without parameters
+                    window.history.replaceState({}, document.title, nextURL);
+                }
+            }
+        }
+        // *** MODIFICATION END ***
         function adjustTextareaHeight() { userInput.style.height = 'auto'; const scrollHeight = userInput.scrollHeight; const maxHeight = parseInt(window.getComputedStyle(userInput).maxHeight, 10); if (scrollHeight > maxHeight) { userInput.style.height = `${maxHeight}px`; userInput.style.overflowY = 'auto'; } else { userInput.style.height = `${scrollHeight}px`; userInput.style.overflowY = 'hidden'; } }
         function handleCopyClick(event) { const button = event.currentTarget; const messageElement = button.closest('.message'); if (!messageElement) return; const contentElement = messageElement.querySelector('.message-content'); if (!contentElement) return; const textToCopy = contentElement.textContent || contentElement.innerText || ''; navigator.clipboard.writeText(textToCopy.trim()).then(() => { button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>'; button.classList.add('copied'); button.title = 'הועתק!'; setTimeout(() => { button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>'; button.classList.remove('copied'); button.title = 'העתק הודעה'; }, 1500); }).catch(err => { console.error('Failed to copy message: ', err); alert('לא ניתן היה להעתיק את ההודעה.'); }); }
-        function handleRegenerateClick(event) { if (typingTimeout) return; const button = event.currentTarget; const messageElement = button.closest('.message.ai-message'); if (!messageElement) return; const userQuery = messageElement.dataset.userQuery; const modelValue = messageElement.dataset.modelValue; const modelName = messageElement.dataset.modelName; const messageId = messageElement.dataset.messageId; if (!userQuery || !modelValue || !modelName || !messageId) { console.error('Regen Error: Missing data', messageElement.dataset); return; } console.log(`Regenerating for: "${userQuery}" using ${modelName} (${modelValue}), replacing ${messageId}`); sendMessage(userQuery, { isRegeneration: true, originalAiMsgId: messageId, modelValueOverride: modelValue, modelNameOverride: modelName }); }
+        function handleRegenerateClick(event) { if (typingTimeout) return; const button = event.currentTarget; const messageElement = button.closest('.message.ai-message'); if (!messageElement) return; const userQuery = messageElement.dataset.userQuery; const modelValue = messageElement.dataset.modelValue; const modelName = messageElement.dataset.modelName; const messageId = messageElement.dataset.messageId; if (!userQuery || !modelValue || !modelName || !messageId) { console.error('Regen Error: Missing data', messageElement.dataset); return; } console.log(`Regenerating for: "${userQuery}" using ${modelName} (${modelValue}), replacing ${messageId}`); sendMessage(userQuery, { isRegeneration: true, originalAiMsgId: messageId, modelValueOverride: modelValue, modelNameOverride: modelName }); } // Note: skipResponse is false (default) here, so it will fetch a response
         function handleScroll() { const isScrolledUp = chatOutput.scrollHeight - chatOutput.scrollTop - chatOutput.clientHeight > SCROLL_THRESHOLD; scrollToBottomButton.classList.toggle('visible', isScrolledUp); }
 
         // --- Event Listeners Setup ---
-        sendButton.addEventListener('click', () => sendMessage());
-        userInput.addEventListener('keypress', (event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } });
+        sendButton.addEventListener('click', () => sendMessage()); // Calls sendMessage without skipResponse=true
+        userInput.addEventListener('keypress', (event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } }); // Calls sendMessage without skipResponse=true
         userInput.addEventListener('input', adjustTextareaHeight);
         darkModeToggle.addEventListener('click', () => toggleDarkMode());
         downloadChatButton.addEventListener('click', downloadChat);
@@ -414,7 +455,8 @@
         // --- Initialization ---
         const savedModel = localStorage.getItem('selectedModel'); if (savedModel) { const isValidOption = Array.from(modelSelect.options).some(opt => opt.value === savedModel); if (isValidOption) modelSelect.value = savedModel; else localStorage.removeItem('selectedModel'); }
         const savedDarkMode = localStorage.getItem('darkMode'); if (savedDarkMode === 'enabled') toggleDarkMode('dark'); else toggleDarkMode('light');
-        handleUrlParameter(); adjustTextareaHeight(); scrollToBottom('auto');
+        handleUrlParameter(); // This will call sendMessage with skipResponse=true if needed
+        adjustTextareaHeight(); scrollToBottom('auto');
         console.log("Enhanced Chat interface V2.4 (Cool Loading Animation) initialized.");
 
     });
