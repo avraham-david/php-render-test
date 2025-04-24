@@ -1,194 +1,131 @@
+```html
+<!DOCTYPE html>
 <html lang="he">
 <head>
-  <meta charset="UTF-8">
-  <title>צ'אט עם AI</title>
-  <style>
-    /* כל העיצוב שלך נשאר כאן */
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f0f2f5;
-      margin: 0;
-      padding: 0;
-      direction: rtl;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: auto;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background-color: #ffffff;
-      border: 1px solid #ccc;
-      position: relative;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    #chat {
-      flex: 1;
-      padding: 10px;
-      overflow-y: auto;
-      background-color: #f6f7f9;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      scroll-behavior: smooth;
-      max-height: 85vh;
-    }
-
-    .message {
-      max-width: 75%;
-      padding: 12px 16px;
-      margin: 6px;
-      border-radius: 12px;
-      word-wrap: break-word;
-      font-size: 15px;
-      position: relative;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-      animation: fadeIn 0.3s ease;
-    }
-
-    .user {
-      background-color: #4caf50;
-      border: 1px solid #388e3c;
-      align-self: flex-end;
-      border-bottom-right-radius: 0;
-    }
-
-    .ai {
-      background-color: #ffffff;
-      border: 1px solid #ddd;
-      align-self: flex-start;
-      border-bottom-left-radius: 0;
-      font-family: 'Courier New', monospace;
-    }
-
-    .input-area {
-      display: flex;
-      align-items: center;
-      padding: 12px;
-      background-color: #f9f9f9;
-      border-top: 1px solid #ccc;
-    }
-
-    .input-area textarea {
-      flex: 1;
-      padding: 12px;
-      font-size: 16px;
-      resize: none;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-    }
-
-    .input-area button {
-      margin-left: 10px;
-      padding: 12px 18px;
-      font-size: 16px;
-      background-color: #25d366;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>צ'אט בסגנון WhatsApp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #e5ddd5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .message {
+            max-width: 70%;
+            margin: 5px 10px;
+            padding: 10px;
+            border-radius: 8px;
+            clear: both;
+        }
+        .sent {
+            background-color: #d9fdd3;
+            float: right;
+        }
+        .received {
+            background-color: #ffffff;
+            float: left;
+        }
+        .input-container {
+            display: flex;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-top: 1px solid #ccc;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            margin-right: 10px;
+            outline: none;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #25d366;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #20b958;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div id="chat"></div>
-    <div class="input-area">
-      <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton()"></textarea>
-      <button id="sendBtn" onclick="sendMessage()" disabled>📨</button>
+    <div class="chat-container" id="chatContainer"></div>
+    <div class="input-container">
+        <input type="text" id="messageInput" placeholder="הקלד הודעה...">
+        <button onclick="sendMessage()">שלח</button>
     </div>
-  </div>
 
-  <script>
-    // פונקציה להוספת הודעה לצ'אט
-    function appendMessage(text, role) {
-      const chat = document.getElementById('chat');
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message ' + role;
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const messageInput = document.getElementById('messageInput');
+        let conversationHistory = []; // מערך לשמירת היסטוריית השיחה
 
-      const timestamp = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+        function addMessage(text, isSent) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+            messageDiv.textContent = text;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight; // גלילה למטה
 
-      messageDiv.innerHTML = text + `<div class="timestamp">${timestamp}</div>`;
-      chat.appendChild(messageDiv);
-      chat.scrollTop = chat.scrollHeight;
-    }
+            // שמירת ההודעה בהיסטוריה
+            conversationHistory.push({ role: isSent ? 'user' : 'assistant', text });
+        }
 
-    // פונקציה לשליחת הודעה לשרת
-    function sendMessage() {
-      const input = document.getElementById('userInput');
-      const userText = input.value.trim();
-      if (userText === '') return;
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
 
-      appendMessage(userText, 'user');  // הצגת הודעת המשתמש בצ'אט
-      input.value = '';
-      input.focus();
+            // הוספת הודעה שנשלחה לממשק
+            addMessage(text, true);
+            messageInput.value = '';
 
-      // שליחה לשרת באמצעות URL GET
-      const apiUrl = `https://php-render-test.onrender.com/?conversation=${encodeURIComponent(userText)}`;
+            // יצירת היסטוריית השיחה כטקסט לשליחה ל-API
+            const historyText = conversationHistory
+                .map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.text}`)
+                .join('\n') + `\nUser: ${text}`;
 
-      fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-          if (data && data.text) {
-            appendMessage(data.text, 'ai');  // הצגת תשובת ה-AI בצ'אט
-          } else {
-            console.error("לא התקבלה תשובה תקינה מהשרת.");
-          }
-        })
-        .catch(error => {
-          console.error("שגיאה בבקשת fetch:", error);
+            try {
+                const response = await fetch('https://php-render-test.onrender.com/main-ai.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: historyText })
+                });
+
+                const data = await response.json();
+                if (data && data.text) {
+                    addMessage(data.text, false); // הוספת תשובה מהשרת
+                } else {
+                    addMessage('לא התקבלה תשובה תקינה מהשרת.', false);
+                }
+            } catch (error) {
+                console.error('שגיאה בבקשת fetch:', error);
+                addMessage('שגיאה בשליחת ההודעה.', false);
+            }
+        }
+
+        // שליחת הודעה בלחיצת Enter
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
         });
-    }
-
-    // פונקציה להפעיל את כפתור השליחה רק אם יש טקסט
-    function toggleSendButton() {
-      const input = document.getElementById('userInput');
-      const button = document.getElementById('sendBtn');
-      button.disabled = input.value.trim() === '';
-    }
-
-    // פונקציה שמבצע חיפוש של פרמטר ב-URL, במקרה שלנו `conversation`
-    function checkForUrlMessage() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const conversationText = urlParams.get('conversation');
-
-      if (conversationText) {
-        // אם יש פרמטר conversation ב-URL, שלח אותו לצ'אט
-        appendMessage(conversationText, 'user');
-        sendMessageFromUrl(conversationText);
-      }
-    }
-
-    // שליחה של הטקסט מה-URL לשרת
-    function sendMessageFromUrl(conversationText) {
-      const apiUrl = `https://php-render-test.onrender.com/?conversation=${encodeURIComponent(conversationText)}`;
-
-      fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-          if (data && data.text) {
-            appendMessage(data.text, 'ai');
-          } else {
-            console.error("לא התקבלה תשובה תקינה מהשרת.");
-          }
-        })
-        .catch(error => {
-          console.error("שגיאה בבקשת fetch:", error);
-        });
-    }
-
-    // קריאה לפונקציה הזו כאשר הדף נטען
-    window.onload = function() {
-      checkForUrlMessage();  // בודק אם יש הודעה ב-URL ומעבירה אותה
-    };
-  </script>
+    </script>
 </body>
 </html>
+```
