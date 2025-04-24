@@ -3,7 +3,7 @@
   <meta charset="UTF-8">
   <title>צ'אט עם AI</title>
   <style>
-    /* כאן יישארו כל העיצובים שלך */
+    /* כל העיצוב שלך נשאר כאן */
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #f0f2f5;
@@ -108,6 +108,7 @@
   </div>
 
   <script>
+    // פונקציה להוספת הודעה לצ'אט
     function appendMessage(text, role) {
       const chat = document.getElementById('chat');
       const messageDiv = document.createElement('div');
@@ -120,18 +121,56 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
+    // פונקציה לשליחת הודעה לשרת
     function sendMessage() {
       const input = document.getElementById('userInput');
       const userText = input.value.trim();
       if (userText === '') return;
 
-      appendMessage(userText, 'user');
+      appendMessage(userText, 'user');  // הצגת הודעת המשתמש בצ'אט
       input.value = '';
       input.focus();
 
       // שליחה לשרת באמצעות URL GET
       const apiUrl = `https://php-render-test.onrender.com/?conversation=${encodeURIComponent(userText)}`;
-      
+
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.text) {
+            appendMessage(data.text, 'ai');  // הצגת תשובת ה-AI בצ'אט
+          } else {
+            console.error("לא התקבלה תשובה תקינה מהשרת.");
+          }
+        })
+        .catch(error => {
+          console.error("שגיאה בבקשת fetch:", error);
+        });
+    }
+
+    // פונקציה להפעיל את כפתור השליחה רק אם יש טקסט
+    function toggleSendButton() {
+      const input = document.getElementById('userInput');
+      const button = document.getElementById('sendBtn');
+      button.disabled = input.value.trim() === '';
+    }
+
+    // פונקציה שמבצע חיפוש של פרמטר ב-URL, במקרה שלנו `conversation`
+    function checkForUrlMessage() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const conversationText = urlParams.get('conversation');
+
+      if (conversationText) {
+        // אם יש פרמטר conversation ב-URL, שלח אותו לצ'אט
+        appendMessage(conversationText, 'user');
+        sendMessageFromUrl(conversationText);
+      }
+    }
+
+    // שליחה של הטקסט מה-URL לשרת
+    function sendMessageFromUrl(conversationText) {
+      const apiUrl = `https://php-render-test.onrender.com/?conversation=${encodeURIComponent(conversationText)}`;
+
       fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
@@ -146,11 +185,10 @@
         });
     }
 
-    function toggleSendButton() {
-      const input = document.getElementById('userInput');
-      const button = document.getElementById('sendBtn');
-      button.disabled = input.value.trim() === '';
-    }
+    // קריאה לפונקציה הזו כאשר הדף נטען
+    window.onload = function() {
+      checkForUrlMessage();  // בודק אם יש הודעה ב-URL ומעבירה אותה
+    };
   </script>
 </body>
 </html>
