@@ -39,12 +39,13 @@
     #chat {
       flex: 1;
       padding: 10px;
-      overflow-y: auto;
+      overflow-y: auto; /* גלילה אנכית */
       background-color: #f6f7f9;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
       scroll-behavior: smooth;
+      max-height: 85vh; /* הגבלת גובה הצ'אט */
     }
 
     body.darkmode #chat {
@@ -237,17 +238,6 @@
     let aiTypingEl = null;
     let darkMode = false;
 
-    // Check if URL contains a 'conversation' parameter and use it
-    function handleInitialConversation() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const conversationText = urlParams.get('conversation');
-      if (conversationText) {
-        appendMessage(conversationText, 'user');
-        conversationHistory.push({ role: 'user', content: conversationText });
-        sendMessage(true);  // Automatically send the message to the server
-      }
-    }
-
     function removeTypingIndicator() {
       if (aiTypingEl) {
         aiTypingEl.remove();
@@ -281,13 +271,13 @@
       document.getElementById(role === 'user' ? 'sendSound' : 'receiveSound').play();
     }
 
-    function sendMessage(initial = false) {
+    function sendMessage() {
       const input = document.getElementById('userInput');
       const model = document.getElementById('modelSelect').value;
       const endpoint = model === 'gemini25' 
         ? 'https://php-render-test.onrender.com/gemini25.php' 
         : 'https://php-render-test.onrender.com/main-ai.php';
-      const userText = initial ? conversationHistory[conversationHistory.length - 1].content : input.value.trim();
+      const userText = input.value.trim();
       if (userText === '') return;
 
       removeTypingIndicator();
@@ -352,9 +342,6 @@
       const btn = document.querySelector('.darkmode-btn');
       btn.textContent = darkMode ? '☀️' : '🌙';
     }
-
-    // Run on page load
-    handleInitialConversation();
   </script>
 </body>
 </html>
