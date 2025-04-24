@@ -1,30 +1,59 @@
 <?php
-function askOpenAI($prompt) {
-    $config = require 'config.php';
-    $apiKey = $config['OPENAI_API_KEY'];
+// טוען את קובץ הקונפיגורציה
+$config = require 'config.php'; // טוען את קובץ הקונפיגורציה
+
+$answer = "";
+if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST["user_input"])) {
+    $userInput = $_POST["user_input"];
+    $apiKey = $config['OPENAI_API_KEY']; // קורא את המפתח מתוך קובץ הקונפיגורציה
 
     $data = [
         "model" => "gpt-4",
-        "messages" => [["role" => "user", "content" => $prompt]],
+        "messages" => [
+            ["role" => "user", "content" => $userInput]
+        ],
         "temperature" => 0.7
     ];
 
-    $ch = curl_init('https://api.openai.com/v1/chat/completions');
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_HTTPHEADER => [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $apiKey
-        ],
-        CURLOPT_POSTFIELDS => json_encode($data)
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, 'https://api.openai.com/v1/chat/completions');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $apiKey
     ]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     $response = curl_exec($ch);
     curl_close($ch);
 
-    if ($response) {
+    if ($response !== false) {
         $responseData = json_decode($response, true);
-        return $responseData['choices'][0]['message']['content'] ?? 'שגיאה בפענוח תשובה';
+        $answer = $responseData['choices'][0]['message']['content'] ?? 'שגיאה בתגובה';
+    } else {
+        $answer = "שגיאה בשליחת הבקשה לשרת של OpenAI.";
     }
-    return 'שגיאה בשליחת הבקשה ל-OpenAI.';
 }
+?>
+
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <title>שיחה עם ChatGPT</title>
+</head>
+<body style="font-family: Arial; direction: rtl; padding: 2em;">
+    <h2>שאל את ChatGPT</h2>
+    <form method="post">
+        <textarea name="user_input" rows="5" cols="60" placeholder="כתוב כאן את השאלה שלך..." required></textarea><br><br>
+        <button type="submit">שלח</button>
+    </form>
+
+    <?php if (!empty($answer)): ?>
+        <h3>תשובת ChatGPT:</h3>
+        <div style="border:1px solid #ccc; padding:10px; background:#f9f9f9;">
+            <?= nl2br(htmlspecialchars($answer)) ?>
+        </div>
+    <?php endif; ?>
+</body>
+</html>
