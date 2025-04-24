@@ -10,7 +10,6 @@
       margin: 0;
       padding: 0;
       direction: rtl;
-      transition: background-color 0.3s ease;
     }
 
     .container {
@@ -22,7 +21,6 @@
       background-color: #ffffff;
       border: 1px solid #ccc;
       position: relative;
-      transition: background-color 0.3s ease;
     }
 
     #loader {
@@ -50,115 +48,78 @@
       flex-direction: column;
       justify-content: flex-end;
       scroll-behavior: smooth;
-      transition: background-color 0.3s ease;
     }
 
     .message {
       max-width: 75%;
-      padding: 12px 18px;
-      margin: 8px;
-      border-radius: 15px;
+      padding: 10px 14px;
+      margin: 6px;
+      border-radius: 10px;
       word-wrap: break-word;
-      font-size: 16px;
+      font-size: 15px;
       position: relative;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      transition: all 0.2s ease;
-      animation: appear 0.5s ease-out;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      animation: fadeIn 0.3s ease;
     }
 
-    @keyframes appear {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(5px);}
+      to {opacity: 1; transform: translateY(0);}
     }
 
-    .message.user {
+    .user {
       background-color: #dcf8c6;
       border: 1px solid #b8e8b0;
-      color: #4a4a4a;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
     }
 
-    .message.ai {
+    .ai {
       background-color: #ffffff;
       border: 1px solid #ddd;
-      color: #333;
-    }
-
-    .message:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+      font-family: 'Courier New', monospace;
     }
 
     .input-area {
       display: flex;
       align-items: center;
-      padding: 12px 15px;
-      background-color: #f7f7f7;
-      border-top: 2px solid #ccc;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-top: 1px solid #ccc;
       flex-wrap: wrap;
-      gap: 8px;
-      transition: background-color 0.3s ease;
+      gap: 5px;
     }
 
     .input-area textarea {
-      flex: 1;
-      padding: 12px;
+      flex: 1 1 auto;
+      padding: 10px;
       font-size: 16px;
-      border-radius: 12px;
+      resize: none;
+      border-radius: 10px;
       border: 1px solid #ccc;
       outline: none;
-      transition: all 0.3s ease;
     }
 
-    .input-area textarea:focus {
-      border-color: #25d366;
-      box-shadow: 0 0 8px rgba(37, 211, 102, 0.5);
+    .input-area select,
+    .input-area button {
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      cursor: pointer;
     }
 
     .input-area button {
-      padding: 10px 14px;
       background-color: #25d366;
       color: white;
-      font-size: 16px;
-      border-radius: 12px;
       border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .input-area button:hover {
-      background-color: #128c7e;
     }
 
     .input-area button:disabled {
       background-color: #ccc;
       cursor: not-allowed;
-    }
-
-    .top-buttons {
-      display: flex;
-      justify-content: flex-start;
-      gap: 10px;
-      padding: 10px;
-    }
-
-    .top-buttons button {
-      background: linear-gradient(135deg, #25d366, #128c7e);
-      color: white;
-      padding: 8px 14px;
-      font-size: 14px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-    .top-buttons button:hover {
-      background-color: #128c7e;
-      transform: scale(1.05);
-    }
-
-    .top-buttons button:active {
-      transform: scale(0.95);
     }
 
     .typing {
@@ -204,7 +165,7 @@
     body.dark .input-area select {
       background-color: #2c2c2e;
       color: #fff;
-      border-color: #555;
+      border: 1px solid #555;
     }
 
     body.dark .input-area button {
@@ -226,17 +187,47 @@
     body.dark #chat {
       background-color: #1e1e1f;
     }
+
+    /* כפתורים למעלה */
+    .top-buttons {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .top-buttons button {
+      background-color: #25d366;
+      color: white;
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .top-buttons button:hover {
+      background-color: #128c7e;
+    }
+
+    /* נגישות */
+    #chat[aria-live] {
+      padding-bottom: 5px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <div id="loader" class="hidden"></div>
-    <div id="chat"></div>
+    <!-- כפתורים למעלה -->
     <div class="top-buttons">
-      <button onclick="toggleDarkMode()">🌙</button>
-      <button onclick="clearChat()">🗑️</button>
-      <button onclick="downloadChat()">⬇️</button>
+      <button onclick="toggleDarkMode()">🌙 מצב לילה</button>
+      <button onclick="clearChat()">🗑️ נקה</button>
+      <button onclick="downloadChat()">⬇️ הורדה</button>
     </div>
+
+    <div id="loader" class="hidden"></div>
+    <div id="chat" aria-live="polite" role="log"></div>
     <div class="input-area">
       <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton(); showUserTyping();"></textarea>
       <select id="modelSelect">
@@ -317,31 +308,70 @@
       const chat = document.getElementById('chat');
       const messageDiv = document.createElement('div');
       messageDiv.className = 'message ' + role;
-      messageDiv.innerHTML = text;
       chat.appendChild(messageDiv);
-      chat.scrollTop = chat.scrollHeight;
-      document.getElementById(role === 'user' ? 'sendSound' : 'receiveSound').play();
+
+      let i = 0;
+      const fullText = text + `<br><div style='font-size: 12px; color: gray; margin-top: 6px;'>התגובה נוצרה על ידי: <strong>${modelName}</strong></div>`;
+      const speed = 5;
+
+      const interval = setInterval(() => {
+        messageDiv.innerHTML = fullText.slice(0, i++);
+        chat.scrollTop = chat.scrollHeight;
+        if (i > fullText.length) {
+          clearInterval(interval);
+          document.getElementById('receiveSound').play();
+        }
+      }, speed);
     }
 
     function sendMessage() {
       const input = document.getElementById('userInput');
-      const message = input.value.trim();
-      input.value = '';
-      appendMessage(message, 'user');
-      fetchMessageFromAI(message);
-    }
-
-    async function fetchMessageFromAI(message) {
-      showLoader();
       const model = document.getElementById('modelSelect').value;
-      const response = await fetch('/ai-endpoint', {
+      const endpoint = model === 'gemini25'
+        ? 'https://php-render-test.onrender.com/gemini25.php'
+        : 'https://php-render-test.onrender.com/main-ai.php';
+      const modelName = model === 'gemini25' ? 'מודל תמונות (Gemini)' : 'מודל ראשי (AI)';
+      const userText = input.value.trim();
+      if (userText === '') return;
+
+      appendMessage(userText, 'user');
+      conversationHistory.push({ role: 'user', content: userText });
+      input.value = '';
+      input.focus();
+
+      showTypingIndicator('ai');
+      showLoader();
+
+      const formattedHistory = conversationHistory.map(e =>
+        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`).join('\n');
+
+      fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, model }),
+        body: JSON.stringify({ text: formattedHistory })
+      })
+      .then(response => response.json())
+      .then(data => {
+        removeTypingIndicator();
+        hideLoader();
+        if (data && data.text) {
+          const imageMatch = data.text.match(/<img[^>]*src=["']([^"']+)["'][^>]*>/);
+          if (imageMatch) {
+            const imageUrl = imageMatch[1];
+            const textOnly = data.text.replace(/<img[^>]*>/, '').trim();
+            if (textOnly) typeMessage(textOnly, 'ai', modelName);
+            typeMessage(`<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">`, 'ai', modelName);
+          } else {
+            typeMessage(data.text, 'ai', modelName);
+          }
+          conversationHistory.push({ role: 'ai', content: data.text });
+        }
+      })
+      .catch(error => {
+        removeTypingIndicator();
+        hideLoader();
+        console.error("שגיאה בבקשת fetch:", error);
       });
-      const data = await response.json();
-      appendMessage(data.reply, 'ai');
-      hideLoader();
     }
 
     function toggleDarkMode() {
@@ -350,17 +380,35 @@
 
     function clearChat() {
       document.getElementById('chat').innerHTML = '';
+      conversationHistory = [];
     }
 
     function downloadChat() {
-      const chat = document.getElementById('chat');
-      const messages = chat.querySelectorAll('.message');
-      const text = Array.from(messages).map(msg => msg.innerText).join('\n\n');
-      const blob = new Blob([text], { type: 'text/plain' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'chat.txt';
-      link.click();
+      const chatText = conversationHistory.map(entry =>
+        `${entry.role === 'user' ? 'משתמש' : 'AI'}: ${entry.content}`).join('\n\n');
+      const blob = new Blob([chatText], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'chat_history.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // שמירת היסטוריית שיחה באופן מקומי
+    if (localStorage.getItem('conversationHistory')) {
+      conversationHistory = JSON.parse(localStorage.getItem('conversationHistory'));
+      renderChatHistory();
+    }
+
+    function saveConversation() {
+      localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+    }
+
+    function renderChatHistory() {
+      conversationHistory.forEach(entry => {
+        appendMessage(entry.content, entry.role);
+      });
     }
   </script>
 </body>
