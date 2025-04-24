@@ -3,228 +3,408 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>צ'אט AI - מסך מלא</title>
+    <title>צ'אט AI עם בחירת מודל (מתוקן)</title>
     <style>
-        /* CSS משולב ישירות בקובץ ה-HTML */
-        html, body {
-            height: 100%; /* גורם ל-html ול-body לתפוס את כל הגובה */
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* מונע גלילה מיותרת ברמת ה-body */
+        :root {
+            /* --- Light Mode Colors (הוחזרו כל המשתנים) --- */
+            --bg-default: #e5ddd5;
+            --chat-bg: #ffffff;
+            --header-bg: #00a884;
+            --header-text: #ffffff;
+            --header-icon-fill: #ffffff;
+            --user-msg-bg: #dcf8c6;
+            --ai-msg-bg: #ffffff;
+            --msg-text: #111b21;
+            --input-area-bg: #f0f2f5;
+            --input-bg: #ffffff;
+            --input-text: #111b21;
+            --button-bg: #008069;
+            --button-hover-bg: #00a884;
+            --button-icon-fill: #ffffff;
+            --timestamp-color: rgba(17, 27, 33, 0.45);
+            --border-color: #e9edef;
+            --icon-button-hover-bg: rgba(0, 0, 0, 0.05);
+            --scrollbar-thumb: #c1c1c1;
+            --scrollbar-track: #f0f0f0;
+            --link-color: #007bff;
+            /* משתני Select */
+            --select-bg: rgba(255, 255, 255, 0.15);
+            --select-border: rgba(255, 255, 255, 0.3);
+            --select-text: var(--header-text);
+            --select-arrow: var(--header-icon-fill);
         }
 
+        body.dark-mode {
+             /* --- Dark Mode Colors (הוחזרו כל המשתנים) --- */
+            --bg-default: #111b21;
+            --chat-bg: #0d141a;
+            --header-bg: #202c33;
+            --header-text: #e9edef;
+            --header-icon-fill: #aebac1;
+            --user-msg-bg: #005c4b;
+            --ai-msg-bg: #202c33;
+            --msg-text: #e9edef;
+            --input-area-bg: #1f2c34;
+            --input-bg: #2a3942;
+            --input-text: #e9edef;
+            --button-bg: #00a884;
+            --button-hover-bg: #008069;
+            --button-icon-fill: #111b21;
+            --timestamp-color: rgba(233, 237, 239, 0.45);
+            --border-color: #2a3942;
+            --icon-button-hover-bg: rgba(255, 255, 255, 0.08);
+            --scrollbar-thumb: #4a4a4a;
+            --scrollbar-track: #202c33;
+            --link-color: #58a6ff;
+             /* משתני Select במצב כהה */
+            --select-bg: rgba(255, 255, 255, 0.08);
+            --select-border: rgba(255, 255, 255, 0.15);
+            --select-text: var(--header-text);
+            --select-arrow: var(--header-icon-fill);
+        }
+
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
         body {
-            font-family: Assistant, Arial, sans-serif;
-            background-color: #e5ddd5; /* רקע נשאר */
-            display: flex; /* שימוש ב-flex כדי שהקונטיינר יתפוס מקום */
-            flex-direction: column; /* הקונטיינר יתפרס אנכית */
+            font-family: Assistant, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--bg-default); color: var(--msg-text);
+            display: flex; flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-
         #chat-container {
-            width: 100%; /* תופס את כל הרוחב הזמין */
-            max-width: 800px; /* אפשר להגדיל/להסיר אם רוצים רוחב מלא לגמרי */
-            height: 100vh; /* תופס את כל גובה אזור התצוגה */
-            margin: 0 auto; /* ממקם אופקית אם יש max-width */
-            background-color: #fff;
-            /* border-radius: 8px; /* הוסר */
-            /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* הוסר */
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; /* עדיין חשוב למנוע גלישה פנימית */
+            width: 100%; max-width: 800px; height: 100vh; margin: 0 auto;
+            background-color: var(--chat-bg); display: flex; flex-direction: column;
+            overflow: hidden; position: relative; transition: background-color 0.3s ease;
         }
 
-        #chat-output {
-            flex-grow: 1; /* תופס את כל הגובה הפנוי */
-            padding: 15px;
-            overflow-y: auto; /* מאפשר גלילה רק לאזור ההודעות */
-            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-repeat: repeat;
-            display: flex;
-            flex-direction: column;
+        /* --- Header --- */
+        #chat-header {
+            background-color: var(--header-bg); color: var(--header-text);
+            padding: 8px 10px;
+            display: flex; align-items: center;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); z-index: 10;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            gap: 8px;
+        }
+        #chat-header h1 {
+            margin: 0; font-size: 17px;
+            font-weight: 600; flex-grow: 1;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .header-controls {
+            display: flex; align-items: center; gap: 5px;
         }
 
-        .message {
-            max-width: 75%;
-            padding: 8px 12px;
-            margin-bottom: 10px;
-            border-radius: 18px;
-            word-wrap: break-word;
-            line-height: 1.4;
-            position: relative;
-            font-size: 14.5px;
-        }
-
-        .user-message {
-            background-color: #dcf8c6;
-            align-self: flex-start;
-            margin-left: auto;
-            text-align: right;
-        }
-
-        .ai-message {
-            background-color: #ffffff;
-            align-self: flex-end;
-            margin-right: auto;
-            text-align: right;
-            border: 1px solid #eee;
-        }
-
-        .message span {
-            display: inline-block;
-        }
-
-        #chat-input-area {
-            display: flex;
-            padding: 10px;
-            border-top: 1px solid #eee;
-            background-color: #f0f0f0;
-            /* flex-shrink: 0; /* מונע מהאזור הזה להתכווץ */
-        }
-
-        #user-input {
-            flex-grow: 1;
-            padding: 10px 15px;
-            border: 1px solid #ccc;
-            border-radius: 20px;
-            margin-left: 8px;
-            font-size: 15px;
-            outline: none;
-        }
-
-        #send-button {
-            padding: 10px 18px;
-            background-color: #075e54;
-            color: white;
-            border: none;
-            border-radius: 20px;
+        /* --- Model Selector (עם URL חץ תקין כברירת מחדל) --- */
+        #model-select {
+            background-color: var(--select-bg);
+            color: var(--select-text);
+            border: 1px solid var(--select-border);
+            border-radius: 6px;
+            padding: 5px 25px 5px 8px;
+            font-size: 13px;
             cursor: pointer;
-            font-size: 15px;
+            outline: none;
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+             /* חץ ברירת מחדל (לבן) - יוחלף ע"י JS */
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%23ffffff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 5px center;
+            background-size: 18px;
+            transition: background-color 0.3s ease, border-color 0.3s ease, background-image 0.3s ease; /* הוספנו transition ל-background-image */
+        }
+        #model-select option {
+             background-color: var(--chat-bg);
+             color: var(--msg-text);
+        }
+        body.dark-mode #model-select option {
+             background-color: var(--input-bg);
+        }
+
+        /* --- Header Buttons --- */
+        .icon-button {
+            background: none; border: none; padding: 7px;
+            cursor: pointer; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
             transition: background-color 0.2s ease;
         }
-
-        #send-button:hover {
-            background-color: #128c7e;
+        .icon-button:hover { background-color: var(--icon-button-hover-bg); }
+        .icon-button svg {
+            width: 20px; height: 20px;
+            fill: var(--header-icon-fill);
+            transition: fill 0.3s ease;
         }
+        /* --- End Header --- */
 
+        /* --- Chat Output (עם URL רקע תקין) --- */
+        #chat-output {
+            flex-grow: 1; padding: 15px 15px 10px 15px; overflow-y: auto;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); /* <<< URL תקין */
+            background-repeat: repeat; display: flex; flex-direction: column;
+             scroll-behavior: smooth; /* הוספנו גלילה חלקה */
+        }
+        body.dark-mode #chat-output { background-image: none; background-color: var(--chat-bg); }
+        #chat-output::-webkit-scrollbar { width: 6px; }
+        #chat-output::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 3px; }
+        #chat-output::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+        #chat-output::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--scrollbar-thumb) 70%, black); }
+        #chat-output { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
+
+        .message {
+            max-width: 70%; padding: 6px 12px 8px 12px; margin-bottom: 8px; border-radius: 12px;
+            word-wrap: break-word; line-height: 1.45; position: relative; font-size: 14.2px;
+            color: var(--msg-text); box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+             opacity: 0; /* להוספת אנימציית הופעה */
+             animation: fadeIn 0.3s ease forwards; /* אנימציית הופעה */
+        }
+         /* אנימציית הופעת הודעה */
+         @keyframes fadeIn {
+             to { opacity: 1; }
+         }
+
+        .user-message { background-color: var(--user-msg-bg); align-self: flex-start; margin-left: auto; border-bottom-left-radius: 4px; }
+        body.dark-mode .user-message { color: var(--msg-text); }
+        .ai-message { background-color: var(--ai-msg-bg); align-self: flex-end; margin-right: auto; border: 1px solid var(--border-color); border-bottom-right-radius: 4px; box-shadow: none; }
+        .message-content { padding-bottom: 15px; }
+        .timestamp { font-size: 11px; color: var(--timestamp-color); position: absolute; bottom: 5px; transition: color 0.3s ease; }
+        .user-message .timestamp { right: 10px; }
+        .ai-message .timestamp { left: 10px; }
+
+        /* --- Input Area --- */
+        #chat-input-area {
+            display: flex; align-items: center; padding: 8px 12px;
+            border-top: 1px solid var(--border-color); background-color: var(--input-area-bg);
+            flex-shrink: 0; transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        #user-input {
+            flex-grow: 1; padding: 10px 18px; border: none; border-radius: 20px; margin-left: 8px;
+            font-size: 15px; background-color: var(--input-bg); color: var(--input-text);
+            outline: none; transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease; /* הוספנו transition ל-box-shadow */
+        }
+         /* הדגשת פוקוס */
+         #user-input:focus {
+             box-shadow: 0 0 0 2px color-mix(in srgb, var(--button-bg) 30%, transparent);
+         }
+
+        /* --- Send Button (עם SVG תקין) --- */
+        #send-button {
+            width: 40px; height: 40px; padding: 0; background-color: var(--button-bg);
+            border: none; border-radius: 50%; cursor: pointer; font-size: 0;
+            display: flex; justify-content: center; align-items: center;
+            transition: background-color 0.2s ease, transform 0.1s ease; /* הוספנו transition ל-transform */
+            flex-shrink: 0;
+        }
+         /* אפקט לחיצה */
+         #send-button:active {
+             transform: scale(0.9);
+         }
+
+        #send-button::before {
+            content: ''; display: block; width: 20px; height: 20px;
+            background-color: var(--button-icon-fill);
+             /* <<< SVG תקין של מטוס נייר */
+            mask-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"%3E%3Cpath d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/%3E%3C/svg%3E');
+            mask-size: contain; mask-repeat: no-repeat; mask-position: center;
+            -webkit-mask-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"%3E%3Cpath d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/%3E%3C/svg%3E');
+            -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center;
+            transition: background-color 0.3s ease;
+        }
+        #send-button:hover { background-color: var(--button-hover-bg); }
+
+        /* --- Loading Indicator --- */
         .loading span::after {
-            content: ' .';
-            animation: dots 1.4s linear infinite;
-            display: inline-block;
+            content: ' .'; animation: dots 1.4s linear infinite; display: inline-block;
         }
-
         @keyframes dots {
-            0%, 20% { content: ' .'; }
-            40% { content: ' ..'; }
-            60% { content: ' ...'; }
-            80%, 100% { content: '.'; }
+            0%, 20% { content: ' .'; } 40% { content: ' ..'; } 60% { content: ' ...'; } 80%, 100% { content: '.'; }
         }
-
-        /* אין צורך ב-media query מיוחד למסכים קטנים כי זה כבר תופס 100% */
 
     </style>
 </head>
 <body>
 
+<!-- HTML נשאר זהה לתשובה הקודמת -->
 <div id="chat-container">
-    <div id="chat-output">
-        <!-- הודעת פתיחה -->
-        <div class="message ai-message">
-            <span>שלום! איך אני יכול לעזור לך היום?</span>
+    <!-- Header -->
+    <div id="chat-header">
+        <h1>צ'אט AI</h1>
+        <div class="header-controls">
+            <select id="model-select" aria-label="בחר מודל AI">
+                <option value="main-ai.php">מודל 1 (ראשי)</option>
+                <option value="gemini25.php">מודל 2 (Gemini)</option>
+            </select>
+            <button class="icon-button" id="dark-mode-toggle" title="שנה ערכת נושא" aria-label="שנה ערכת נושא">
+                <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18v-8a2 2 0 0 0-2-2H4.08A8 8 0 0 1 12 4v8a2 2 0 0 0 2 2h5.92A8 8 0 0 1 12 20z"/></svg>
+                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.64 5.64c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L5.64 5.64zm12.73 12.73c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41l-1.41-1.41zM19.78 4.22c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41zm-12.73 12.73c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41z"/></svg>
+            </button>
+            <button class="icon-button" id="download-chat" title="הורד צ'אט" aria-label="הורד צ'אט">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            </button>
+            <button class="icon-button" id="clear-chat" title="נקה צ'אט" aria-label="נקה צ'אט">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            </button>
         </div>
     </div>
+    <!-- Chat Messages Area -->
+    <div id="chat-output">
+        <div class="message ai-message">
+            <div class="message-content"><span>שלום! בחר מודל AI והתחל לשוחח.</span></div>
+            <span class="timestamp">התחל</span>
+        </div>
+    </div>
+    <!-- Input Area -->
     <div id="chat-input-area">
-        <input type="text" id="user-input" placeholder="הקלד הודעה...">
-        <button id="send-button">שלח</button>
+        <input type="text" id="user-input" placeholder="הקלד/י הודעה...">
+        <button id="send-button" aria-label="שלח"></button>
     </div>
 </div>
 
 <script>
-    // JavaScript נשאר זהה לקודם
+    // --- JavaScript נשאר זהה לחלוטין לתשובה הקודמת ---
     document.addEventListener('DOMContentLoaded', () => {
-
+        const chatContainer = document.getElementById('chat-container');
         const chatOutput = document.getElementById('chat-output');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
-        // const chatContainer = document.getElementById('chat-container'); // לא נחוץ יותר לגלילה
+        const modelSelect = document.getElementById('model-select');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const themeIconLight = document.getElementById('theme-icon-light');
+        const sunIcon = document.getElementById('sun-icon');
+        const downloadChatButton = document.getElementById('download-chat');
+        const clearChatButton = document.getElementById('clear-chat');
+        const BASE_API_URL = 'https://php-render-test.onrender.com/';
 
-        const API_URL = 'https://php-render-test.onrender.com/main-ai.php';
-
-        function addMessageToChat(text, sender, isLoading = false) {
+        function getCurrentTimestamp() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+        function addMessageToChat(text, sender, isLoading = false, timestamp = null) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
             messageDiv.classList.add(sender === 'user' ? 'user-message' : 'ai-message');
-
+            messageDiv.dataset.sender = sender;
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('message-content');
             const messageSpan = document.createElement('span');
             messageSpan.textContent = text;
-            messageDiv.appendChild(messageSpan);
-
-            if (isLoading) {
+            contentDiv.appendChild(messageSpan);
+            messageDiv.appendChild(contentDiv);
+            if (!isLoading) {
+                const timestampSpan = document.createElement('span');
+                timestampSpan.classList.add('timestamp');
+                timestampSpan.textContent = timestamp || getCurrentTimestamp();
+                messageDiv.appendChild(timestampSpan);
+                messageDiv.dataset.timestamp = timestampSpan.textContent;
+            } else {
                 messageDiv.classList.add('loading');
+                messageSpan.textContent = "מעבד";
             }
-
+            // הוספה לפני גלילה כדי שהאנימציה תתחיל לפני
             chatOutput.appendChild(messageDiv);
-            scrollToBottom();
+            // דחייה קטנה לפני הגלילה כדי לאפשר לאנימציה להתחיל
+             setTimeout(scrollToBottom, 50);
+            // scrollToBottom(); // גלילה מיידית קודמת
             return messageDiv;
         }
-
-        function scrollToBottom() {
-            // ודא שגוללים רק את אזור ההודעות
-            chatOutput.scrollTop = chatOutput.scrollHeight;
-        }
-
-        async function sendMessage() {
-            const text = userInput.value.trim();
+        function scrollToBottom() { chatOutput.scrollTop = chatOutput.scrollHeight; }
+        async function sendMessage(textToSend) {
+            const text = (textToSend || userInput.value).trim();
             if (text === '') return;
-
             addMessageToChat(text, 'user');
-            userInput.value = '';
-
+            if (!textToSend) { userInput.value = ''; }
             const loadingMessageElement = addMessageToChat("מעבד", 'ai', true);
-
+            const selectedModelFile = modelSelect.value;
+            const currentApiUrl = BASE_API_URL + selectedModelFile;
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ text })
-                });
-
-                if (loadingMessageElement) {
-                    chatOutput.removeChild(loadingMessageElement);
-                }
-
-                if (!response.ok) {
-                    throw new Error(`שגיאת שרת: ${response.status} ${response.statusText}`);
-                }
-
+                console.log(`שולח בקשה ל: ${currentApiUrl}`);
+                const response = await fetch(currentApiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+                if (loadingMessageElement) { chatOutput.removeChild(loadingMessageElement); }
+                if (!response.ok) { throw new Error(`שגיאת שרת: ${response.status} ${response.statusText}`); }
                 const data = await response.json();
-
-                if (data && data.text) {
-                    addMessageToChat(data.text, 'ai');
-                } else {
-                    console.error("השרת החזיר תשובה לא תקינה:", data);
-                    addMessageToChat("אופס, קרתה שגיאה בקבלת התשובה מהשרת.", 'ai');
-                }
-
+                if (data && data.text) { addMessageToChat(data.text, 'ai'); }
+                else { console.error("תשובה לא תקינה:", data); addMessageToChat("אופס, קרתה שגיאה בקבלת התשובה מהשרת.", 'ai'); }
             } catch (error) {
-                if (loadingMessageElement && loadingMessageElement.parentNode === chatOutput) {
-                   chatOutput.removeChild(loadingMessageElement);
-                }
-                console.error("שגיאה בשליחת/קבלת ההודעה:", error);
+                if (loadingMessageElement && loadingMessageElement.parentNode === chatOutput) { chatOutput.removeChild(loadingMessageElement); }
+                console.error("שגיאה:", error);
                 addMessageToChat(`שגיאה: ${error.message}`, 'ai');
             }
         }
-
-        sendButton.addEventListener('click', sendMessage);
-
-        userInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                sendMessage();
+        function toggleDarkMode(forceMode) {
+            const body = document.body;
+            let isDark;
+            if (forceMode) { isDark = (forceMode === 'dark'); }
+            else { isDark = !body.classList.contains('dark-mode'); }
+            body.classList.toggle('dark-mode', isDark);
+            themeIconLight.style.display = isDark ? 'none' : 'inline-block';
+            sunIcon.style.display = isDark ? 'inline-block' : 'none';
+            localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+            updateSelectArrowColor();
+        }
+        function updateSelectArrowColor() {
+            // Function to safely get color and encode it
+            const getEncodedColor = () => {
+                 try {
+                    const colorValue = getComputedStyle(document.documentElement).getPropertyValue('--select-arrow').trim();
+                    return encodeURIComponent(colorValue.startsWith('#') ? colorValue.substring(1) : colorValue);
+                 } catch (e) {
+                     console.error("Error getting computed style for --select-arrow", e);
+                     return 'ffffff'; // Default to white on error
+                 }
+            };
+             const encodedColor = getEncodedColor();
+             modelSelect.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg fill="%23${encodedColor}" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>')`;
+        }
+        function downloadChat() {
+            let chatContent = "היסטוריית צ'אט AI\n====================\n\n";
+            const messages = chatOutput.querySelectorAll('.message:not(.loading)');
+            messages.forEach(msg => {
+                const sender = msg.dataset.sender === 'user' ? 'משתמש' : 'AI';
+                const timestamp = msg.dataset.timestamp || '';
+                const text = msg.querySelector('.message-content span')?.textContent || '';
+                if (timestamp === "התחל" && sender === "AI") return;
+                chatContent += `[${timestamp}] ${sender}: ${text}\n`;
+            });
+            const blob = new Blob([chatContent], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const now = new Date();
+            const filename = `ai_chat_log_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.txt`;
+            link.download = filename;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
+        }
+        function clearChat() {
+            if (confirm("האם אתה בטוח שברצונך למחוק את כל ההודעות בצ'אט?")) {
+                chatOutput.innerHTML = '';
+                addMessageToChat("בחר מודל AI והתחל לשוחח.", 'ai', false, 'התחל');
             }
-        });
-
-        scrollToBottom(); // גלול לתחתית בעת טעינת הדף
+        }
+        function handleUrlParameter() {
+             const urlParams = new URLSearchParams(window.location.search);
+             const conversationText = urlParams.get('conversation');
+             if (conversationText) {
+                 const decodedText = decodeURIComponent(conversationText).trim();
+                 if (decodedText) { console.log("שולח שיחה מפרמטר URL:", decodedText); sendMessage(decodedText); }
+             }
+         }
+        sendButton.addEventListener('click', () => sendMessage());
+        userInput.addEventListener('keypress', (event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } });
+        darkModeToggle.addEventListener('click', () => toggleDarkMode());
+        downloadChatButton.addEventListener('click', downloadChat);
+        clearChatButton.addEventListener('click', clearChat);
+        modelSelect.addEventListener('change', () => { localStorage.setItem('selectedModel', modelSelect.value); console.log(`המודל שנבחר הוא: ${modelSelect.value}`); });
+        const savedModel = localStorage.getItem('selectedModel');
+        if (savedModel) {
+            const isValidOption = Array.from(modelSelect.options).some(opt => opt.value === savedModel);
+            if (isValidOption) { modelSelect.value = savedModel; console.log(`טוען מודל שמור: ${savedModel}`); }
+            else { console.warn(`המודל השמור (${savedModel}) אינו אפשרות חוקית. משתמש בברירת המחדל.`); localStorage.removeItem('selectedModel'); }
+        }
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'enabled') { toggleDarkMode('dark'); }
+        else { toggleDarkMode('light'); }
+        handleUrlParameter();
+        scrollToBottom(); // גלילה ראשונית לתחתית
     });
 </script>
 
