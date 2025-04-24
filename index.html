@@ -82,14 +82,6 @@
       font-family: 'Courier New', monospace;
     }
 
-    .typing-indicator {
-      border: 2px solid #25d366;
-      border-radius: 10px;
-      padding: 10px;
-      margin: 10px;
-      background-color: #f9f9f9;
-    }
-
     .input-area {
       display: flex;
       align-items: center;
@@ -255,7 +247,7 @@
     function showTypingIndicator(role) {
       const chat = document.getElementById('chat');
       const messageDiv = document.createElement('div');
-      messageDiv.className = 'message typing-indicator ' + role;
+      messageDiv.className = 'message ' + role;
       const typing = document.createElement('div');
       typing.className = 'typing';
       typing.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
@@ -305,41 +297,61 @@
       const model = document.getElementById('modelSelect').value;
       const endpoint = model === 'gemini25'
         ? 'https://php-render-test.onrender.com/gemini25.php'
-        : 'https://php-render-test.onrender.com/main-ai.php';
+        : 'https://php-render-test.onrender.com/main-ai.php'; // הכתובת החדשה
+      const modelName = model === 'gemini25' ? 'מודל תמונות (Gemini)' : 'מודל ראשי (AI)';
+      const userText = input.value.trim();
+      if (userText === '') return;
 
-      appendMessage(input.value, 'user');
+      appendMessage(userText, 'user');
+      conversationHistory.push({ role: 'user', content: userText });
       input.value = '';
-      toggleSendButton();
+      input.focus();
+
+      showTypingIndicator('ai');
       showLoader();
+
+      const formattedHistory = conversationHistory.map(e =>
+        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
+      ).join('\n');
+
       fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input.value })
+        body: JSON.stringify({ text: formattedHistory })
       })
       .then(response => response.json())
       .then(data => {
-        appendMessage(data.reply, 'ai');
+        removeTypingIndicator();
         hideLoader();
-      });
-    }
+        if (data && data.text) {
+          const imageMatch = data.text
 
-    function clearChat() {
-      document.getElementById('chat').innerHTML = '';
-    }
 
-    function downloadChat() {
-      const chatContent = document.getElementById('chat').innerText;
-      const blob = new Blob([chatContent], { type: 'text/plain;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `chat_${new Date().toISOString()}.txt`;
-      link.click();
-    }
 
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark');
-    }
 
-  </script>
-</body>
-</html>
+
+
+ChatGPT said:
+.match(/<img[^>]src="'["'][^>]>/); if (imageMatch) { const imageUrl = imageMatch[1]; const textOnly = data.text.replace(/<img[^>]*>/, '').trim(); if (textOnly) typeMessage(textOnly, 'ai', modelName); typeMessage(<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">, 'ai', modelName); } else { typeMessage(data.text, 'ai', modelName); } conversationHistory.push({ role: 'ai', content: data.text }); } }) .catch(error => { removeTypingIndicator(); hideLoader(); console.error("שגיאה בבקשת fetch:", error); }); }
+
+javascript
+Copy
+Edit
+function toggleDarkMode() {
+  document.body.classList.toggle('dark');
+}
+
+function clearChat() {
+  document.getElementById('chat').innerHTML = '';
+  conversationHistory = [];
+}
+
+function downloadChat() {
+  const text = conversationHistory.map(m => `${m.role === 'user' ? 'משתמש' : 'AI'}: ${m.content}`).join('\n\n');
+  const blob = new Blob([text], { type: 'text/plain' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `chat_${new Date().toISOString().split('T')[0]}.txt`;
+  link.click();
+}
+</script> </body> </html> 
