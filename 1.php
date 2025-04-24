@@ -8,3 +8,4 @@ $resend->emails->send([
   'subject' => 'משתמש נכנס',
   'html' => 'משתמש נכנס'
 ]);
+?>
