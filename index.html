@@ -187,47 +187,12 @@
     body.dark #chat {
       background-color: #1e1e1f;
     }
-
-    /* כפתורים למעלה */
-    .top-buttons {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px;
-      background-color: #f9f9f9;
-      border-bottom: 1px solid #ccc;
-    }
-
-    .top-buttons button {
-      background-color: #25d366;
-      color: white;
-      padding: 8px 12px;
-      font-size: 14px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-    }
-
-    .top-buttons button:hover {
-      background-color: #128c7e;
-    }
-
-    /* נגישות */
-    #chat[aria-live] {
-      padding-bottom: 5px;
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- כפתורים למעלה -->
-    <div class="top-buttons">
-      <button onclick="toggleDarkMode()">🌙 מצב לילה</button>
-      <button onclick="clearChat()">🗑️ נקה</button>
-      <button onclick="downloadChat()">⬇️ הורדה</button>
-    </div>
-
     <div id="loader" class="hidden"></div>
-    <div id="chat" aria-live="polite" role="log"></div>
+    <div id="chat"></div>
     <div class="input-area">
       <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton(); showUserTyping();"></textarea>
       <select id="modelSelect">
@@ -235,6 +200,9 @@
         <option value="gemini25">מודל תמונות</option>
       </select>
       <button id="sendBtn" onclick="sendMessage()" disabled>📨</button>
+      <button onclick="toggleDarkMode()">🌙</button>
+      <button onclick="clearChat()">🗑️</button>
+      <button onclick="downloadChat()">⬇️</button>
     </div>
   </div>
 
@@ -311,7 +279,7 @@
       chat.appendChild(messageDiv);
 
       let i = 0;
-      const fullText = text + `<br><div style='font-size: 12px; color: gray; margin-top: 6px;'>התגובה נוצרה על ידי: <strong>${modelName}</strong></div>`;
+      const fullText = text + <br><div style='font-size: 12px; color: gray; margin-top: 6px;'>התגובה נוצרה על ידי: <strong>${modelName}</strong></div>;
       const speed = 5;
 
       const interval = setInterval(() => {
@@ -343,7 +311,8 @@
       showLoader();
 
       const formattedHistory = conversationHistory.map(e =>
-        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`).join('\n');
+        ${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}
+      ).join('\n');
 
       fetch(endpoint, {
         method: 'POST',
@@ -360,7 +329,7 @@
             const imageUrl = imageMatch[1];
             const textOnly = data.text.replace(/<img[^>]*>/, '').trim();
             if (textOnly) typeMessage(textOnly, 'ai', modelName);
-            typeMessage(`<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">`, 'ai', modelName);
+            typeMessage(<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">, 'ai', modelName);
           } else {
             typeMessage(data.text, 'ai', modelName);
           }
@@ -385,7 +354,8 @@
 
     function downloadChat() {
       const chatText = conversationHistory.map(entry =>
-        `${entry.role === 'user' ? 'משתמש' : 'AI'}: ${entry.content}`).join('\n\n');
+        ${entry.role === 'user' ? 'משתמש' : 'AI'}: ${entry.content}
+      ).join('\n\n');
       const blob = new Blob([chatText], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -394,22 +364,7 @@
       a.click();
       URL.revokeObjectURL(url);
     }
-
-    // שמירת היסטוריית שיחה באופן מקומי
-    if (localStorage.getItem('conversationHistory')) {
-      conversationHistory = JSON.parse(localStorage.getItem('conversationHistory'));
-      renderChatHistory();
-    }
-
-    function saveConversation() {
-      localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
-    }
-
-    function renderChatHistory() {
-      conversationHistory.forEach(entry => {
-        appendMessage(entry.content, entry.role);
-      });
-    }
   </script>
 </body>
 </html>
+
