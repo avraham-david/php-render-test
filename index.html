@@ -12,11 +12,6 @@
       direction: rtl;
     }
 
-    body.dark-mode {
-      background-color: #1e1e1e;
-      color: #f0f0f0;
-    }
-
     .container {
       max-width: 600px;
       margin: auto;
@@ -26,11 +21,6 @@
       background-color: #ffffff;
       border: 1px solid #ccc;
       position: relative;
-    }
-
-    body.dark-mode .container {
-      background-color: #2c2c2c;
-      border-color: #444;
     }
 
     #loader {
@@ -58,10 +48,6 @@
       flex-direction: column;
       justify-content: flex-end;
       scroll-behavior: smooth;
-    }
-
-    body.dark-mode #chat {
-      background-color: #1e1e1e;
     }
 
     .message {
@@ -96,26 +82,18 @@
       font-family: 'Courier New', monospace;
     }
 
-    body.dark-mode .ai {
-      background-color: #333;
-      border-color: #555;
-    }
-
     .input-area {
       display: flex;
       align-items: center;
       padding: 10px;
       background-color: #f9f9f9;
       border-top: 1px solid #ccc;
-    }
-
-    body.dark-mode .input-area {
-      background-color: #2a2a2a;
-      border-color: #444;
+      flex-wrap: wrap;
+      gap: 5px;
     }
 
     .input-area textarea {
-      flex: 1;
+      flex: 1 1 auto;
       padding: 10px;
       font-size: 16px;
       resize: none;
@@ -124,23 +102,19 @@
       outline: none;
     }
 
-    .input-area select {
-      margin-right: 10px;
-      padding: 8px;
+    .input-area select,
+    .input-area button {
+      padding: 8px 12px;
+      font-size: 14px;
       border-radius: 10px;
       border: 1px solid #ccc;
-      font-size: 14px;
+      cursor: pointer;
     }
 
     .input-area button {
-      margin-right: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
       background-color: #25d366;
       color: white;
       border: none;
-      border-radius: 10px;
-      cursor: pointer;
     }
 
     .input-area button:disabled {
@@ -172,30 +146,51 @@
       40% { transform: scale(1); }
     }
 
-    .timestamp {
-      display: block;
-      font-size: 12px;
-      color: gray;
-      margin-top: 4px;
-      text-align: left;
+    /* מצב לילה */
+    body.dark {
+      background-color: #18191a;
     }
 
-    .share-button {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      padding: 6px 12px;
-      border-radius: 10px;
-      border: none;
-      background-color: #128c7e;
+    body.dark .container {
+      background-color: #242526;
+      border-color: #3a3b3c;
+    }
+
+    body.dark .input-area {
+      background-color: #3a3b3c;
+      border-top: 1px solid #555;
+    }
+
+    body.dark .input-area textarea,
+    body.dark .input-area select {
+      background-color: #2c2c2e;
+      color: #fff;
+      border: 1px solid #555;
+    }
+
+    body.dark .input-area button {
+      background-color: #3e8e41;
+    }
+
+    body.dark .message.user {
+      background-color: #056162;
+      border-color: #064c4c;
       color: white;
-      cursor: pointer;
+    }
+
+    body.dark .message.ai {
+      background-color: #2f2f31;
+      border-color: #555;
+      color: #e0e0e0;
+    }
+
+    body.dark #chat {
+      background-color: #1e1e1f;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <button class="share-button" onclick="shareConversation()">שתף שיחה</button>
     <div id="loader" class="hidden"></div>
     <div id="chat"></div>
     <div class="input-area">
@@ -205,6 +200,9 @@
         <option value="gemini25">מודל תמונות</option>
       </select>
       <button id="sendBtn" onclick="sendMessage()" disabled>📨</button>
+      <button onclick="toggleDarkMode()">🌙</button>
+      <button onclick="clearChat()">🗑️</button>
+      <button onclick="downloadChat()">⬇️</button>
     </div>
   </div>
 
@@ -234,18 +232,13 @@
       }
     }
 
-    function getTimeString() {
-      const now = new Date();
-      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-
     function appendMessage(text, role) {
       removeTypingIndicator();
       userTypingShown = false;
       const chat = document.getElementById('chat');
       const messageDiv = document.createElement('div');
       messageDiv.className = 'message ' + role;
-      messageDiv.innerHTML = `${text}<span class="timestamp">${getTimeString()}</span>`;
+      messageDiv.innerHTML = text;
       chat.appendChild(messageDiv);
       chat.scrollTop = chat.scrollHeight;
       document.getElementById(role === 'user' ? 'sendSound' : 'receiveSound').play();
@@ -257,7 +250,7 @@
       messageDiv.className = 'message ' + role;
       const typing = document.createElement('div');
       typing.className = 'typing';
-      typing.innerHTML = `<span style='font-size:12px;color:gray;'>${role === 'ai' ? 'מודל AI מקליד...' : 'משתמש מקליד...'}</span><div class="dot"></div><div class="dot"></div><div class="dot"></div>`;
+      typing.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
       messageDiv.appendChild(typing);
       chat.appendChild(messageDiv);
       chat.scrollTop = chat.scrollHeight;
@@ -286,7 +279,8 @@
       chat.appendChild(messageDiv);
 
       let i = 0;
-      const fullText = text + `<br><div style='font-size: 12px; color: gray; margin-top: 6px;'>התגובה נוצרה על ידי: <strong>${modelName}</strong></div>` + `<br><button onclick='askAgain(${conversationHistory.length})' style='font-size:12px; margin-top:4px;'>🔁 שאל שוב</button>` + `<span class='timestamp'>${getTimeString()}</span>`;
+      const fullText = text + `<br><div style='font-size: 12px; color: gray; margin-top: 6px;'>התגובה נוצרה על ידי: <strong>${modelName}</strong></div>`;
+      const speed = 5;
 
       const interval = setInterval(() => {
         messageDiv.innerHTML = fullText.slice(0, i++);
@@ -294,15 +288,16 @@
         if (i > fullText.length) {
           clearInterval(interval);
           document.getElementById('receiveSound').play();
-          saveConversation();
         }
-      }, 5);
+      }, speed);
     }
 
     function sendMessage() {
       const input = document.getElementById('userInput');
       const model = document.getElementById('modelSelect').value;
-      const endpoint = model === 'gemini25' ? 'https://php-render-test.onrender.com/gemini25.php' : 'https://php-render-test.onrender.com/main-ai.php';
+      const endpoint = model === 'gemini25'
+        ? 'https://php-render-test.onrender.com/gemini25.php'
+        : 'https://php-render-test.onrender.com/main-ai.php';
       const modelName = model === 'gemini25' ? 'מודל תמונות (Gemini)' : 'מודל ראשי (AI)';
       const userText = input.value.trim();
       if (userText === '') return;
@@ -315,7 +310,9 @@
       showTypingIndicator('ai');
       showLoader();
 
-      const formattedHistory = conversationHistory.map(e => `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`).join('\n');
+      const formattedHistory = conversationHistory.map(e =>
+        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
+      ).join('\n');
 
       fetch(endpoint, {
         method: 'POST',
@@ -346,41 +343,27 @@
       });
     }
 
-    function shareConversation() {
-      const content = conversationHistory.map(e => `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`).join('\n');
-      navigator.clipboard.writeText(content).then(() => {
-        alert('השיחה הועתקה ללוח!');
-      });
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
     }
 
-    function askAgain(index) {
-      const msg = conversationHistory[index - 1]?.content;
-      if (msg) {
-        document.getElementById('userInput').value = msg;
-        sendMessage();
-      }
+    function clearChat() {
+      document.getElementById('chat').innerHTML = '';
+      conversationHistory = [];
     }
 
-    function saveConversation() {
-      const dateKey = new Date().toISOString().split('T')[0];
-      localStorage.setItem(`convo-${dateKey}`, JSON.stringify(conversationHistory));
+    function downloadChat() {
+      const chatText = conversationHistory.map(entry =>
+        `${entry.role === 'user' ? 'משתמש' : 'AI'}: ${entry.content}`
+      ).join('\n\n');
+      const blob = new Blob([chatText], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'chat_history.txt';
+      a.click();
+      URL.revokeObjectURL(url);
     }
-
-    function analyzeConversation() {
-      let userWords = 0, aiWords = 0;
-      conversationHistory.forEach(e => {
-        const wordCount = e.content.split(/\s+/).length;
-        e.role === 'user' ? userWords += wordCount : aiWords += wordCount;
-      });
-      alert(`מילים - משתמש: ${userWords}, AI: ${aiWords}`);
-    }
-
-    document.getElementById('userInput').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
   </script>
 </body>
 </html>
