@@ -2,7 +2,7 @@
 $answer = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST["user_input"])) {
     $userInput = $_POST["user_input"];
-    $apiKey = "sk-proj-..."; // שים כאן את המפתח שלך
+    $apiKey = "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"; // שים כאן את המפתח שלך
 
     $data = [
         "model" => "gpt-4",
