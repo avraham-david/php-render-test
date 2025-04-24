@@ -13,7 +13,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-$apiKey = 'AIzaSyBISD9M3rsAt9l2uhS-27K6VBkVZFh-l0A'; 
+$apiKey = 'AIzaSyAQeJqpeH-VYT5bt0tDBs8z3k8NMIcYey0'; 
 $systemInstruction = "ענה תמיד בעברית בלבד";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
