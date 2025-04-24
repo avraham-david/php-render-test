@@ -17,6 +17,47 @@
       color: #eee;
     }
 
+    /* העיצוב של החלק העליון של הדף */
+    .header {
+      background: #f9f9f9;
+      border-bottom: 1px solid #ccc;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+    }
+
+    .header button {
+      padding: 8px 16px;
+      font-size: 14px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      background-color: #ffffff;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* כאשר יש מעבר על הכפתור */
+    .header button:hover {
+      background-color: #25d366;
+      border-color: #128c7e;
+      color: white;
+    }
+
+    /* כאשר הכפתורים במצב כהה */
+    body.dark .header button {
+      background-color: #333;
+      border-color: #555;
+      color: #eee;
+    }
+
+    /* כאשר יש מעבר על הכפתור במצב כהה */
+    body.dark .header button:hover {
+      background-color: #128c7e;
+      border-color: #25d366;
+    }
+
     .container {
       max-width: 600px;
       margin: auto;
@@ -192,9 +233,9 @@
   </style>
 </head>
 <body>
-  <div style="background: #f9f9f9; border-bottom: 1px solid #ccc; padding: 10px; display: flex; justify-content: space-between; align-items: center;">
-    <span style="font-weight: bold;">צ'אט עם AI</span>
-    <div style="display: flex; gap: 10px;">
+  <div class="header">
+    <span>צ'אט עם AI</span>
+    <div>
       <button onclick="toggleDarkMode()">🌓 מצב כהה</button>
       <button onclick="clearChat()">🧹 ניקוי</button>
       <button onclick="downloadChat()">⬇️ הורד</button>
@@ -205,7 +246,7 @@
     <div id="loader" class="hidden"></div>
     <div id="chat"></div>
     <div class="input-area">
-      <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton(); showUserTyping();" onkeydown="if(event.key === 'Enter') sendMessage();"></textarea>
+      <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton(); showUserTyping();"></textarea>
       <select id="modelSelect">
         <option value="main-ai">מודל ראשי</option>
         <option value="gemini25">מודל תמונות</option>
@@ -241,61 +282,42 @@
       document.body.removeChild(link);
     }
 
+    function sendMessage() {
+      const userInput = document.getElementById('userInput').value.trim();
+      if (!userInput) return;
+
+      const chat = document.getElementById('chat');
+      const userMessage = document.createElement('div');
+      userMessage.classList.add('message', 'user');
+      userMessage.textContent = userInput;
+      chat.appendChild(userMessage);
+
+      const modelSelect = document.getElementById('modelSelect');
+      const model = modelSelect.value;
+      
+      // כאן תוכל להוסיף את הקוד לשלוח את ההודעה לשרת ולקבל תשובה
+      const aiMessage = document.createElement('div');
+      aiMessage.classList.add('message', 'ai');
+      aiMessage.textContent = 'תשובת AI לשאלה במודל ' + model;  // תשובה דמה, צריך לשדרג עם קריאה לשרת
+      chat.appendChild(aiMessage);
+
+      document.getElementById('userInput').value = '';
+      document.getElementById('sendBtn').disabled = true;
+    }
+
     function toggleSendButton() {
-      const input = document.getElementById('userInput');
-      const button = document.getElementById('sendBtn');
-      button.disabled = input.value.trim() === '';
+      const userInput = document.getElementById('userInput').value.trim();
+      document.getElementById('sendBtn').disabled = !userInput;
     }
 
     function showUserTyping() {
-      const input = document.getElementById('userInput').value.trim();
-      if (input.length > 0) {
-        // Handle showing user typing indicator if necessary
+      const userInput = document.getElementById('userInput').value.trim();
+      if (userInput.length > 0) {
+        const typingIndicator = document.createElement('div');
+        typingIndicator.classList.add('typing');
+        typingIndicator.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+        document.getElementById('chat').appendChild(typingIndicator);
       }
-    }
-
-    // פונקציה לשלוח הודעה לשרת
-    function sendMessage() {
-      const input = document.getElementById('userInput');
-      const model = document.getElementById('modelSelect').value;
-      const userText = input.value.trim();
-      if (userText === '') return;
-
-      // הצגת ההודעה בצ'אט
-      appendMessage(userText, 'user');
-
-      // שליחת ההודעה לשרת
-      const requestData = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: userText, model: model })
-      };
-
-      // שליחת הבקשה לשרת
-      fetch('https://php-render-test.onrender.com/ai-with-image.php', requestData)
-        .then(response => response.json())
-        .then(data => {
-          // הצגת ההודעה שהתקבלה מהשרת
-          appendMessage(data.reply, 'ai');
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          appendMessage("הייתה שגיאה בשליחה, נסה שוב.", 'ai');
-        });
-
-      // ניקוי שדה ההקלדה
-      input.value = '';
-      toggleSendButton();  // Disable button after send
-    }
-
-    // פונקציה להוסיף הודעה לתצוגה
-    function appendMessage(message, sender) {
-      const chat = document.getElementById('chat');
-      const messageElement = document.createElement('div');
-      messageElement.classList.add('message', sender);
-      messageElement.textContent = message;
-      chat.appendChild(messageElement);
-      chat.scrollTop = chat.scrollHeight; // Scroll to bottom
     }
   </script>
 </body>
