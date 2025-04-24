@@ -497,8 +497,7 @@ $response = curl_exec($ch);
 if(curl_errno($ch)) {
     echo 'cURL error: ' . curl_error($ch);
 } else {
-    // הצגת התגובה
-    echo $response;
+
 }
 
 // סגירת החיבור ל-cURL
