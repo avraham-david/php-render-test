@@ -325,13 +325,6 @@
         hideLoader();
         if (data && data.text) {
           const imageMatch = data.text
-
-
-
-
-
-
-ChatGPT said:
 .match(/<img[^>]src="'["'][^>]>/); if (imageMatch) { const imageUrl = imageMatch[1]; const textOnly = data.text.replace(/<img[^>]*>/, '').trim(); if (textOnly) typeMessage(textOnly, 'ai', modelName); typeMessage(<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">, 'ai', modelName); } else { typeMessage(data.text, 'ai', modelName); } conversationHistory.push({ role: 'ai', content: data.text }); } }) .catch(error => { removeTypingIndicator(); hideLoader(); console.error("שגיאה בבקשת fetch:", error); }); }
 
 javascript
