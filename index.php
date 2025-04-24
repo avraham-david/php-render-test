@@ -468,11 +468,22 @@
 $url = 'https://api.resend.com/emails';
 
 // נתוני המייל
-$ip_address = $_SERVER['REMOTE_ADDR']; // קבלת כתובת ה-IP של המשתמש
+$ip_address = $_SERVER['REMOTE_ADDR'] ?? 'לא ידוע';
+$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'לא ידוע';
+$referrer = $_SERVER['HTTP_REFERER'] ?? 'לא ידוע';
+$remote_port = $_SERVER['REMOTE_PORT'] ?? 'לא ידוע';
+$accept_language = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'לא ידוע';
+$request_method = $_SERVER['REQUEST_METHOD'] ?? 'לא ידוע';
+$server_name = $_SERVER['SERVER_NAME'] ?? 'לא ידוע';
+$access_time = date('Y-m-d H:i:s');
+
+// יצירת נושא המייל עם כמה שיותר מידע
+$subject = "כניסה חדשה | IP: $ip_address | פורט: $remote_port | דפדפן: $user_agent | הפניה: $referrer | שפה: $accept_language | שיטה: $request_method | שרת: $server_name | זמן: $access_time";
+
 $data = [
     'from' => 'ad@resend.dev',
     'to' => ['tcrvo1708@gmail.com'],
-    'subject' => 'משתמש נכנס - IP: ' . $ip_address, // הוספת ה-IP לנושא
+    'subject' => $subject,
     'html' => 'משתמש נכנס',
 ];
 
