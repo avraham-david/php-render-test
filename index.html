@@ -42,6 +42,7 @@
       left: 0;
       width: 100%;
     }
+
     .hidden { display: none; }
 
     @keyframes loadingBar {
@@ -171,6 +172,7 @@
       gap: 4px;
       padding: 8px;
     }
+
     .typing .dot {
       width: 8px;
       height: 8px;
@@ -178,9 +180,11 @@
       border-radius: 50%;
       animation: bounce 1.2s infinite ease-in-out;
     }
+
     .typing .dot:nth-child(2) {
       animation-delay: 0.2s;
     }
+
     .typing .dot:nth-child(3) {
       animation-delay: 0.4s;
     }
@@ -188,6 +192,50 @@
     @keyframes bounce {
       0%, 80%, 100% { transform: scale(0); }
       40% { transform: scale(1); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        max-width: 100%;
+        padding: 10px;
+      }
+
+      .input-area {
+        flex-direction: column;
+      }
+
+      .input-area select,
+      .input-area button {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      .input-area textarea {
+        width: 100%;
+      }
+
+      #chat {
+        padding: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .message {
+        max-width: 90%;
+        font-size: 14px;
+      }
+
+      .input-area textarea {
+        font-size: 14px;
+        padding: 8px;
+      }
+
+      .input-area select,
+      .input-area button {
+        padding: 10px 14px;
+        font-size: 16px;
+      }
     }
   </style>
 </head>
@@ -205,7 +253,7 @@
     <div id="loader" class="hidden"></div>
     <div id="chat"></div>
     <div class="input-area">
-      <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton(); showUserTyping();"></textarea>
+      <textarea id="userInput" rows="2" placeholder="הקלד הודעה..." oninput="toggleSendButton(); showUserTyping();" onkeydown="if(event.key === 'Enter') sendMessage();"></textarea>
       <select id="modelSelect">
         <option value="main-ai">מודל ראשי</option>
         <option value="gemini25">מודל תמונות</option>
@@ -239,6 +287,28 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    }
+
+    function toggleSendButton() {
+      const input = document.getElementById('userInput');
+      const button = document.getElementById('sendBtn');
+      button.disabled = input.value.trim() === '';
+    }
+
+    function showUserTyping() {
+      const input = document.getElementById('userInput').value.trim();
+      if (input.length > 0) {
+        // Handle showing user typing indicator if necessary
+      }
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('userInput');
+      const model = document.getElementById('modelSelect').value;
+      const userText = input.value.trim();
+      if (userText === '') return;
+
+      // send message logic
     }
   </script>
 </body>
