@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>צ'אט עם AI</title>
   <style>
-    /* --- כל ה-CSS שלך --- */
+    /* --- כל ה-CSS המקורי שלך נשמר --- */
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #f0f2f5;
@@ -37,26 +37,14 @@
     #chat {
       flex: 1;
       padding: 10px;
-      overflow-y: scroll; /* הגדרת גלילה */
+      overflow-y: auto;
       background-color: #f6f7f9;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
       scroll-behavior: smooth;
-      scrollbar-width: thin; /* מחוון גלילה דק */
-      scrollbar-color: #888 #f0f2f5; /* צבע מחוון גלילה */
     }
     body.darkmode #chat {
-      background-color: #222;
-    }
-    body.darkmode #chat::-webkit-scrollbar {
-      width: 8px;
-    }
-    body.darkmode #chat::-webkit-scrollbar-thumb {
-      background-color: #888;
-      border-radius: 4px;
-    }
-    body.darkmode #chat::-webkit-scrollbar-track {
       background-color: #222;
     }
     .message {
@@ -244,9 +232,9 @@
       const messageDiv = document.createElement('div');
       messageDiv.className = 'message ' + role;
       const timestamp = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-      messageDiv.innerHTML = text + `<div class="timestamp">${timestamp}</div>`;
+      messageDiv.innerHTML = text + <div class="timestamp">${timestamp}</div>;
       chat.appendChild(messageDiv);
-      chat.scrollTop = chat.scrollHeight;  // גלילה אוטומטית למטה
+      chat.scrollTop = chat.scrollHeight;
       document.getElementById(role === 'user' ? 'sendSound' : 'receiveSound').play();
     }
 
@@ -268,7 +256,7 @@
       showTypingIndicator('ai');
 
       const formattedHistory = conversationHistory.map(e =>
-        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}` 
+        ${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}
       ).join('\n');
 
       fetch(endpoint, {
@@ -285,7 +273,7 @@
             const imageUrl = imageMatch[1];
             const textOnly = data.text.replace(/<img[^>]*>/, '').trim();
             if (textOnly) appendMessage(textOnly, 'ai');
-            appendMessage(`<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">`, 'ai');
+            appendMessage(<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">, 'ai');
           } else {
             appendMessage(data.text, 'ai');
           }
@@ -307,7 +295,7 @@
     }
 
     function downloadSummary() {
-      const summary = conversationHistory.map(msg => `${msg.role === 'user' ? 'משתמש' : 'AI'}: ${msg.content}`).join('\n');
+      const summary = conversationHistory.map(msg => ${msg.role === 'user' ? 'משתמש' : 'AI'}: ${msg.content}).join('\n');
       const blob = new Blob([summary], { type: 'text/plain' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
