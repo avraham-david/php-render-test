@@ -1,129 +1,232 @@
 <!DOCTYPE html>
-<html lang="he">
+<html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>צ'אט בסגנון WhatsApp</title>
+    <title>צ'אט AI - מסך מלא</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        /* CSS משולב ישירות בקובץ ה-HTML */
+        html, body {
+            height: 100%; /* גורם ל-html ול-body לתפוס את כל הגובה */
             margin: 0;
-            background-color: #e5ddd5;
+            padding: 0;
+            overflow: hidden; /* מונע גלילה מיותרת ברמת ה-body */
+        }
+
+        body {
+            font-family: Assistant, Arial, sans-serif;
+            background-color: #e5ddd5; /* רקע נשאר */
+            display: flex; /* שימוש ב-flex כדי שהקונטיינר יתפוס מקום */
+            flex-direction: column; /* הקונטיינר יתפרס אנכית */
+        }
+
+        #chat-container {
+            width: 100%; /* תופס את כל הרוחב הזמין */
+            max-width: 800px; /* אפשר להגדיל/להסיר אם רוצים רוחב מלא לגמרי */
+            height: 100vh; /* תופס את כל גובה אזור התצוגה */
+            margin: 0 auto; /* ממקם אופקית אם יש max-width */
+            background-color: #fff;
+            /* border-radius: 8px; /* הוסר */
+            /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* הוסר */
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            overflow: hidden; /* עדיין חשוב למנוע גלישה פנימית */
         }
-        .chat-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
+
+        #chat-output {
+            flex-grow: 1; /* תופס את כל הגובה הפנוי */
+            padding: 15px;
+            overflow-y: auto; /* מאפשר גלילה רק לאזור ההודעות */
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-repeat: repeat;
+            display: flex;
+            flex-direction: column;
         }
+
         .message {
-            max-width: 70%;
-            margin: 5px 10px;
-            padding: 10px;
-            border-radius: 8px;
-            clear: both;
+            max-width: 75%;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.4;
+            position: relative;
+            font-size: 14.5px;
         }
-        .sent {
-            background-color: #d9fdd3;
-            float: right;
+
+        .user-message {
+            background-color: #dcf8c6;
+            align-self: flex-start;
+            margin-left: auto;
+            text-align: right;
         }
-        .received {
+
+        .ai-message {
             background-color: #ffffff;
-            float: left;
+            align-self: flex-end;
+            margin-right: auto;
+            text-align: right;
+            border: 1px solid #eee;
         }
-        .input-container {
+
+        .message span {
+            display: inline-block;
+        }
+
+        #chat-input-area {
             display: flex;
             padding: 10px;
+            border-top: 1px solid #eee;
             background-color: #f0f0f0;
-            border-top: 1px solid #ccc;
+            /* flex-shrink: 0; /* מונע מהאזור הזה להתכווץ */
         }
-        input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            border: none;
+
+        #user-input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid #ccc;
             border-radius: 20px;
-            margin-right: 10px;
+            margin-left: 8px;
+            font-size: 15px;
             outline: none;
         }
-        button {
-            padding: 10px 15px;
-            border: none;
-            background-color: #25d366;
+
+        #send-button {
+            padding: 10px 18px;
+            background-color: #075e54;
             color: white;
+            border: none;
             border-radius: 20px;
             cursor: pointer;
+            font-size: 15px;
+            transition: background-color 0.2s ease;
         }
-        button:hover {
-            background-color: #20b958;
+
+        #send-button:hover {
+            background-color: #128c7e;
         }
+
+        .loading span::after {
+            content: ' .';
+            animation: dots 1.4s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ' .'; }
+            40% { content: ' ..'; }
+            60% { content: ' ...'; }
+            80%, 100% { content: '.'; }
+        }
+
+        /* אין צורך ב-media query מיוחד למסכים קטנים כי זה כבר תופס 100% */
+
     </style>
 </head>
 <body>
-    <div class="chat-container" id="chatContainer"></div>
-    <div class="input-container">
-        <input type="text" id="messageInput" placeholder="הקלד הודעה...">
-        <button onclick="sendMessage()">שלח</button>
+
+<div id="chat-container">
+    <div id="chat-output">
+        <!-- הודעת פתיחה -->
+        <div class="message ai-message">
+            <span>שלום! איך אני יכול לעזור לך היום?</span>
+        </div>
     </div>
+    <div id="chat-input-area">
+        <input type="text" id="user-input" placeholder="הקלד הודעה...">
+        <button id="send-button">שלח</button>
+    </div>
+</div>
 
-    <script>
-        const chatContainer = document.getElementById('chatContainer');
-        const messageInput = document.getElementById('messageInput');
-        let conversationHistory = []; // מערך לשמירת היסטוריית השיחה
+<script>
+    // JavaScript נשאר זהה לקודם
+    document.addEventListener('DOMContentLoaded', () => {
 
-        function addMessage(text, isSent) {
+        const chatOutput = document.getElementById('chat-output');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        // const chatContainer = document.getElementById('chat-container'); // לא נחוץ יותר לגלילה
+
+        const API_URL = 'https://php-render-test.onrender.com/main-ai.php';
+
+        function addMessageToChat(text, sender, isLoading = false) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
-            messageDiv.textContent = text;
-            chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight; // גלילה למטה
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(sender === 'user' ? 'user-message' : 'ai-message');
 
-            // שמירת ההודעה בהיסטוריה
-            conversationHistory.push({ role: isSent ? 'user' : 'assistant', text });
+            const messageSpan = document.createElement('span');
+            messageSpan.textContent = text;
+            messageDiv.appendChild(messageSpan);
+
+            if (isLoading) {
+                messageDiv.classList.add('loading');
+            }
+
+            chatOutput.appendChild(messageDiv);
+            scrollToBottom();
+            return messageDiv;
+        }
+
+        function scrollToBottom() {
+            // ודא שגוללים רק את אזור ההודעות
+            chatOutput.scrollTop = chatOutput.scrollHeight;
         }
 
         async function sendMessage() {
-            const text = messageInput.value.trim();
-            if (!text) return;
+            const text = userInput.value.trim();
+            if (text === '') return;
 
-            // הוספת הודעה שנשלחה לממשק
-            addMessage(text, true);
-            messageInput.value = '';
+            addMessageToChat(text, 'user');
+            userInput.value = '';
 
-            // יצירת היסטוריית השיחה כטקסט לשליחה ל-API
-            const historyText = conversationHistory
-                .map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.text}`)
-                .join('\n') + `\nUser: ${text}`;
+            const loadingMessageElement = addMessageToChat("מעבד", 'ai', true);
 
             try {
-                const response = await fetch('https://php-render-test.onrender.com/main-ai.php', {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ text: historyText })
+                    body: JSON.stringify({ text })
                 });
 
-                const data = await response.json();
-                if (data && data.text) {
-                    addMessage(data.text, false); // הוספת תשובה מהשרת
-                } else {
-                    addMessage('לא התקבלה תשובה תקינה מהשרת.', false);
+                if (loadingMessageElement) {
+                    chatOutput.removeChild(loadingMessageElement);
                 }
+
+                if (!response.ok) {
+                    throw new Error(`שגיאת שרת: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data && data.text) {
+                    addMessageToChat(data.text, 'ai');
+                } else {
+                    console.error("השרת החזיר תשובה לא תקינה:", data);
+                    addMessageToChat("אופס, קרתה שגיאה בקבלת התשובה מהשרת.", 'ai');
+                }
+
             } catch (error) {
-                console.error('שגיאה בבקשת fetch:', error);
-                addMessage('שגיאה בשליחת ההודעה.', false);
+                if (loadingMessageElement && loadingMessageElement.parentNode === chatOutput) {
+                   chatOutput.removeChild(loadingMessageElement);
+                }
+                console.error("שגיאה בשליחת/קבלת ההודעה:", error);
+                addMessageToChat(`שגיאה: ${error.message}`, 'ai');
             }
         }
 
-        // שליחת הודעה בלחיצת Enter
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+        sendButton.addEventListener('click', sendMessage);
+
+        userInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
                 sendMessage();
             }
         });
-    </script>
+
+        scrollToBottom(); // גלול לתחתית בעת טעינת הדף
+    });
+</script>
+
 </body>
 </html>
