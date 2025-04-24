@@ -145,48 +145,6 @@
       0%, 80%, 100% { transform: scale(0); }
       40% { transform: scale(1); }
     }
-
-    /* מצב לילה */
-    body.dark {
-      background-color: #18191a;
-    }
-
-    body.dark .container {
-      background-color: #242526;
-      border-color: #3a3b3c;
-    }
-
-    body.dark .input-area {
-      background-color: #3a3b3c;
-      border-top: 1px solid #555;
-    }
-
-    body.dark .input-area textarea,
-    body.dark .input-area select {
-      background-color: #2c2c2e;
-      color: #fff;
-      border: 1px solid #555;
-    }
-
-    body.dark .input-area button {
-      background-color: #3e8e41;
-    }
-
-    body.dark .message.user {
-      background-color: #056162;
-      border-color: #064c4c;
-      color: white;
-    }
-
-    body.dark .message.ai {
-      background-color: #2f2f31;
-      border-color: #555;
-      color: #e0e0e0;
-    }
-
-    body.dark #chat {
-      background-color: #1e1e1f;
-    }
   </style>
 </head>
 <body>
@@ -200,14 +158,9 @@
         <option value="gemini25">מודל תמונות</option>
       </select>
       <button id="sendBtn" onclick="sendMessage()" disabled>📨</button>
-      <button onclick="toggleDarkMode()">🌙</button>
-      <button onclick="clearChat()">🗑️</button>
-      <button onclick="downloadChat()">⬇️</button>
+      <button onclick="quickAsk()">שאלה מהירה</button>
     </div>
   </div>
-
-  <audio id="sendSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_37e2f07d7e.mp3?filename=message-pop-alert-1-189853.mp3"></audio>
-  <audio id="receiveSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0e2ce4a24d.mp3?filename=notification-132111.mp3"></audio>
 
   <script>
     let conversationHistory = [];
@@ -241,7 +194,6 @@
       messageDiv.innerHTML = text;
       chat.appendChild(messageDiv);
       chat.scrollTop = chat.scrollHeight;
-      document.getElementById(role === 'user' ? 'sendSound' : 'receiveSound').play();
     }
 
     function showTypingIndicator(role) {
@@ -287,7 +239,6 @@
         chat.scrollTop = chat.scrollHeight;
         if (i > fullText.length) {
           clearInterval(interval);
-          document.getElementById('receiveSound').play();
         }
       }, speed);
     }
@@ -297,7 +248,7 @@
       const model = document.getElementById('modelSelect').value;
       const endpoint = model === 'gemini25'
         ? 'https://php-render-test.onrender.com/gemini25.php'
-        : 'https://php-render-test.onrender.com/main-ai.php'; // הכתובת החדשה
+        : 'https://php-render-test.onrender.com/main-ai.php';
       const modelName = model === 'gemini25' ? 'מודל תמונות (Gemini)' : 'מודל ראשי (AI)';
       const userText = input.value.trim();
       if (userText === '') return;
@@ -310,41 +261,62 @@
       showTypingIndicator('ai');
       showLoader();
 
-      const formattedHistory = conversationHistory.map(e =>
-        `${e.role === 'user' ? 'משתמש' : 'AI'}: ${e.content}`
-      ).join('\n');
-
       fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: formattedHistory })
+        body: JSON.stringify({ text: userText })
       })
       .then(response => response.json())
       .then(data => {
         removeTypingIndicator();
         hideLoader();
         if (data && data.text) {
-          const imageMatch = data.text
-.match(/<img[^>]src="'["'][^>]>/); if (imageMatch) { const imageUrl = imageMatch[1]; const textOnly = data.text.replace(/<img[^>]*>/, '').trim(); if (textOnly) typeMessage(textOnly, 'ai', modelName); typeMessage(<img src="${imageUrl}" alt="תמונה" style="max-width:100%; border-radius:10px;">, 'ai', modelName); } else { typeMessage(data.text, 'ai', modelName); } conversationHistory.push({ role: 'ai', content: data.text }); } }) .catch(error => { removeTypingIndicator(); hideLoader(); console.error("שגיאה בבקשת fetch:", error); }); }
+          typeMessage(data.text, 'ai', modelName);
+          conversationHistory.push({ role: 'ai', content: data.text });
+        }
+      })
+      .catch(error => {
+        removeTypingIndicator();
+        hideLoader();
+        console.error("שגיאה בבקשת fetch:", error);
+      });
+    }
 
-javascript
-Copy
-Edit
-function toggleDarkMode() {
-  document.body.classList.toggle('dark');
-}
+    function quickAsk() {
+      const text = prompt("הקלד טקסט לשליחה ל-AI:");
+      if (!text || text.trim() === '') return;
 
-function clearChat() {
-  document.getElementById('chat').innerHTML = '';
-  conversationHistory = [];
-}
+      const endpoint = 'https://php-render-test.onrender.com/main-ai.php';
+      const modelName = 'מודל ראשי (AI)';
 
-function downloadChat() {
-  const text = conversationHistory.map(m => `${m.role === 'user' ? 'משתמש' : 'AI'}: ${m.content}`).join('\n\n');
-  const blob = new Blob([text], { type: 'text/plain' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `chat_${new Date().toISOString().split('T')[0]}.txt`;
-  link.click();
-}
-</script> </body> </html> 
+      appendMessage(text.trim(), 'user');
+      conversationHistory.push({ role: 'user', content: text.trim() });
+
+      showTypingIndicator('ai');
+      showLoader();
+
+      fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      })
+      .then(response => response.json())
+      .then(data => {
+        removeTypingIndicator();
+        hideLoader();
+        if (data && data.text) {
+          typeMessage(data.text, 'ai', modelName);
+          conversationHistory.push({ role: 'ai', content: data.text });
+        } else {
+          console.error("לא התקבלה תשובה תקינה מהשרת.");
+        }
+      })
+      .catch(error => {
+        removeTypingIndicator();
+        hideLoader();
+        console.error("שגיאה בבקשת fetch:", error);
+      });
+    }
+  </script>
+</body>
+</html>
