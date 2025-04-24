@@ -12,6 +12,11 @@
       direction: rtl;
     }
 
+    body.dark {
+      background-color: #181818;
+      color: #eee;
+    }
+
     .container {
       max-width: 600px;
       margin: auto;
@@ -21,6 +26,11 @@
       background-color: #ffffff;
       border: 1px solid #ccc;
       position: relative;
+    }
+
+    body.dark .container {
+      background-color: #1f1f1f;
+      border-color: #444;
     }
 
     #loader {
@@ -50,6 +60,10 @@
       scroll-behavior: smooth;
     }
 
+    body.dark #chat {
+      background-color: #222;
+    }
+
     .message {
       max-width: 75%;
       padding: 10px 14px;
@@ -74,12 +88,22 @@
       border-bottom-right-radius: 0;
     }
 
+    body.dark .user {
+      background-color: #2e4c2f;
+      border-color: #3a5e3a;
+    }
+
     .ai {
       background-color: #ffffff;
       border: 1px solid #ddd;
       align-self: flex-start;
       border-bottom-left-radius: 0;
       font-family: 'Courier New', monospace;
+    }
+
+    body.dark .ai {
+      background-color: #2a2a2a;
+      border-color: #444;
     }
 
     .input-area {
@@ -92,6 +116,11 @@
       gap: 5px;
     }
 
+    body.dark .input-area {
+      background-color: #1f1f1f;
+      border-color: #444;
+    }
+
     .input-area textarea {
       flex: 1 1 auto;
       padding: 10px;
@@ -100,6 +129,13 @@
       border-radius: 10px;
       border: 1px solid #ccc;
       outline: none;
+      background-color: white;
+    }
+
+    body.dark .input-area textarea {
+      background-color: #333;
+      color: #eee;
+      border-color: #555;
     }
 
     .input-area select,
@@ -109,6 +145,7 @@
       border-radius: 10px;
       border: 1px solid #ccc;
       cursor: pointer;
+      background-color: white;
     }
 
     .input-area button {
@@ -120,6 +157,13 @@
     .input-area button:disabled {
       background-color: #ccc;
       cursor: not-allowed;
+    }
+
+    body.dark .input-area select,
+    body.dark .input-area button {
+      background-color: #333;
+      color: #eee;
+      border-color: #555;
     }
 
     .typing {
@@ -148,6 +192,15 @@
   </style>
 </head>
 <body>
+  <div style="background: #f9f9f9; border-bottom: 1px solid #ccc; padding: 10px; display: flex; justify-content: space-between; align-items: center;">
+    <span style="font-weight: bold;">צ'אט עם AI</span>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="toggleDarkMode()">🌓 מצב כהה</button>
+      <button onclick="clearChat()">🧹 ניקוי</button>
+      <button onclick="downloadChat()">⬇️ הורד</button>
+    </div>
+  </div>
+
   <div class="container">
     <div id="loader" class="hidden"></div>
     <div id="chat"></div>
@@ -158,164 +211,34 @@
         <option value="gemini25">מודל תמונות</option>
       </select>
       <button id="sendBtn" onclick="sendMessage()" disabled>📨</button>
-      <button onclick="quickAsk()">שאלה מהירה</button>
     </div>
   </div>
 
   <script>
-    let conversationHistory = [];
-    let aiTypingEl = null;
-    let userTypingShown = false;
-
-    function toggleSendButton() {
-      const input = document.getElementById('userInput');
-      const button = document.getElementById('sendBtn');
-      button.disabled = input.value.trim() === '';
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
     }
 
-    function showUserTyping() {
-      const input = document.getElementById('userInput').value.trim();
-      if (!userTypingShown && input.length > 0) {
-        showTypingIndicator('user');
-        userTypingShown = true;
-      }
-      if (userTypingShown && input.length === 0) {
-        removeTypingIndicator();
-        userTypingShown = false;
-      }
-    }
-
-    function appendMessage(text, role) {
-      removeTypingIndicator();
-      userTypingShown = false;
+    function clearChat() {
       const chat = document.getElementById('chat');
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message ' + role;
-      messageDiv.innerHTML = text;
-      chat.appendChild(messageDiv);
-      chat.scrollTop = chat.scrollHeight;
+      chat.innerHTML = '';
     }
 
-    function showTypingIndicator(role) {
+    function downloadChat() {
       const chat = document.getElementById('chat');
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message ' + role;
-      const typing = document.createElement('div');
-      typing.className = 'typing';
-      typing.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-      messageDiv.appendChild(typing);
-      chat.appendChild(messageDiv);
-      chat.scrollTop = chat.scrollHeight;
-      aiTypingEl = messageDiv;
-    }
-
-    function removeTypingIndicator() {
-      if (aiTypingEl) {
-        aiTypingEl.remove();
-        aiTypingEl = null;
-      }
-    }
-
-    function showLoader() {
-      document.getElementById('loader').classList.remove('hidden');
-    }
-
-    function hideLoader() {
-      document.getElementById('loader').classList.add('hidden');
-    }
-
-    function typeMessage(text, role, modelName) {
-      const chat = document.getElementById('chat');
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message ' + role;
-      chat.appendChild(messageDiv);
-
-      let i = 0;
-      const fullText = text + `<br><div style='font-size: 12px; color: gray; margin-top: 6px;'>התגובה נוצרה על ידי: <strong>${modelName}</strong></div>`;
-      const speed = 5;
-
-      const interval = setInterval(() => {
-        messageDiv.innerHTML = fullText.slice(0, i++);
-        chat.scrollTop = chat.scrollHeight;
-        if (i > fullText.length) {
-          clearInterval(interval);
-        }
-      }, speed);
-    }
-
-    function sendMessage() {
-      const input = document.getElementById('userInput');
-      const model = document.getElementById('modelSelect').value;
-      const endpoint = model === 'gemini25'
-        ? 'https://php-render-test.onrender.com/gemini25.php'
-        : 'https://php-render-test.onrender.com/main-ai.php';
-      const modelName = model === 'gemini25' ? 'מודל תמונות (Gemini)' : 'מודל ראשי (AI)';
-      const userText = input.value.trim();
-      if (userText === '') return;
-
-      appendMessage(userText, 'user');
-      conversationHistory.push({ role: 'user', content: userText });
-      input.value = '';
-      input.focus();
-
-      showTypingIndicator('ai');
-      showLoader();
-
-      fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: userText })
-      })
-      .then(response => response.json())
-      .then(data => {
-        removeTypingIndicator();
-        hideLoader();
-        if (data && data.text) {
-          typeMessage(data.text, 'ai', modelName);
-          conversationHistory.push({ role: 'ai', content: data.text });
-        }
-      })
-      .catch(error => {
-        removeTypingIndicator();
-        hideLoader();
-        console.error("שגיאה בבקשת fetch:", error);
+      const messages = chat.querySelectorAll('.message');
+      let content = '';
+      messages.forEach(msg => {
+        const sender = msg.classList.contains('user') ? 'אתה: ' : 'AI: ';
+        content += sender + msg.innerText + '\n';
       });
-    }
-
-    function quickAsk() {
-      const text = prompt("הקלד טקסט לשליחה ל-AI:");
-      if (!text || text.trim() === '') return;
-
-      const endpoint = 'https://php-render-test.onrender.com/main-ai.php';
-      const modelName = 'מודל ראשי (AI)';
-
-      appendMessage(text.trim(), 'user');
-      conversationHistory.push({ role: 'user', content: text.trim() });
-
-      showTypingIndicator('ai');
-      showLoader();
-
-      fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-      })
-      .then(response => response.json())
-      .then(data => {
-        removeTypingIndicator();
-        hideLoader();
-        if (data && data.text) {
-          typeMessage(data.text, 'ai', modelName);
-          conversationHistory.push({ role: 'ai', content: data.text });
-        } else {
-          console.error("לא התקבלה תשובה תקינה מהשרת.");
-        }
-      })
-      .catch(error => {
-        removeTypingIndicator();
-        hideLoader();
-        console.error("שגיאה בבקשת fetch:", error);
-      });
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'chat.txt';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   </script>
 </body>
