@@ -5,7 +5,7 @@ $url = 'https://api.resend.com/emails';
 
 // נתוני המייל
 $data = [
-    'from' => 'onboarding@resend.dev',
+    'from' => 'hello@resend.dev',
     'to' => ['tcrvo1708@gmail.com'],
     'subject' => 'hello world',
     'html' => '<p>it works!</p>',
