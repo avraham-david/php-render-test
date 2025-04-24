@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="he">
 <head>
   <meta charset="UTF-8">
@@ -14,8 +13,8 @@
     }
 
     body.darkmode {
-      background-color: #333;
-      color: #fff;
+      background-color: #181818;
+      color: #e0e0e0;
     }
 
     .container {
@@ -29,6 +28,12 @@
       position: relative;
       border-radius: 10px;
       overflow: hidden;
+      transition: background-color 0.3s ease;
+    }
+
+    body.darkmode .container {
+      background-color: #1f1f1f;
+      border-color: #444;
     }
 
     #chat {
@@ -48,13 +53,13 @@
 
     .message {
       max-width: 75%;
-      padding: 10px 14px;
+      padding: 12px 16px;
       margin: 6px;
-      border-radius: 10px;
+      border-radius: 12px;
       word-wrap: break-word;
       font-size: 15px;
       position: relative;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
       animation: fadeIn 0.3s ease;
     }
 
@@ -66,8 +71,8 @@
     }
 
     .user {
-      background-color: #dcf8c6;
-      border: 1px solid #b8e8b0;
+      background-color: #4caf50;
+      border: 1px solid #388e3c;
       align-self: flex-end;
       border-bottom-right-radius: 0;
     }
@@ -78,6 +83,11 @@
       align-self: flex-start;
       border-bottom-left-radius: 0;
       font-family: 'Courier New', monospace;
+    }
+
+    body.darkmode .ai {
+      background-color: #333;
+      border-color: #444;
     }
 
     .ai::before {
@@ -93,50 +103,51 @@
     .input-area {
       display: flex;
       align-items: center;
-      padding: 10px;
+      padding: 12px;
       background-color: #f9f9f9;
       border-top: 1px solid #ccc;
       transition: background-color 0.3s ease;
     }
 
     body.darkmode .input-area {
-      background-color: #1f1f1f;
+      background-color: #1a1a1a;
     }
 
     .input-area textarea {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       font-size: 16px;
       resize: none;
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid #ccc;
       outline: none;
+      transition: background-color 0.3s ease;
     }
 
     body.darkmode .input-area textarea {
-      background-color: #333;
+      background-color: #444;
       color: #eee;
       border-color: #555;
     }
 
     .input-area select {
       margin-right: 10px;
-      padding: 8px;
-      border-radius: 10px;
+      padding: 10px;
+      border-radius: 12px;
       border: 1px solid #ccc;
       font-size: 14px;
     }
 
     .input-area button {
-      margin-right: 10px;
-      padding: 10px 20px;
+      margin-left: 10px;
+      padding: 12px 18px;
       font-size: 16px;
       background-color: #25d366;
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: background-color 0.3s ease;
     }
 
     .input-area button:hover {
@@ -145,17 +156,17 @@
 
     .clear-btn, .download-btn, .darkmode-btn {
       position: absolute;
-      top: 10px;
+      top: 12px;
       background: transparent;
       border: none;
-      font-size: 16px;
+      font-size: 18px;
       color: #888;
       cursor: pointer;
     }
 
-    .clear-btn { left: 10px; }
-    .download-btn { left: 40px; }
-    .darkmode-btn { left: 70px; }
+    .clear-btn { left: 12px; }
+    .download-btn { left: 45px; }
+    .darkmode-btn { left: 78px; }
 
     .typing {
       display: flex;
