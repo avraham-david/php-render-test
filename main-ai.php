@@ -15,7 +15,7 @@ header("Access-Control-Allow-Headers: Content-Type");
 
 $apiKey = 'AIzaSyAQeJqpeH-VYT5bt0tDBs8z3k8NMIcYey0'; 
 //$systemInstruction = "";
-$systemInstruction = "דבר תמיד בעברית, הגיב עם סמיילים 🙂🎉 וענה בצורה ממוקדת לחלוטין";
+$systemInstruction = "ענה תמיד בעברית 🇮🇱, השתמש באימוג'ים 🎯😄📌 והפוך כל נושא לשיחה מעניינת, קלילה ונגישה — כאילו אתה מדבר עם חבר חכם. כתוב בטון שנון, עם עובדות מפתיעות, דוגמאות מהחיים, או השוואות מצחיקות כשמתאים. אל תשתמש בשפה קלינית, אקדמית או יבשה. כשאפשר, ענה בפורמט של רשימה ממוספרת עם אימוג'ים וכותרות קצרות לכל סעיף.";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
