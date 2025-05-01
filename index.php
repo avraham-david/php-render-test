@@ -199,7 +199,8 @@
         </div>
     </div>
     <div id="chat-output" aria-live="polite">
-        <div class="message ai-message" data-message-id="initial-0">
+        <!-- ההודעה הראשונית תישאר כמו שהיא -->
+        <div class="message ai-message" data-message-id="initial-0" data-sender="ai" data-timestamp="התחל">
             <div class="message-content"><span>שלום! בחר מודל AI והתחל לשוחח.</span></div>
             <div class="message-footer"><span class="timestamp">התחל</span></div>
         </div>
@@ -238,51 +239,162 @@
         // --- Utility Functions ---
         function getCurrentTimestamp() { const now = new Date(); const hours = now.getHours().toString().padStart(2, '0'); const minutes = now.getMinutes().toString().padStart(2, '0'); return `${hours}:${minutes}`; }
         function generateMessageId() { return `msg-${Date.now()}-${messageCounter++}`; }
-        function scrollToBottom(behavior = 'smooth') { if (behavior === 'smooth') { chatOutput.scrollTo({ top: chatOutput.scrollHeight, behavior: 'smooth' }); } else { chatOutput.scrollTop = chatOutput.scrollHeight; } }
+        function scrollToBottom(behavior = 'smooth') {
+             // Short delay to allow rendering before scrolling
+             setTimeout(() => {
+                 if (behavior === 'smooth') {
+                     chatOutput.scrollTo({ top: chatOutput.scrollHeight, behavior: 'smooth' });
+                 } else {
+                     chatOutput.scrollTop = chatOutput.scrollHeight;
+                 }
+             }, 50); // Added a small delay
+        }
 
         // --- Get Chat History Function ---
         function getChatHistory(currentUserMessage, forRegeneration = false, regenerationTargetMsgId = null) {
              const history = [];
              const messages = chatOutput.querySelectorAll('.message:not(.typing-indicator)');
              messages.forEach((msg) => {
-                 const sender = msg.dataset.sender; const timestamp = msg.dataset.timestamp; const messageId = msg.dataset.messageId;
+                 const sender = msg.dataset.sender;
+                 const timestamp = msg.dataset.timestamp;
+                 const messageId = msg.dataset.messageId;
+                 // Skip initial message
                  if (timestamp === 'התחל' && sender === 'ai') return;
+                 // Skip the AI message being regenerated
                  if (forRegeneration && messageId === regenerationTargetMsgId && sender === 'ai') return;
-                 const contentElement = msg.querySelector('.message-content'); let content = '';
-                 contentElement.childNodes.forEach(node => { if (node.nodeType === Node.TEXT_NODE) { content += node.textContent; } else if (node.nodeType === Node.ELEMENT_NODE && !node.classList.contains('copy-code-button')) { if (node.tagName === 'PRE') { content += node.textContent; } else { content += node.textContent; } } });
+
+                 const contentElement = msg.querySelector('.message-content');
+                 let content = '';
+                 if (contentElement) {
+                     // Try to reconstruct content more reliably, handling different node types
+                     contentElement.childNodes.forEach(node => {
+                         if (node.nodeType === Node.TEXT_NODE) {
+                             content += node.textContent;
+                         } else if (node.nodeType === Node.ELEMENT_NODE) {
+                             if (node.tagName === 'PRE') {
+                                 // Extract code directly, ignore copy button if present
+                                 const codeNode = node.querySelector('code') || node;
+                                 content += '```\n' + (codeNode.textContent || '').replace(/\nהעתק קוד$/, '').trim() + '\n```'; // Basic markdown reconstruction
+                             } else if (!node.classList.contains('copy-code-button') && !node.classList.contains('message-actions') && !node.classList.contains('message-footer')) {
+                                 content += node.textContent; // Get text from other elements like span, div etc.
+                             }
+                         }
+                     });
+                 }
                  content = content.trim();
-                 if (content) { const role = sender === 'user' ? 'user' : 'model'; history.push({ role: role, content: content }); }
+                 if (content) {
+                    const role = sender === 'user' ? 'user' : 'model';
+                    history.push({ role: role, content: content });
+                 } else {
+                     console.warn("Skipping empty message in history:", msg);
+                 }
              });
+             // Add the current user message if provided (and not empty)
+             if (currentUserMessage && currentUserMessage.trim()) {
+                history.push({ role: 'user', content: currentUserMessage.trim() });
+             }
              return history;
          }
+
 
         // --- Add Message to Chat Function ---
         function addMessageToChat(text, sender, options = {}) {
             const { isLoading = false, timestamp = null, modelNameUsed = null, userQuery = null, modelValue = null } = options;
-            const messageId = generateMessageId(); const messageDiv = document.createElement('div'); messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message'); messageDiv.dataset.sender = sender; messageDiv.dataset.messageId = messageId; const contentDiv = document.createElement('div'); contentDiv.classList.add('message-content');
+            const messageId = generateMessageId();
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
+            messageDiv.dataset.sender = sender;
+            messageDiv.dataset.messageId = messageId;
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('message-content');
 
             if (isLoading) {
                 messageDiv.classList.add('typing-indicator');
-                // --- אנימצית טעינה "מגניבה" ---
                 contentDiv.innerHTML = `
                     <div class="cool-loading-container">
                         <div class="loading-spinner"></div>
                         <span>מעבד...</span>
-                        <button id="stop-generation-button" class="msg-action-button stop-button" title="עצור יצירה" aria-label="עצור יצירה">
+                        <button id="stop-generation-button-${messageId}" class="msg-action-button stop-button" title="עצור יצירה" aria-label="עצור יצירה">
                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13H7v-2h10v2z"/></svg>
                         </button>
                     </div>`;
                 messageDiv.appendChild(contentDiv);
-                const stopButton = messageDiv.querySelector('#stop-generation-button');
-                if (stopButton) { stopButton.addEventListener('click', stopTypingAndGeneration); }
+                // Use unique ID for stop button
+                const stopButton = messageDiv.querySelector(`#stop-generation-button-${messageId}`);
+                if (stopButton) {
+                    stopButton.addEventListener('click', stopTypingAndGeneration);
+                } else {
+                    console.error("Stop button not found after creation!");
+                }
             } else {
-                if (sender === 'user') { contentDiv.textContent = text; }
+                if (sender === 'user') {
+                     // Basic sanitization for user input to prevent simple HTML injection
+                     const tempDiv = document.createElement('div');
+                     tempDiv.textContent = text;
+                     contentDiv.innerHTML = tempDiv.innerHTML; // Convert text to safe HTML (handles <, > etc.)
+                } else {
+                     // For AI messages, text might contain HTML/Markdown rendered later by typeAiResponse
+                     // Initially set empty or with placeholder if needed
+                     contentDiv.innerHTML = ''; // Will be populated by typeAiResponse or finalize
+                }
                 messageDiv.appendChild(contentDiv);
-                const footerDiv = document.createElement('div'); footerDiv.classList.add('message-footer'); const currentTimestamp = timestamp || getCurrentTimestamp(); messageDiv.dataset.timestamp = currentTimestamp; if (sender === 'ai' && modelNameUsed && timestamp !== 'התחל') { const modelSpan = document.createElement('span'); modelSpan.classList.add('model-indicator'); modelSpan.textContent = `(${modelNameUsed})`; footerDiv.appendChild(modelSpan); messageDiv.dataset.userQuery = userQuery || ''; messageDiv.dataset.modelName = modelNameUsed || ''; messageDiv.dataset.modelValue = modelValue || ''; } const timestampSpan = document.createElement('span'); timestampSpan.classList.add('timestamp'); timestampSpan.textContent = currentTimestamp; footerDiv.appendChild(timestampSpan); messageDiv.appendChild(footerDiv); const actionsDiv = document.createElement('div'); actionsDiv.classList.add('message-actions'); const copyButton = document.createElement('button'); copyButton.classList.add('msg-action-button', 'copy-button'); copyButton.title = 'העתק הודעה'; copyButton.setAttribute('aria-label', 'העתק הודעה'); copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>'; copyButton.addEventListener('click', handleCopyClick); actionsDiv.appendChild(copyButton); if (sender === 'ai' && userQuery && modelValue && timestamp !== 'התחל') { const regenerateButton = document.createElement('button'); regenerateButton.classList.add('msg-action-button', 'regenerate-button'); regenerateButton.title = 'צור תגובה מחדש'; regenerateButton.setAttribute('aria-label', 'צור תגובה מחדש'); regenerateButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>'; regenerateButton.addEventListener('click', handleRegenerateClick); actionsDiv.appendChild(regenerateButton); } messageDiv.appendChild(actionsDiv);
+
+                const footerDiv = document.createElement('div');
+                footerDiv.classList.add('message-footer');
+                const currentTimestamp = timestamp || getCurrentTimestamp();
+                messageDiv.dataset.timestamp = currentTimestamp; // Store timestamp
+
+                if (sender === 'ai' && modelNameUsed && timestamp !== 'התחל') {
+                    const modelSpan = document.createElement('span');
+                    modelSpan.classList.add('model-indicator');
+                    modelSpan.textContent = `(${modelNameUsed})`;
+                    footerDiv.appendChild(modelSpan);
+                    // Store data attributes needed for regeneration
+                    messageDiv.dataset.userQuery = userQuery || '';
+                    messageDiv.dataset.modelName = modelNameUsed || '';
+                    messageDiv.dataset.modelValue = modelValue || '';
+                }
+
+                const timestampSpan = document.createElement('span');
+                timestampSpan.classList.add('timestamp');
+                timestampSpan.textContent = currentTimestamp;
+                footerDiv.appendChild(timestampSpan);
+                messageDiv.appendChild(footerDiv);
+
+                // Add action buttons (Copy, Regenerate) only if it's not the initial message
+                if (timestamp !== 'התחל') {
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.classList.add('message-actions');
+
+                    const copyButton = document.createElement('button');
+                    copyButton.classList.add('msg-action-button', 'copy-button');
+                    copyButton.title = 'העתק הודעה';
+                    copyButton.setAttribute('aria-label', 'העתק הודעה');
+                    copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+                    copyButton.addEventListener('click', handleCopyClick);
+                    actionsDiv.appendChild(copyButton);
+
+                    if (sender === 'ai' && userQuery && modelValue) { // Ensure necessary data exists for regen
+                        const regenerateButton = document.createElement('button');
+                        regenerateButton.classList.add('msg-action-button', 'regenerate-button');
+                        regenerateButton.title = 'צור תגובה מחדש';
+                        regenerateButton.setAttribute('aria-label', 'צור תגובה מחדש');
+                        regenerateButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
+                        regenerateButton.addEventListener('click', handleRegenerateClick);
+                        actionsDiv.appendChild(regenerateButton);
+                    }
+                    messageDiv.appendChild(actionsDiv);
+                }
+                 // If adding a fully formed AI message directly (not typing)
+                 if (sender === 'ai' && text && !isLoading) {
+                     finalizeAiMessage(messageDiv, contentDiv, text); // Render content immediately
+                 }
             }
+
             chatOutput.insertBefore(messageDiv, scrollToBottomButton);
-            if (!isLoading) { setTimeout(() => scrollToBottom('smooth'), 50); }
-            else { chatOutput.scrollTop = chatOutput.scrollHeight; }
+            // Scroll immediately for loading indicator, slightly delayed otherwise
+            scrollToBottom(isLoading ? 'auto' : 'smooth');
+
             return messageDiv;
         }
 
@@ -290,179 +402,654 @@
          function typeAiResponse(messageElement, fullText) {
              const contentDiv = messageElement.querySelector('.message-content');
              if (!contentDiv) { console.error("Content div not found for typing"); return; }
-             contentDiv.innerHTML = ''; messageElement.classList.add('typing-cursor');
-             let nodeIndex = 0; const nodes = []; const tempDiv = document.createElement('div'); tempDiv.innerHTML = fullText;
-             tempDiv.childNodes.forEach(node => nodes.push(node));
+
+             contentDiv.innerHTML = ''; // Clear previous content
+             messageElement.classList.add('typing-cursor');
+
+             let nodeIndex = 0;
+             const nodes = [];
+             // Use a more robust HTML parser (DOMParser)
+             try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(fullText, 'text/html');
+                // Select nodes from the body, excluding potentially harmful ones if needed later
+                doc.body.childNodes.forEach(node => nodes.push(node));
+             } catch (e) {
+                 console.error("Error parsing AI response HTML:", e);
+                 // Fallback to plain text rendering
+                 const textNode = document.createTextNode(fullText);
+                 nodes.push(textNode);
+             }
+
+
              clearTimeout(typingTimeout);
+             typingTimeout = null; // Reset timeout flag
 
              function processNode() {
-                 if (nodeIndex >= nodes.length) { finalizeAiMessage(messageElement, contentDiv); return; }
+                 if (currentAbortController?.signal.aborted) { // Check if aborted during typing
+                      console.log("Typing aborted.");
+                      finalizeAiMessage(messageElement, contentDiv, contentDiv.innerHTML); // Finalize with current content
+                      return;
+                 }
+                 if (nodeIndex >= nodes.length) {
+                      finalizeAiMessage(messageElement, contentDiv, contentDiv.innerHTML); // Finalize when done
+                      return;
+                 }
+
                  const currentNode = nodes[nodeIndex];
+
                  if (currentNode.nodeType === Node.TEXT_NODE) {
-                     let textContent = currentNode.textContent; let charIndex = 0;
+                     let textContent = currentNode.textContent;
+                     let charIndex = 0;
+
                      function typeChar() {
-                         if (charIndex < textContent.length) { if (contentDiv.lastChild && contentDiv.lastChild.nodeType === Node.TEXT_NODE) { contentDiv.lastChild.textContent += textContent[charIndex]; } else { contentDiv.appendChild(document.createTextNode(textContent[charIndex])); } charIndex++; scrollToBottom('auto'); typingTimeout = setTimeout(typeChar, TYPING_SPEED); }
-                         else { nodeIndex++; typingTimeout = setTimeout(processNode, TYPING_SPEED); }
+                          if (currentAbortController?.signal.aborted) { // Check abort during char typing
+                             console.log("Typing aborted (char level).");
+                             finalizeAiMessage(messageElement, contentDiv, contentDiv.innerHTML);
+                             return;
+                          }
+                         if (charIndex < textContent.length) {
+                             // Append char by char
+                             contentDiv.appendChild(document.createTextNode(textContent[charIndex]));
+                             charIndex++;
+                             scrollToBottom('auto'); // Scroll as content grows
+                             typingTimeout = setTimeout(typeChar, TYPING_SPEED);
+                         } else {
+                             // Text node finished, move to next node
+                             nodeIndex++;
+                             typingTimeout = setTimeout(processNode, TYPING_SPEED / 2); // Slightly faster transition between nodes
+                         }
                      }
-                     typeChar();
+                     typeChar(); // Start typing this text node
                  } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
-                     const clonedNode = currentNode.cloneNode(true); contentDiv.appendChild(clonedNode); if (clonedNode.tagName === 'PRE') { addCopyButtonToCodeBlock(clonedNode); } nodeIndex++; scrollToBottom('auto'); typingTimeout = setTimeout(processNode, TYPING_SPEED);
-                 } else { nodeIndex++; processNode(); }
+                     // Append the whole element at once for simplicity and structure integrity
+                     const clonedNode = currentNode.cloneNode(true); // Clone to avoid issues if original node source changes
+                     contentDiv.appendChild(clonedNode);
+                     // If it's a code block, add the button immediately after appending
+                     if (clonedNode.tagName === 'PRE') {
+                         addCopyButtonToCodeBlock(clonedNode);
+                     }
+                     nodeIndex++;
+                     scrollToBottom('auto'); // Scroll after adding element
+                     typingTimeout = setTimeout(processNode, TYPING_SPEED); // Move to next node
+                 } else {
+                     // Skip other node types (like comments)
+                     nodeIndex++;
+                     processNode();
+                 }
              }
+
+             // Start processing the first node
              processNode();
          }
 
+
         // --- Finalize AI Message after typing/rendering ---
-        function finalizeAiMessage(messageElement, contentDiv) {
-             clearTimeout(typingTimeout); typingTimeout = null;
-             if (messageElement) { messageElement.classList.remove('typing-cursor'); contentDiv.querySelectorAll('pre').forEach(addCopyButtonToCodeBlock); }
-             scrollToBottom('smooth');
-             if (!document.querySelector('.typing-indicator') && !typingTimeout) { userInput.disabled = false; sendButton.disabled = false; userInput.style.opacity = '1'; if (document.activeElement !== sendButton && document.activeElement !== modelSelect) { userInput.focus(); } }
+        function finalizeAiMessage(messageElement, contentDiv, finalHtmlContent = null) {
+             clearTimeout(typingTimeout); // Stop any pending typing timeouts
+             typingTimeout = null; // Mark typing as finished
+
+             if (messageElement) {
+                 messageElement.classList.remove('typing-cursor'); // Remove blinking cursor effect
+
+                 // Ensure final content is set if provided (useful if typing was aborted or skipped)
+                 if (finalHtmlContent !== null && contentDiv.innerHTML !== finalHtmlContent) {
+                     contentDiv.innerHTML = finalHtmlContent;
+                 }
+
+                 // Ensure all code blocks have copy buttons (might be missed if typing aborted early)
+                 contentDiv.querySelectorAll('pre').forEach(pre => {
+                    if (!pre.querySelector('.copy-code-button')) {
+                        addCopyButtonToCodeBlock(pre);
+                    }
+                 });
+             } else {
+                 console.warn("finalizeAiMessage called without a valid messageElement");
+             }
+
+             scrollToBottom('smooth'); // Ensure visibility of the complete message
+
+             // Re-enable input only if no other typing is active and no fetch is pending
+             if (!document.querySelector('.typing-indicator') && !typingTimeout && !currentAbortController) {
+                 enableInput();
+             }
         }
+
+        // --- Enable Input Function ---
+        function enableInput() {
+            userInput.disabled = false;
+            sendButton.disabled = false;
+            userInput.style.opacity = '1';
+            // Avoid stealing focus if user clicked elsewhere (like model select)
+            if (document.activeElement === document.body || document.activeElement === sendButton || document.activeElement === chatOutput) {
+                 userInput.focus();
+            }
+            adjustTextareaHeight(); // Adjust height in case content changed while disabled
+            console.log("Input enabled.");
+        }
+
+        // --- Disable Input Function ---
+        function disableInput() {
+             userInput.disabled = true;
+             sendButton.disabled = true;
+             userInput.style.opacity = '0.7';
+             console.log("Input disabled.");
+        }
+
 
         // --- Stop Typing and Fetch Request ---
          function stopTypingAndGeneration() {
-             console.log('Stopping generation...');
-             clearTimeout(typingTimeout); typingTimeout = null;
-             const typingIndicator = chatOutput.querySelector('.typing-indicator'); if (typingIndicator) typingIndicator.remove();
-             const typingCursorMsg = chatOutput.querySelector('.typing-cursor'); if(typingCursorMsg) typingCursorMsg.classList.remove('typing-cursor');
-             if (currentAbortController) { currentAbortController.abort(); currentAbortController = null; }
-             else { userInput.disabled = false; sendButton.disabled = false; userInput.style.opacity = '1'; userInput.focus(); const lastAiMsg = chatOutput.querySelector('.message.ai-message:last-child'); if (!lastAiMsg || lastAiMsg.querySelector('.message-footer')) { addMessageToChat('היצירה הופסקה.', 'ai', { modelNameUsed: 'N/A' }); } }
+             console.log('Attempting to stop generation...');
+
+             // 1. Abort Fetch Request (if active)
+             if (currentAbortController) {
+                 console.log('Aborting active fetch request.');
+                 currentAbortController.abort();
+                 currentAbortController = null; // Clear the controller
+             } else {
+                 console.log('No active fetch request to abort.');
+             }
+
+             // 2. Stop Typing Animation (if active)
+             clearTimeout(typingTimeout);
+             typingTimeout = null;
+             const typingCursorMsg = chatOutput.querySelector('.message.ai-message.typing-cursor');
+             if (typingCursorMsg) {
+                 console.log('Removing typing cursor.');
+                 // Finalize the message with whatever content was typed so far
+                 const contentDiv = typingCursorMsg.querySelector('.message-content');
+                 finalizeAiMessage(typingCursorMsg, contentDiv, contentDiv?.innerHTML);
+             } else {
+                 console.log('No active typing animation found.');
+             }
+
+             // 3. Remove Loading Indicator Placeholder (if present)
+             const typingIndicator = chatOutput.querySelector('.typing-indicator');
+             if (typingIndicator) {
+                 console.log('Removing typing indicator placeholder.');
+                 typingIndicator.remove();
+             }
+
+             // 4. Re-enable Input Fields
+             enableInput();
+
+             // 5. Add "Stopped" Message (Optional, prevents confusion if stopped early)
+             // Check if the last message isn't already finalized or the indicator isn't present
+             const lastMessage = chatOutput.lastElementChild.previousElementSibling; // Get message before scroll button
+             if (!lastMessage || (!lastMessage.classList.contains('ai-message') || lastMessage.querySelector('.typing-cursor') || lastMessage.classList.contains('typing-indicator'))) {
+                // Add a confirmation message only if the AI wasn't already finished or finalizing.
+                // addMessageToChat('היצירה הופסקה על ידי המשתמש.', 'ai', { modelNameUsed: 'N/A' });
+             }
+             console.log('Generation stop process complete.');
          }
+
 
         // --- Helper Function to Add Copy Button to Code Blocks ---
         function addCopyButtonToCodeBlock(preElement) {
-             if (!preElement || preElement.querySelector('.copy-code-button')) return; const copyButton = document.createElement('button'); copyButton.textContent = 'העתק קוד'; copyButton.className = 'copy-code-button'; copyButton.setAttribute('aria-label', 'העתק קוד'); copyButton.addEventListener('click', (e) => { e.stopPropagation(); const codeElement = preElement.querySelector('code') || preElement; const codeToCopy = codeElement.textContent || ''; navigator.clipboard.writeText(codeToCopy).then(() => { copyButton.textContent = 'הועתק!'; copyButton.classList.add('copied'); setTimeout(() => { copyButton.textContent = 'העתק קוד'; copyButton.classList.remove('copied'); }, 1500); }).catch(err => { console.error('שגיאה בהעתקת קוד: ', err); copyButton.textContent = 'שגיאה'; }); }); preElement.appendChild(copyButton);
+             if (!preElement || preElement.querySelector('.copy-code-button')) return; // Already added
+             const copyButton = document.createElement('button');
+             copyButton.textContent = 'העתק קוד';
+             copyButton.className = 'copy-code-button';
+             copyButton.setAttribute('aria-label', 'העתק קוד');
+
+             copyButton.addEventListener('click', (e) => {
+                 e.stopPropagation(); // Prevent triggering message hover effects
+                 const codeElement = preElement.querySelector('code') || preElement; // Target <code> if exists, else <pre>
+                 // Get text content, excluding the button text itself if somehow included
+                 const codeToCopy = (codeElement.textContent || '').replace(/העתק קוד$/, '').replace(/הועתק!$/, '').replace(/שגיאה$/, '').trim();
+
+                 navigator.clipboard.writeText(codeToCopy).then(() => {
+                     copyButton.textContent = 'הועתק!';
+                     copyButton.classList.add('copied');
+                     setTimeout(() => {
+                         copyButton.textContent = 'העתק קוד';
+                         copyButton.classList.remove('copied');
+                     }, 1500);
+                 }).catch(err => {
+                     console.error('שגיאה בהעתקת קוד: ', err);
+                     copyButton.textContent = 'שגיאה';
+                      // Optional: Add fallback for older browsers or insecure contexts
+                      // tryManualCopy(codeToCopy);
+                 });
+             });
+             // Append button inside the <pre> tag
+             preElement.style.position = 'relative'; // Ensure pre is positioned for absolute child
+             preElement.appendChild(copyButton);
         }
 
         // --- Send Message Function ---
-        // *** MODIFICATION START ***
         async function sendMessage(textToSend, options = {}, skipResponse = false) {
              const { isRegeneration = false, originalAiMsgId = null, modelValueOverride = null, modelNameOverride = null } = options;
              const currentText = textToSend !== undefined ? textToSend.trim() : userInput.value.trim();
-             if (currentText === '' || typingTimeout) return;
 
-             userInput.disabled = true; sendButton.disabled = true; userInput.style.opacity = '0.7';
+             if (currentText === '') {
+                 console.log("Attempted to send empty message.");
+                 return; // Don't send empty messages
+             }
+             if (typingTimeout || currentAbortController) {
+                 console.warn("Attempted to send message while AI is responding or fetch is active.");
+                 // Optionally provide feedback: alert("Please wait for the current response to finish or stop it first.");
+                 return; // Prevent sending while AI is busy
+             }
+
+             disableInput(); // Disable input fields
 
              if (!isRegeneration) {
                  addMessageToChat(currentText, 'user', { timestamp: getCurrentTimestamp() });
-                 userInput.value = '';
-                 adjustTextareaHeight();
-             }
-             // Handle removing old AI message if regenerating
-             else if (originalAiMsgId) {
+                 userInput.value = ''; // Clear input *after* adding message
+                 adjustTextareaHeight(); // Reset height
+             } else if (originalAiMsgId) {
                 const oldAiMsg = chatOutput.querySelector(`.message[data-message-id="${originalAiMsgId}"]`);
-                if (oldAiMsg) oldAiMsg.remove();
+                if (oldAiMsg) {
+                    console.log(`Removing old AI message ${originalAiMsgId} for regeneration.`);
+                    oldAiMsg.remove();
+                } else {
+                    console.warn(`Could not find AI message ${originalAiMsgId} to remove for regeneration.`);
+                }
              }
 
-             // If this is an initial URL message, skip the AI response fetch
-             if (skipResponse && !isRegeneration) { // Only skip for initial URL message, not regeneration
-                 console.log('Initial URL message added, skipping AI response fetch.');
-                 // Re-enable input immediately as we are not waiting for AI response
-                 userInput.disabled = false;
-                 sendButton.disabled = false;
-                 userInput.style.opacity = '1';
-                 if (document.activeElement !== sendButton && document.activeElement !== modelSelect) {
-                     userInput.focus();
-                 }
-                 scrollToBottom('auto'); // Scroll down to see the added message
-                 return; // Exit the function here
+             // If this is an initial URL message OR explicitly told to skip response
+             if (skipResponse) {
+                 console.log('Message added, skipping AI response fetch as requested.');
+                 enableInput(); // Re-enable input immediately
+                 scrollToBottom('smooth'); // Scroll down to see the added message
+                 return; // Exit the function
              }
-             // *** MODIFICATION END ***
 
-             // Continue with fetching AI response for regular messages or regenerations
-             const historyArray = getChatHistory( null, isRegeneration, originalAiMsgId );
-             let historyStringPart = ""; historyArray.forEach(message => { historyStringPart += `[ROLE=${message.role}] ${message.content}\n`; }); historyStringPart = historyStringPart.trim();
-             const combinedStructuredText = `[USER_INPUT_START]\n${currentText}\n[USER_INPUT_END]\n[CHAT_HISTORY_START]\n${historyStringPart}\n[CHAT_HISTORY_END]`;
+             // --- Prepare for AI response ---
+             const loadingIndicatorElement = addMessageToChat(null, 'ai', { isLoading: true });
+             scrollToBottom('auto'); // Ensure indicator is visible
 
-             const selectedOption = modelValueOverride ? Array.from(modelSelect.options).find(opt => opt.value === modelValueOverride) || modelSelect.options[modelSelect.selectedIndex] : modelSelect.options[modelSelect.selectedIndex];
-             const modelName = modelNameOverride || selectedOption.text; const selectedModelFile = selectedOption.value; const currentApiUrl = BASE_API_URL + selectedModelFile;
+             // Get history *after* adding user message and removing old AI message (if regenerating)
+             const historyArray = getChatHistory( isRegeneration ? null : currentText, isRegeneration, originalAiMsgId );
+             // Format history (Example: Simple concatenation, adjust as needed for your API)
+             let historyStringPart = "";
+             historyArray.forEach(message => {
+                  // Prefix role clearly for the model
+                 historyStringPart += `[${message.role.toUpperCase()}] ${message.content}\n`;
+             });
+             historyStringPart = historyStringPart.trim();
 
-             const typingIndicatorElement = addMessageToChat(null, 'ai', { isLoading: true });
-             currentAbortController = new AbortController(); const signal = currentAbortController.signal;
+             // Combine current input and history (adjust structure based on API needs)
+             // const combinedStructuredText = `[USER_INPUT_START]\n${currentText}\n[USER_INPUT_END]\n[CHAT_HISTORY_START]\n${historyStringPart}\n[CHAT_HISTORY_END]`;
+              // Simpler structure might be better: just send history + current query
+              const requestPayloadText = historyStringPart; // Assuming API handles history + last user message
+
+
+             const selectedOption = modelValueOverride ?
+                (Array.from(modelSelect.options).find(opt => opt.value === modelValueOverride) || modelSelect.options[modelSelect.selectedIndex])
+                : modelSelect.options[modelSelect.selectedIndex];
+
+             const modelName = modelNameOverride || selectedOption.text;
+             const selectedModelFile = selectedOption.value;
+             const currentApiUrl = BASE_API_URL + selectedModelFile;
+
+             currentAbortController = new AbortController(); // Create a new controller for this request
+             const signal = currentAbortController.signal;
 
              try {
-                 const requestBody = { text: combinedStructuredText };
-                 const response = await fetch(currentApiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody), signal });
-                 const wasAborted = signal.aborted;
-                 currentAbortController = null;
-                 if (typingIndicatorElement && typingIndicatorElement.parentNode === chatOutput) { typingIndicatorElement.remove(); }
-                 if (wasAborted) throw new DOMException('Aborted by user', 'AbortError');
+                 console.log(`Sending request to: ${currentApiUrl} with model: ${modelName}`);
+                 const requestBody = { text: requestPayloadText }; // API expects 'text' field
+                 const response = await fetch(currentApiUrl, {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify(requestBody),
+                     signal // Pass the signal to the fetch request
+                 });
 
-                 if (!response.ok) { let errorText = `Server Error: ${response.status} ${response.statusText}`; try { const errorData = await response.json(); if(errorData && errorData.error) errorText += ` - ${errorData.error}`; else if(errorData && errorData.message) errorText += ` - ${errorData.message}`; } catch (e) {} throw new Error(errorText); }
+                 // Check if aborted *during* fetch
+                 if (signal.aborted) {
+                     // Abort handled by the signal listener or catch block
+                     throw new DOMException('Aborted by user', 'AbortError');
+                 }
+
+                 // Remove loading indicator *after* fetch returns, before processing response
+                 if (loadingIndicatorElement && loadingIndicatorElement.parentNode === chatOutput) {
+                     loadingIndicatorElement.remove();
+                 } else {
+                    // If it was already removed (e.g., by stop button), that's okay.
+                 }
+
+
+                 if (!response.ok) {
+                     let errorText = `Server Error: ${response.status} ${response.statusText}`;
+                     try {
+                         const errorData = await response.json();
+                         if(errorData && (errorData.error || errorData.message)) {
+                            errorText += ` - ${errorData.error || errorData.message}`;
+                         }
+                     } catch (e) { /* Ignore if error response is not JSON */ }
+                     throw new Error(errorText);
+                 }
 
                  const data = await response.json();
+
                  if (data && data.text) {
-                     const aiMessageElement = addMessageToChat('', 'ai', { timestamp: getCurrentTimestamp(), modelNameUsed: modelName, userQuery: currentText, modelValue: selectedModelFile });
-                     typeAiResponse(aiMessageElement, data.text);
+                      // Add the container for the AI message first
+                     const aiMessageElement = addMessageToChat('', 'ai', { // Start with empty content
+                         timestamp: getCurrentTimestamp(),
+                         modelNameUsed: modelName,
+                         userQuery: currentText, // Pass user query for potential regeneration later
+                         modelValue: selectedModelFile // Pass model value too
+                     });
+                      // Now type the received text into the created element
+                     typeAiResponse(aiMessageElement, data.text); // This will handle enabling input via finalizeAiMessage
                  } else {
-                     console.error("Invalid response format from server (after OK):", data);
-                     addMessageToChat("Unexpected response format from server.", 'ai', { modelNameUsed: modelName });
-                     if (!typingTimeout) { userInput.disabled = false; sendButton.disabled = false; userInput.style.opacity = '1'; userInput.focus(); }
+                     console.error("Invalid response format from server (missing text field):", data);
+                     addMessageToChat("שגיאה: תגובה לא תקינה מהשרת.", 'ai', { modelNameUsed: modelName });
+                     enableInput(); // Re-enable input on format error
                  }
+
              } catch (error) {
-                 currentAbortController = null;
-                 if (typingIndicatorElement && typingIndicatorElement.parentNode === chatOutput) { typingIndicatorElement.remove(); }
+                 // Remove loading indicator if fetch failed or was aborted
+                 if (loadingIndicatorElement && loadingIndicatorElement.parentNode === chatOutput) {
+                     loadingIndicatorElement.remove();
+                 }
+
                  if (error.name === 'AbortError') {
-                      console.log('Request aborted.');
-                      if (!typingTimeout) { userInput.disabled = false; sendButton.disabled = false; userInput.style.opacity = '1'; userInput.focus(); }
+                      console.log('Fetch request aborted successfully.');
+                      // Input should already be enabled by the stop function or will be enabled below
                  } else {
                       console.error("Error sending/receiving message:", error);
-                      addMessageToChat(`שגיאה: ${error.message}`, 'ai', { modelNameUsed: modelName });
-                      if (!typingTimeout) { userInput.disabled = false; sendButton.disabled = false; userInput.style.opacity = '1'; userInput.focus(); }
+                      addMessageToChat(`שגיאה בתקשורת: ${error.message}`, 'ai', { modelNameUsed: modelName });
                  }
+                  // Always ensure input is enabled after error or abort, unless typing has started elsewhere
+                 if (!typingTimeout) { // Only enable if not currently typing another message
+                    enableInput();
+                 }
+             } finally {
+                  // Clear the abort controller reference once fetch is done (success, error, or abort)
+                 currentAbortController = null;
+                 console.log("Fetch process finished. Abort controller cleared.");
              }
          }
 
         // --- UI Interaction Functions ---
-        function toggleDarkMode(forceMode) { const body = document.body; let isDark; if (forceMode) isDark = (forceMode === 'dark'); else isDark = !body.classList.contains('dark-mode'); body.classList.toggle('dark-mode', isDark); themeIconLight.style.display = isDark ? 'none' : 'inline-block'; sunIcon.style.display = isDark ? 'inline-block' : 'none'; localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled'); updateSelectArrowColor(); }
-        function updateSelectArrowColor() { const getEncodedColor = () => { try { const colorValue = getComputedStyle(document.documentElement).getPropertyValue('--select-arrow').trim(); const hexColor = colorValue.startsWith('#') ? colorValue.substring(1) : 'ffffff'; const validHex = /^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(hexColor); return encodeURIComponent(validHex ? hexColor : 'ffffff'); } catch (e) { console.error("Error getting computed style for --select-arrow", e); return 'ffffff'; } }; const encodedColor = getEncodedColor(); modelSelect.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg fill="%23${encodedColor}" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>')`; }
-        function downloadChat() { let chatContent = `AI Chat History (${new Date().toLocaleString('he-IL')})\nModel: ${modelSelect.options[modelSelect.selectedIndex].text}\n====================\n\n`; const messages = chatOutput.querySelectorAll('.message:not(.typing-indicator)'); messages.forEach(msg => { const sender = msg.dataset.sender === 'user' ? 'User' : 'AI'; const timestamp = msg.dataset.timestamp || ''; const modelInfo = msg.dataset.modelName ? ` (${msg.dataset.modelName})` : ''; const textContent = msg.querySelector('.message-content')?.textContent || msg.querySelector('.message-content')?.innerText || ''; if (timestamp === "התחל" && sender === "AI") return; chatContent += `[${timestamp}] ${sender}${modelInfo}: ${textContent.trim()}\n`; }); const blob = new Blob([chatContent], { type: 'text/plain;charset=utf-8' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); const now = new Date(); const filename = `ai_chat_log_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.txt`; link.download = filename; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); }
-        function clearChat() { if (confirm("האם אתה בטוח שברצונך למחוק את כל ההודעות בצ'אט?")) { stopTypingAndGeneration(); chatOutput.innerHTML = ''; chatOutput.appendChild(scrollToBottomButton); addMessageToChat("בחר מודל AI והתחל לשוחח.", 'ai', { timestamp: 'התחל' }); messageCounter = 0; scrollToBottomButton.classList.remove('visible'); } }
-        // *** MODIFICATION START ***
-        function handleUrlParameter() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const conversationText = urlParams.get('conversation');
-            if (conversationText) {
-                const decodedText = decodeURIComponent(conversationText).trim();
-                if (decodedText) {
-                    console.log("Sending conversation from URL parameter (no response expected):", decodedText);
-                    // Pass true as the third argument to skip AI response
-                    setTimeout(() => sendMessage(decodedText, {}, true), 100);
-                    // Clear the parameter from the URL to prevent resending on refresh
-                    const nextURL = window.location.pathname; // URL without parameters
-                    window.history.replaceState({}, document.title, nextURL);
-                }
+        function toggleDarkMode(forceMode) {
+            const body = document.body;
+            let isDark;
+            if (forceMode !== undefined) { // Allow forcing 'dark' or 'light'
+                 isDark = (forceMode === 'dark');
+            } else {
+                isDark = !body.classList.contains('dark-mode'); // Toggle if no force mode
+            }
+            body.classList.toggle('dark-mode', isDark);
+            themeIconLight.style.display = isDark ? 'none' : 'inline-block';
+            sunIcon.style.display = isDark ? 'inline-block' : 'none';
+            try { // Defensive coding for localStorage
+                 localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+            } catch (e) {
+                 console.warn("Could not save dark mode preference to localStorage:", e);
+            }
+            updateSelectArrowColor();
+        }
+
+        function updateSelectArrowColor() {
+            try {
+                // Get the computed color value safely
+                const colorValue = getComputedStyle(document.documentElement).getPropertyValue('--select-arrow').trim();
+                // Ensure it's a valid hex color (basic check)
+                const hexColor = colorValue.startsWith('#') ? colorValue.substring(1) : 'ffffff'; // Default to white
+                const validHex = /^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(hexColor) ? hexColor : 'ffffff';
+                const encodedColor = encodeURIComponent(validHex); // URL-encode the color
+                modelSelect.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg fill="%23${encodedColor}" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>')`;
+            } catch (e) {
+                 console.error("Error updating select arrow color:", e);
+                 // Fallback or do nothing
             }
         }
-        // *** MODIFICATION END ***
-        function adjustTextareaHeight() { userInput.style.height = 'auto'; const scrollHeight = userInput.scrollHeight; const maxHeight = parseInt(window.getComputedStyle(userInput).maxHeight, 10); if (scrollHeight > maxHeight) { userInput.style.height = `${maxHeight}px`; userInput.style.overflowY = 'auto'; } else { userInput.style.height = `${scrollHeight}px`; userInput.style.overflowY = 'hidden'; } }
-        function handleCopyClick(event) { const button = event.currentTarget; const messageElement = button.closest('.message'); if (!messageElement) return; const contentElement = messageElement.querySelector('.message-content'); if (!contentElement) return; const textToCopy = contentElement.textContent || contentElement.innerText || ''; navigator.clipboard.writeText(textToCopy.trim()).then(() => { button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>'; button.classList.add('copied'); button.title = 'הועתק!'; setTimeout(() => { button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>'; button.classList.remove('copied'); button.title = 'העתק הודעה'; }, 1500); }).catch(err => { console.error('Failed to copy message: ', err); alert('לא ניתן היה להעתיק את ההודעה.'); }); }
-        function handleRegenerateClick(event) { if (typingTimeout) return; const button = event.currentTarget; const messageElement = button.closest('.message.ai-message'); if (!messageElement) return; const userQuery = messageElement.dataset.userQuery; const modelValue = messageElement.dataset.modelValue; const modelName = messageElement.dataset.modelName; const messageId = messageElement.dataset.messageId; if (!userQuery || !modelValue || !modelName || !messageId) { console.error('Regen Error: Missing data', messageElement.dataset); return; } console.log(`Regenerating for: "${userQuery}" using ${modelName} (${modelValue}), replacing ${messageId}`); sendMessage(userQuery, { isRegeneration: true, originalAiMsgId: messageId, modelValueOverride: modelValue, modelNameOverride: modelName }); } // Note: skipResponse is false (default) here, so it will fetch a response
-        function handleScroll() { const isScrolledUp = chatOutput.scrollHeight - chatOutput.scrollTop - chatOutput.clientHeight > SCROLL_THRESHOLD; scrollToBottomButton.classList.toggle('visible', isScrolledUp); }
+
+        function downloadChat() {
+            let chatContent = `AI Chat History (${new Date().toLocaleString('he-IL')})\n`;
+            chatContent += `Model: ${modelSelect.options[modelSelect.selectedIndex].text}\n`;
+            chatContent += `====================\n\n`;
+
+            const messages = chatOutput.querySelectorAll('.message:not(.typing-indicator)');
+            messages.forEach(msg => {
+                const sender = msg.dataset.sender === 'user' ? 'User' : 'AI';
+                const timestamp = msg.dataset.timestamp || '';
+                const modelInfo = msg.dataset.modelName ? ` (${msg.dataset.modelName})` : '';
+                const contentElement = msg.querySelector('.message-content');
+                let textContent = '';
+
+                if (contentElement) {
+                    // Extract text content, trying to handle code blocks cleanly
+                    contentElement.childNodes.forEach(node => {
+                         if (node.nodeType === Node.TEXT_NODE) {
+                             textContent += node.textContent;
+                         } else if (node.nodeType === Node.ELEMENT_NODE) {
+                             if (node.tagName === 'PRE') {
+                                 const codeNode = node.querySelector('code') || node;
+                                 textContent += '\n```\n' + (codeNode.textContent || '').replace(/העתק קוד$|הועתק!$|שגיאה$/,'').trim() + '\n```\n';
+                             } else if (node.tagName === 'SPAN' && node.classList.contains('timestamp')) {
+                                // Skip timestamp if it's somehow inside content
+                             } else if (!node.classList.contains('copy-code-button') && !node.classList.contains('message-actions') && !node.classList.contains('message-footer')) {
+                                 textContent += node.textContent;
+                             }
+                         }
+                    });
+                }
+
+                // Skip the initial system message
+                if (timestamp === "התחל" && sender === "AI") return;
+
+                chatContent += `[${timestamp}] ${sender}${modelInfo}: ${textContent.trim()}\n\n`; // Add extra newline for readability
+            });
+
+            try {
+                const blob = new Blob([chatContent], { type: 'text/plain;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                const now = new Date();
+                const filename = `ai_chat_log_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.txt`;
+                link.download = filename;
+                document.body.appendChild(link); // Required for Firefox
+                link.click();
+                document.body.removeChild(link); // Clean up
+                URL.revokeObjectURL(link.href); // Release memory
+            } catch (e) {
+                 console.error("Error creating download link:", e);
+                 alert("שגיאה ביצירת קובץ ההורדה.");
+            }
+        }
+
+        function clearChat() {
+            if (confirm("האם אתה בטוח שברצונך למחוק את כל ההודעות בצ'אט? פעולה זו אינה ניתנת לשחזור.")) {
+                stopTypingAndGeneration(); // Stop any ongoing generation first
+                // Clear messages, keeping the scroll button structure
+                while (chatOutput.firstChild && chatOutput.firstChild !== scrollToBottomButton) {
+                    chatOutput.removeChild(chatOutput.firstChild);
+                }
+                 // Add back the initial message
+                addMessageToChat("שלום! בחר מודל AI והתחל לשוחח.", 'ai', { timestamp: 'התחל' });
+                messageCounter = 0; // Reset counter if needed
+                scrollToBottomButton.classList.remove('visible'); // Hide scroll button
+                console.log("Chat cleared.");
+                userInput.value = ''; // Clear input field as well
+                adjustTextareaHeight();
+                enableInput(); // Ensure input is enabled
+            }
+        }
+
+        function handleUrlParameter() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const conversationText = urlParams.get('conversation');
+                if (conversationText) {
+                    const decodedText = decodeURIComponent(conversationText).trim();
+                    if (decodedText) {
+                        console.log("Processing conversation from URL parameter (response skipped):", decodedText);
+                        // Send the message but skip the AI response fetch for this initial load
+                        setTimeout(() => sendMessage(decodedText, {}, true), 100); // Slight delay for UI readiness
+
+                        // Clear the parameter from the URL to prevent resending on refresh/navigation
+                        const nextURL = window.location.pathname; // URL without parameters
+                        window.history.replaceState({}, document.title, nextURL);
+                    }
+                }
+            } catch (e) {
+                console.error("Error processing URL parameters:", e);
+            }
+        }
+
+        function adjustTextareaHeight() {
+             const MIN_HEIGHT = 44; // Match initial CSS min-height if needed
+             userInput.style.height = 'auto'; // Temporarily shrink to calculate natural height
+             const scrollHeight = userInput.scrollHeight;
+             const maxHeight = parseInt(window.getComputedStyle(userInput).maxHeight, 10) || 160; // Default max height
+
+             if (scrollHeight <= MIN_HEIGHT) {
+                userInput.style.height = `${MIN_HEIGHT}px`;
+                userInput.style.overflowY = 'hidden';
+             } else if (scrollHeight > maxHeight) {
+                 userInput.style.height = `${maxHeight}px`;
+                 userInput.style.overflowY = 'auto'; // Show scrollbar if content exceeds max height
+             } else {
+                 userInput.style.height = `${scrollHeight}px`;
+                 userInput.style.overflowY = 'hidden'; // Hide scrollbar if content fits
+             }
+         }
+
+        function handleCopyClick(event) {
+             const button = event.currentTarget;
+             const messageElement = button.closest('.message');
+             if (!messageElement) return;
+             const contentElement = messageElement.querySelector('.message-content');
+             if (!contentElement) return;
+
+             // Extract text, handling code blocks more carefully
+             let textToCopy = '';
+             contentElement.childNodes.forEach(node => {
+                  if (node.nodeType === Node.TEXT_NODE) {
+                      textToCopy += node.textContent;
+                  } else if (node.nodeType === Node.ELEMENT_NODE) {
+                      if (node.tagName === 'PRE') {
+                         const codeNode = node.querySelector('code') || node;
+                         textToCopy += (codeNode.textContent || '').replace(/העתק קוד$|הועתק!$|שגיאה$/,'').trim();
+                      } else if (!node.classList.contains('copy-code-button') && !node.classList.contains('message-actions') && !node.classList.contains('message-footer')) {
+                          textToCopy += node.textContent;
+                      }
+                  }
+             });
+             textToCopy = textToCopy.trim();
+
+
+             navigator.clipboard.writeText(textToCopy).then(() => {
+                 button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>'; // Checkmark icon
+                 button.classList.add('copied');
+                 button.title = 'הועתק!';
+                 setTimeout(() => {
+                      // Restore original icon
+                     button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+                     button.classList.remove('copied');
+                     button.title = 'העתק הודעה';
+                 }, 1500);
+             }).catch(err => {
+                 console.error('Failed to copy message: ', err);
+                 alert('לא ניתן היה להעתיק את ההודעה.');
+             });
+         }
+
+        function handleRegenerateClick(event) {
+            if (typingTimeout || currentAbortController) {
+                 console.warn("Cannot regenerate while AI is responding.");
+                 alert("אנא המתן לסיום התגובה הנוכחית או בטל אותה לפני יצירה מחדש.");
+                 return;
+            }
+            const button = event.currentTarget;
+            const messageElement = button.closest('.message.ai-message');
+            if (!messageElement) {
+                 console.error("Could not find parent AI message for regeneration button.");
+                 return;
+            }
+
+            const userQuery = messageElement.dataset.userQuery;
+            const modelValue = messageElement.dataset.modelValue;
+            const modelName = messageElement.dataset.modelName;
+            const messageId = messageElement.dataset.messageId;
+
+            if (!userQuery || !modelValue || !modelName || !messageId) {
+                console.error('Regeneration Error: Missing required data attributes on message:', messageElement.dataset);
+                alert("שגיאה: חסר מידע הדרוש ליצירה מחדש.");
+                return;
+            }
+
+            console.log(`Regenerating response for query: "${userQuery}" using model: ${modelName} (${modelValue}), replacing message ID: ${messageId}`);
+
+            // Call sendMessage with regeneration options
+            sendMessage(userQuery, {
+                isRegeneration: true,
+                originalAiMsgId: messageId,
+                modelValueOverride: modelValue,
+                modelNameOverride: modelName
+            }, false); // Ensure skipResponse is false to fetch a new response
+        }
+
+        function handleScroll() {
+             // Show button if scrolled up significantly from the bottom
+             const isScrolledUp = chatOutput.scrollHeight - chatOutput.scrollTop - chatOutput.clientHeight > SCROLL_THRESHOLD;
+             scrollToBottomButton.classList.toggle('visible', isScrolledUp);
+         }
 
         // --- Event Listeners Setup ---
-        sendButton.addEventListener('click', () => sendMessage()); // Calls sendMessage without skipResponse=true
-        userInput.addEventListener('keypress', (event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } }); // Calls sendMessage without skipResponse=true
-        userInput.addEventListener('input', adjustTextareaHeight);
-        darkModeToggle.addEventListener('click', () => toggleDarkMode());
-        downloadChatButton.addEventListener('click', downloadChat);
-        clearChatButton.addEventListener('click', clearChat);
-        modelSelect.addEventListener('change', () => { localStorage.setItem('selectedModel', modelSelect.value); console.log(`Model changed to: ${modelSelect.value}`); });
-        chatOutput.addEventListener('scroll', handleScroll);
-        scrollToBottomButton.addEventListener('click', () => scrollToBottom('smooth'));
+        sendButton.addEventListener('click', () => sendMessage()); // Normal send
+        userInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { // Added !event.isComposing
+                event.preventDefault(); // Prevent newline
+                sendMessage(); // Normal send
+            }
+        });
+        userInput.addEventListener('input', adjustTextareaHeight); // Adjust height on input
+        darkModeToggle.addEventListener('click', () => toggleDarkMode()); // Toggle theme
+        downloadChatButton.addEventListener('click', downloadChat); // Download history
+        clearChatButton.addEventListener('click', clearChat); // Clear chat
+        modelSelect.addEventListener('change', () => {
+            try {
+                localStorage.setItem('selectedModel', modelSelect.value);
+                console.log(`Model changed to: ${modelSelect.value}`);
+            } catch (e) {
+                 console.warn("Could not save selected model to localStorage:", e);
+            }
+        });
+        chatOutput.addEventListener('scroll', handleScroll); // Show/hide scroll button
+        scrollToBottomButton.addEventListener('click', () => scrollToBottom('smooth')); // Scroll action
 
         // --- Initialization ---
-        const savedModel = localStorage.getItem('selectedModel'); if (savedModel) { const isValidOption = Array.from(modelSelect.options).some(opt => opt.value === savedModel); if (isValidOption) modelSelect.value = savedModel; else localStorage.removeItem('selectedModel'); }
-        const savedDarkMode = localStorage.getItem('darkMode'); if (savedDarkMode === 'enabled') toggleDarkMode('dark'); else toggleDarkMode('light');
-        handleUrlParameter(); // This will call sendMessage with skipResponse=true if needed
-        adjustTextareaHeight(); scrollToBottom('auto');
-        console.log("Enhanced Chat interface V2.4 (Cool Loading Animation) initialized.");
+        function initializeChat() {
+            console.log("Initializing Chat Interface...");
+             // Restore preferences
+            try {
+                const savedModel = localStorage.getItem('selectedModel');
+                if (savedModel && Array.from(modelSelect.options).some(opt => opt.value === savedModel)) {
+                    modelSelect.value = savedModel;
+                }
+                const savedDarkMode = localStorage.getItem('darkMode');
+                toggleDarkMode(savedDarkMode === 'enabled' ? 'dark' : 'light'); // Set initial theme
+            } catch (e) {
+                 console.warn("Could not restore preferences from localStorage:", e);
+                 toggleDarkMode('light'); // Default to light mode on error
+            }
+
+            handleUrlParameter(); // Process URL parameter if present (sends message with skipResponse=true)
+            adjustTextareaHeight(); // Initial height adjustment
+            scrollToBottom('auto'); // Go to bottom initially without smooth scroll
+            enableInput(); // Make sure input is enabled on load, unless handleUrlParameter disables it briefly
+            console.log("Enhanced Chat interface V2.5 (Robust Init & Loading) initialized.");
+        }
+
+        // Start initialization process
+        initializeChat();
 
     });
 </script>
 
+<!--
 <?php
+/*
+// קוד ה-PHP הוכנס להערה כיוון שאינו קשור ישירות לפונקציונליות הצ'אט בצד הלקוח
+// והוא עלול להאט את זמן הטעינה הראשוני או לגרום לבלבול.
+// אם יש צורך בלוג כלשהו בצד השרת, יש ליישם אותו בצורה אסינכרונית או בקריאה נפרדת
+// כדי לא להשפיע על חווית המשתמש של הצ'אט.
 
 // URL של ה-API
 $url = 'https://api.resend.com/emails';
@@ -502,29 +1089,26 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+// הגדרת Timeout קצר כדי למנוע תקיעה ארוכה במקרה של בעיה ברשת
+curl_setopt($ch, CURLOPT_TIMEOUT, 5); // 5 שניות Timeout
 
 // שליחת הבקשה והחזרת התגובה
 $response = curl_exec($ch);
 
 // בדיקה אם יש שגיאות ב-cURL
 if(curl_errno($ch)) {
-    echo 'cURL error: ' . curl_error($ch);
+    // אפשר לכתוב ללוג שגיאות בצד השרת במקום להדפיס למשתמש
+    error_log('cURL error sending email: ' . curl_error($ch));
 } else {
-
+    // הצלחה - אפשר לכתוב ללוג הצלחה
+    error_log('Email sent successfully via Resend API. Response: ' . $response);
 }
 
 // סגירת החיבור ל-cURL
 curl_close($ch);
-
+*/
 ?>
-
-
-
-
-
-
-
-
+-->
 
 </body>
 </html>
