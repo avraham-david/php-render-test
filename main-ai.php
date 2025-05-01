@@ -15,7 +15,7 @@ header("Access-Control-Allow-Headers: Content-Type");
 
 $apiKey = 'AIzaSyAQeJqpeH-VYT5bt0tDBs8z3k8NMIcYey0'; 
 //$systemInstruction = "";
-$systemInstruction = "דבר תמיד בעברית, הגיב עם סמיילים 🙂🎉 וענה בצורה מעניינת ככל האפשר.";
+$systemInstruction = "דבר תמיד בעברית, הגיב עם סמיילים 🙂🎉 וענה בצורה מעניינת ככל האפשר.אך עדיין אל תרחיב יותר מדי. תהיה ענייני";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
