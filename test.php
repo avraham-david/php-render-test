@@ -3,1437 +3,1061 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>צ'אט AI אולטימטיבי V4.0+</title>
-    <!-- Syntax Highlighting CSS (Choose a theme) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" media="(prefers-color-scheme: dark)">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)">
-    <!-- Font Awesome for Icons (Optional but used in examples) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- KaTeX for Math Rendering (Optional) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-
+    <title>צ'אט AI משופר</title>
     <style>
-        /* --- V3.0 Variables + NEW --- */
+        /* --- משתני עיצוב גלובליים --- */
         :root {
-            /* Existing variables... */
             --font-main: Assistant, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             --font-code: 'Consolas', 'Monaco', 'Courier New', monospace;
             --border-radius-small: 4px;
             --border-radius-medium: 8px;
-            --border-radius-large: 18px;
-            --border-radius-avatar: 50%;
+            --border-radius-large: 18px; /* מעוגל יותר */
+            --border-radius-round: 50%;
             --transition-fast: 0.15s ease;
             --transition-medium: 0.3s ease;
             --transition-slow: 0.5s ease;
-            --avatar-size: 30px;
-            --message-spacing: 10px;
-            --message-spacing-grouped: 3px;
-            --message-horizontal-gap: 10px;
-
-            /* NEW Variables */
-            --header-height: 59px; /* Approximate */
-            --input-area-min-height: 64px; /* Includes padding */
-            --pinned-message-height: 40px;
-            --reply-preview-height: 50px; /* NEW */
-            --toolbar-height: 35px;
-            --accent-color-light: #008069; /* Default light accent */
-            --accent-color-dark: #00a884; /* Default dark accent */
-            --accent-color: var(--accent-color-light); /* Default */
-            --lm-accent-color: var(--accent-color-light);
-            --dm-accent-color: var(--accent-color-dark);
-            --lm-reply-bg: rgba(0, 0, 0, 0.05);
-            --dm-reply-bg: rgba(255, 255, 255, 0.08);
-            --lm-modal-bg: rgba(255, 255, 255, 0.95);
-            --dm-modal-bg: rgba(30, 40, 50, 0.95);
-            --lm-modal-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            --dm-modal-shadow: 0 5px 20px rgba(0,0,0,0.4);
-            --lm-search-highlight-bg: #fff3cd;
-            --dm-search-highlight-bg: #6a4d00;
-            --lm-pinned-bg: #fffbeb; --lm-pinned-border: #ffeccc;
-            --dm-pinned-bg: #2c3e50; --dm-pinned-border: #34495e;
-            --lm-toolbar-bg: #e9edef; --lm-toolbar-button-hover: #d1d7db;
-            --dm-toolbar-bg: #2a3942; --dm-toolbar-button-hover: #374151;
-            --lm-tooltip-bg: #333; --lm-tooltip-text: #fff;
-            --dm-tooltip-bg: #ddd; --dm-tooltip-text: #111;
-            --lm-error-msg-bg: #fff0f0; --lm-error-msg-border: #ffcccc; --lm-error-msg-text: #c00;
-            --dm-error-msg-bg: #4d1f1f; --dm-error-msg-border: #662d2d; --dm-error-msg-text: #ffdddd;
-            --lm-reply-context-bg: rgba(0, 128, 105, 0.08); /* Light reply context bg */
-            --dm-reply-context-bg: rgba(0, 168, 132, 0.15); /* Dark reply context bg */
-            --lm-action-spinner-color: var(--lm-accent-color);
-            --dm-action-spinner-color: var(--dm-accent-color);
-            --lm-skeleton-bg: #e0e0e0;
-            --dm-skeleton-bg: #374151;
-
+            --avatar-size: 32px; /* גודל אווטאר */
 
             /* --- Light Mode --- */
-            --lm-bg-default: #e5ddd5; --lm-chat-bg: #ffffff; --lm-header-bg: #00a884; --lm-header-bg-gradient: linear-gradient(to bottom, #00b09b, #00a884); --lm-header-text: #ffffff; --lm-header-icon-fill: #ffffff; --lm-user-msg-bg: #dcf8c6; --lm-ai-msg-bg: #ffffff; --lm-msg-text: #111b21; --lm-avatar-user-bg: #adff2f; --lm-avatar-ai-bg: #b0e0e6; --lm-input-area-bg: #f0f2f5; --lm-input-bg: #ffffff; --lm-input-text: #111b21; --lm-input-border: #e0e0e0; --lm-input-border-focus: var(--lm-accent-color); --lm-button-bg: var(--lm-accent-color); --lm-button-hover-bg: color-mix(in srgb, var(--lm-accent-color) 85%, #000); --lm-button-active-bg: color-mix(in srgb, var(--lm-accent-color) 70%, #000); --lm-button-icon-fill: #ffffff; --lm-timestamp-color: rgba(17, 27, 33, 0.6); --lm-model-indicator-color: rgba(17, 27, 33, 0.5); --lm-border-color: #e9edef; --lm-icon-button-hover-bg: rgba(0, 0, 0, 0.07); --lm-msg-action-icon-fill: rgba(0, 0, 0, 0.5); --lm-msg-action-icon-hover-fill: #000000; --lm-msg-action-icon-hover-bg: rgba(0, 0, 0, 0.09); --lm-scrollbar-thumb: #b0b0b0; --lm-scrollbar-track: #f5f5f5; --lm-link-color: #007bff; --lm-code-bg: #f8f9fa; --lm-code-text: #212529; --lm-code-border: #dee2e6; --lm-code-copy-btn-bg: rgba(0, 0, 0, 0.05); --lm-code-copy-btn-hover-bg: rgba(0, 0, 0, 0.1); --lm-code-copy-btn-copied-bg: var(--lm-button-bg); --lm-code-copy-btn-copied-text: #ffffff; --lm-loading-spinner-color1: var(--lm-accent-color); --lm-loading-spinner-color2: #dcf8c6; --lm-shadow-light: 0 1px 1px rgba(0, 0, 0, 0.06); --lm-shadow-medium: 0 2px 4px rgba(0, 0, 0, 0.08); --lm-scroll-btn-bg: rgba(255, 255, 255, 0.9); --lm-scroll-btn-icon: #54656f; --lm-scroll-btn-hover-bg: #ffffff; --lm-date-separator-bg: #e9e9e9; --lm-date-separator-text: #54656f; --lm-focus-outline: var(--lm-accent-color);
+            --lm-bg-default: #e5ddd5;
+            --lm-chat-bg: #ffffff;
+            --lm-header-bg: #00a884;
+            --lm-header-text: #ffffff;
+            --lm-header-icon-fill: #ffffff;
+            --lm-user-msg-bg: #dcf8c6;
+            --lm-ai-msg-bg: #ffffff;
+            --lm-msg-text: #111b21; /* טקסט הודעה מעט כהה יותר */
+            --lm-input-area-bg: #f0f2f5;
+            --lm-input-bg: #ffffff;
+            --lm-input-text: #111b21;
+            --lm-input-border: #e0e0e0;
+            --lm-input-border-focus: var(--lm-button-bg);
+            --lm-button-bg: #008069;
+            --lm-button-hover-bg: #00a884;
+            --lm-button-active-bg: #005c4b;
+            --lm-button-icon-fill: #ffffff;
+            --lm-timestamp-color: rgba(17, 27, 33, 0.6); /* מעט פחות שקוף */
+            --lm-model-indicator-color: rgba(17, 27, 33, 0.5);
+            --lm-border-color: #e9edef;
+            --lm-icon-button-hover-bg: rgba(0, 0, 0, 0.07);
+            --lm-msg-action-icon-fill: rgba(0, 0, 0, 0.55); /* טיפה כהה יותר */
+            --lm-msg-action-icon-hover-fill: #000000;
+            --lm-msg-action-icon-hover-bg: rgba(0, 0, 0, 0.09);
+            --lm-scrollbar-thumb: #b0b0b0;
+            --lm-scrollbar-track: transparent; /* רקע פס גלילה שקוף */
+            --lm-link-color: #007bff;
+            --lm-code-bg: #f8f9fa;
+            --lm-code-text: #212529;
+            --lm-code-border: #dee2e6;
+            --lm-code-copy-btn-bg: rgba(0, 0, 0, 0.05);
+            --lm-code-copy-btn-hover-bg: rgba(0, 0, 0, 0.1);
+            --lm-code-copy-btn-copied-bg: var(--lm-button-bg);
+            --lm-code-copy-btn-copied-text: #ffffff;
+            --lm-loading-spinner-color1: #00a884;
+            --lm-loading-spinner-color2: #dcf8c6;
+            --lm-shadow-light: 0 1px 1px rgba(0, 0, 0, 0.05); /* צל עדין יותר */
+            --lm-shadow-medium: 0 2px 4px rgba(0, 0, 0, 0.08);
+            --lm-scroll-btn-bg: rgba(255, 255, 255, 0.9);
+            --lm-scroll-btn-icon: #54656f;
+            --lm-scroll-btn-hover-bg: #ffffff;
+            --lm-popover-bg: #ffffff;
+            --lm-popover-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --lm-popover-border: #e0e0e0;
+            --lm-menu-item-hover-bg: #f0f0f0;
+            --lm-counter-bg: #f44336;
+            --lm-counter-text: #ffffff;
+            --lm-avatar-bg: #e0e0e0;
+            --lm-whatsapp-bg-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            --lm-attach-icon-fill: #54656f;
 
             /* --- Dark Mode --- */
-            --dm-bg-default: #0f1a21; --dm-chat-bg: #0b141a; --dm-header-bg: #202c33; --dm-header-bg-gradient: linear-gradient(to bottom, #2a3942, #202c33); --dm-header-text: #e9edef; --dm-header-icon-fill: #aebac1; --dm-user-msg-bg: #005c4b; --dm-ai-msg-bg: #202c33; --dm-msg-text: #e9edef; --dm-avatar-user-bg: #008069; --dm-avatar-ai-bg: #345665; --dm-input-area-bg: #1f2c34; --dm-input-bg: #2a3942; --dm-input-text: #e9edef; --dm-input-border: #374151; --dm-input-border-focus: var(--dm-accent-color); --dm-button-bg: var(--dm-accent-color); --dm-button-hover-bg: color-mix(in srgb, var(--dm-accent-color) 85%, #fff); --dm-button-active-bg: color-mix(in srgb, var(--dm-accent-color) 70%, #fff); --dm-button-icon-fill: #111b21; --dm-timestamp-color: rgba(233, 237, 239, 0.65); --dm-model-indicator-color: rgba(233, 237, 239, 0.55); --dm-border-color: #2a3942; --dm-icon-button-hover-bg: rgba(255, 255, 255, 0.08); --dm-msg-action-icon-fill: rgba(255, 255, 255, 0.6); --dm-msg-action-icon-hover-fill: #ffffff; --dm-msg-action-icon-hover-bg: rgba(255, 255, 255, 0.1); --dm-scrollbar-thumb: #4a4a4a; --dm-scrollbar-track: #1a242b; --dm-link-color: #58a6ff; --dm-code-bg: #182128; --dm-code-text: #d1d5db; --dm-code-border: #374151; --dm-code-copy-btn-bg: rgba(255, 255, 255, 0.1); --dm-code-copy-btn-hover-bg: rgba(255, 255, 255, 0.15); --dm-code-copy-btn-copied-bg: var(--dm-button-bg); --dm-code-copy-btn-copied-text: #111b21; --dm-loading-spinner-color1: var(--dm-accent-color); --dm-loading-spinner-color2: #005c4b; --dm-shadow-light: 0 1px 1px rgba(0, 0, 0, 0.25); --dm-shadow-medium: 0 2px 5px rgba(0, 0, 0, 0.3); --dm-scroll-btn-bg: rgba(42, 57, 66, 0.9); --dm-scroll-btn-icon: #aebac1; --dm-scroll-btn-hover-bg: #2a3942; --dm-date-separator-bg: #2a3942; --dm-date-separator-text: #aebac1; --dm-focus-outline: var(--dm-accent-color);
+            --dm-bg-default: #111b21;
+            --dm-chat-bg: #0b141a;
+            --dm-header-bg: #202c33;
+            --dm-header-text: #e9edef;
+            --dm-header-icon-fill: #aebac1;
+            --dm-user-msg-bg: #005c4b;
+            --dm-ai-msg-bg: #202c33;
+            --dm-msg-text: #e9edef;
+            --dm-input-area-bg: #1f2c34;
+            --dm-input-bg: #2a3942;
+            --dm-input-text: #e9edef;
+            --dm-input-border: #374151;
+            --dm-input-border-focus: var(--dm-button-bg);
+            --dm-button-bg: #00a884;
+            --dm-button-hover-bg: #008069;
+            --dm-button-active-bg: #00a884;
+            --dm-button-icon-fill: #111b21;
+            --dm-timestamp-color: rgba(233, 237, 239, 0.65);
+            --dm-model-indicator-color: rgba(233, 237, 239, 0.55);
+            --dm-border-color: #2a3942;
+            --dm-icon-button-hover-bg: rgba(255, 255, 255, 0.08);
+            --dm-msg-action-icon-fill: rgba(255, 255, 255, 0.65);
+            --dm-msg-action-icon-hover-fill: #ffffff;
+            --dm-msg-action-icon-hover-bg: rgba(255, 255, 255, 0.1);
+            --dm-scrollbar-thumb: #4a4a4a;
+            --dm-scrollbar-track: transparent;
+            --dm-link-color: #58a6ff;
+            --dm-code-bg: #182128;
+            --dm-code-text: #d1d5db;
+            --dm-code-border: #374151;
+            --dm-code-copy-btn-bg: rgba(255, 255, 255, 0.1);
+            --dm-code-copy-btn-hover-bg: rgba(255, 255, 255, 0.15);
+            --dm-code-copy-btn-copied-bg: var(--dm-button-bg);
+            --dm-code-copy-btn-copied-text: #111b21;
+            --dm-loading-spinner-color1: #25d366;
+            --dm-loading-spinner-color2: #005c4b;
+            --dm-shadow-light: 0 1px 1px rgba(0, 0, 0, 0.3);
+            --dm-shadow-medium: 0 3px 6px rgba(0, 0, 0, 0.4);
+            --dm-scroll-btn-bg: rgba(42, 57, 66, 0.9);
+            --dm-scroll-btn-icon: #aebac1;
+            --dm-scroll-btn-hover-bg: #2a3942;
+            --dm-popover-bg: #2a3942;
+            --dm-popover-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --dm-popover-border: #374151;
+            --dm-menu-item-hover-bg: #374151;
+            --dm-counter-bg: #d32f2f; /* אדום קצת פחות בוהק */
+            --dm-counter-text: #ffffff;
+            --dm-avatar-bg: #374151;
+            /* דפוס רקע עדין למצב כהה */
+            --dm-whatsapp-bg-image: radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px), radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px);
+            --dm-whatsapp-bg-size: 30px 30px;
+            --dm-whatsapp-bg-pos: 0 0, 15px 15px;
+            --dm-attach-icon-fill: #aebac1;
 
-
-             /* Default Assign Light */
-             --bg-default: var(--lm-bg-default); --chat-bg: var(--lm-chat-bg); /* ... other light vars ... */
-             --accent-color: var(--lm-accent-color); --reply-bg: var(--lm-reply-bg);
-             --modal-bg: var(--lm-modal-bg); --modal-shadow: var(--lm-modal-shadow);
-             --pinned-bg: var(--lm-pinned-bg); --pinned-border: var(--lm-pinned-border);
-             --toolbar-bg: var(--lm-toolbar-bg); --toolbar-button-hover: var(--lm-toolbar-button-hover);
-             --tooltip-bg: var(--lm-tooltip-bg); --tooltip-text: var(--lm-tooltip-text);
-             --error-msg-bg: var(--lm-error-msg-bg); --error-msg-border: var(--lm-error-msg-border);
-             --error-msg-text: var(--lm-error-msg-text);
-             --search-highlight-bg: var(--lm-search-highlight-bg);
-             --reply-context-bg: var(--lm-reply-context-bg);
-             --action-spinner-color: var(--lm-action-spinner-color);
-             --skeleton-bg: var(--lm-skeleton-bg);
-             /* Assign all other LM vars */
-             --header-bg: var(--lm-header-bg); --header-bg-image: var(--lm-header-bg-gradient); --header-text: var(--lm-header-text); --header-icon-fill: var(--lm-header-icon-fill); --user-msg-bg: var(--lm-user-msg-bg); --ai-msg-bg: var(--lm-ai-msg-bg); --msg-text: var(--lm-msg-text); --avatar-user-bg: var(--lm-avatar-user-bg); --avatar-ai-bg: var(--lm-avatar-ai-bg); --input-area-bg: var(--lm-input-area-bg); --input-bg: var(--lm-input-bg); --input-text: var(--lm-input-text); --input-border: var(--lm-input-border); --input-border-focus: var(--lm-input-border-focus); --button-bg: var(--lm-button-bg); --button-hover-bg: var(--lm-button-hover-bg); --button-active-bg: var(--lm-button-active-bg); --button-icon-fill: var(--lm-button-icon-fill); --timestamp-color: var(--lm-timestamp-color); --model-indicator-color: var(--lm-model-indicator-color); --border-color: var(--lm-border-color); --icon-button-hover-bg: var(--lm-icon-button-hover-bg); --msg-action-icon-fill: var(--lm-msg-action-icon-fill); --msg-action-icon-hover-fill: var(--lm-msg-action-icon-hover-fill); --msg-action-icon-hover-bg: var(--lm-msg-action-icon-hover-bg); --scrollbar-thumb: var(--lm-scrollbar-thumb); --scrollbar-track: var(--lm-scrollbar-track); --link-color: var(--lm-link-color); --code-bg: var(--lm-code-bg); --code-text: var(--lm-code-text); --code-border: var(--lm-code-border); --code-copy-btn-bg: var(--lm-code-copy-btn-bg); --code-copy-btn-hover-bg: var(--lm-code-copy-btn-hover-bg); --code-copy-btn-copied-bg: var(--lm-code-copy-btn-copied-bg); --code-copy-btn-copied-text: var(--lm-code-copy-btn-copied-text); --loading-spinner-color1: var(--lm-loading-spinner-color1); --loading-spinner-color2: var(--lm-loading-spinner-color2); --shadow-light: var(--lm-shadow-light); --shadow-medium: var(--lm-shadow-medium); --scroll-btn-bg: var(--lm-scroll-btn-bg); --scroll-btn-icon: var(--lm-scroll-btn-icon); --scroll-btn-hover-bg: var(--lm-scroll-btn-hover-bg); --date-separator-bg: var(--lm-date-separator-bg); --date-separator-text: var(--lm-date-separator-text); --focus-outline-color: var(--lm-focus-outline);
-             --select-bg: rgba(255, 255, 255, 0.15); --select-border: rgba(255, 255, 255, 0.3); --select-text: var(--lm-header-text); --select-arrow: var(--lm-header-icon-fill); --stop-button-fill: var(--lm-msg-action-icon-fill); --stop-button-hover-fill: var(--lm-msg-action-icon-hover-fill);
-
+            /* --- Default Theme (Light) --- */
+             --bg-default: var(--lm-bg-default); --chat-bg: var(--lm-chat-bg); --header-bg: var(--lm-header-bg); --header-text: var(--lm-header-text); --header-icon-fill: var(--lm-header-icon-fill); --user-msg-bg: var(--lm-user-msg-bg); --ai-msg-bg: var(--lm-ai-msg-bg); --msg-text: var(--lm-msg-text); --input-area-bg: var(--lm-input-area-bg); --input-bg: var(--lm-input-bg); --input-text: var(--lm-input-text); --input-border: var(--lm-input-border); --input-border-focus: var(--lm-input-border-focus); --button-bg: var(--lm-button-bg); --button-hover-bg: var(--lm-button-hover-bg); --button-active-bg: var(--lm-button-active-bg); --button-icon-fill: var(--lm-button-icon-fill); --timestamp-color: var(--lm-timestamp-color); --model-indicator-color: var(--lm-model-indicator-color); --border-color: var(--lm-border-color); --icon-button-hover-bg: var(--lm-icon-button-hover-bg); --msg-action-icon-fill: var(--lm-msg-action-icon-fill); --msg-action-icon-hover-fill: var(--lm-msg-action-icon-hover-fill); --msg-action-icon-hover-bg: var(--lm-msg-action-icon-hover-bg); --scrollbar-thumb: var(--lm-scrollbar-thumb); --scrollbar-track: var(--lm-scrollbar-track); --link-color: var(--lm-link-color); --code-bg: var(--lm-code-bg); --code-text: var(--lm-code-text); --code-border: var(--lm-code-border); --code-copy-btn-bg: var(--lm-code-copy-btn-bg); --code-copy-btn-hover-bg: var(--lm-code-copy-btn-hover-bg); --code-copy-btn-copied-bg: var(--lm-code-copy-btn-copied-bg); --code-copy-btn-copied-text: var(--lm-code-copy-btn-copied-text); --loading-spinner-color1: var(--lm-loading-spinner-color1); --loading-spinner-color2: var(--lm-loading-spinner-color2); --shadow-light: var(--lm-shadow-light); --shadow-medium: var(--lm-shadow-medium); --scroll-btn-bg: var(--lm-scroll-btn-bg); --scroll-btn-icon: var(--lm-scroll-btn-icon); --scroll-btn-hover-bg: var(--lm-scroll-btn-hover-bg); --popover-bg: var(--lm-popover-bg); --popover-shadow: var(--lm-popover-shadow); --popover-border: var(--lm-popover-border); --menu-item-hover-bg: var(--lm-menu-item-hover-bg); --counter-bg: var(--lm-counter-bg); --counter-text: var(--lm-counter-text); --avatar-bg: var(--lm-avatar-bg); --whatsapp-bg-image: var(--lm-whatsapp-bg-image); --attach-icon-fill: var(--lm-attach-icon-fill);
         }
         body.dark-mode {
-             /* Assign all DM vars */
-             --bg-default: var(--dm-bg-default); --chat-bg: var(--dm-chat-bg); /* ... other dark vars ... */
-             --accent-color: var(--dm-accent-color); --reply-bg: var(--dm-reply-bg);
-             --modal-bg: var(--dm-modal-bg); --modal-shadow: var(--dm-modal-shadow);
-             --pinned-bg: var(--dm-pinned-bg); --pinned-border: var(--dm-pinned-border);
-             --toolbar-bg: var(--dm-toolbar-bg); --toolbar-button-hover: var(--dm-toolbar-button-hover);
-             --tooltip-bg: var(--dm-tooltip-bg); --tooltip-text: var(--dm-tooltip-text);
-             --error-msg-bg: var(--dm-error-msg-bg); --error-msg-border: var(--dm-error-msg-border);
-             --error-msg-text: var(--dm-error-msg-text);
-             --search-highlight-bg: var(--dm-search-highlight-bg);
-             --reply-context-bg: var(--dm-reply-context-bg);
-             --action-spinner-color: var(--dm-action-spinner-color);
-             --skeleton-bg: var(--dm-skeleton-bg);
-             /* Assign all other DM vars */
-             --header-bg: var(--dm-header-bg); --header-bg-image: var(--dm-header-bg-gradient); --header-text: var(--dm-header-text); --header-icon-fill: var(--dm-header-icon-fill); --user-msg-bg: var(--dm-user-msg-bg); --ai-msg-bg: var(--dm-ai-msg-bg); --msg-text: var(--dm-msg-text); --avatar-user-bg: var(--dm-avatar-user-bg); --avatar-ai-bg: var(--dm-avatar-ai-bg); --input-area-bg: var(--dm-input-area-bg); --input-bg: var(--dm-input-bg); --input-text: var(--dm-input-text); --input-border: var(--dm-input-border); --input-border-focus: var(--dm-input-border-focus); --button-bg: var(--dm-button-bg); --button-hover-bg: var(--dm-button-hover-bg); --button-active-bg: var(--dm-button-active-bg); --button-icon-fill: var(--dm-button-icon-fill); --timestamp-color: var(--dm-timestamp-color); --model-indicator-color: var(--dm-model-indicator-color); --border-color: var(--dm-border-color); --icon-button-hover-bg: var(--dm-icon-button-hover-bg); --msg-action-icon-fill: var(--dm-msg-action-icon-fill); --msg-action-icon-hover-fill: var(--dm-msg-action-icon-hover-fill); --msg-action-icon-hover-bg: var(--dm-msg-action-icon-hover-bg); --scrollbar-thumb: var(--dm-scrollbar-thumb); --scrollbar-track: var(--dm-scrollbar-track); --link-color: var(--dm-link-color); --code-bg: var(--dm-code-bg); --code-text: var(--dm-code-text); --code-border: var(--dm-code-border); --code-copy-btn-bg: var(--dm-code-copy-btn-bg); --code-copy-btn-hover-bg: var(--dm-code-copy-btn-hover-bg); --code-copy-btn-copied-bg: var(--dm-code-copy-btn-copied-bg); --code-copy-btn-copied-text: var(--dm-code-copy-btn-copied-text); --loading-spinner-color1: var(--dm-loading-spinner-color1); --loading-spinner-color2: var(--dm-loading-spinner-color2); --shadow-light: var(--dm-shadow-light); --shadow-medium: var(--dm-shadow-medium); --scroll-btn-bg: var(--dm-scroll-btn-bg); --scroll-btn-icon: var(--dm-scroll-btn-icon); --scroll-btn-hover-bg: var(--dm-scroll-btn-hover-bg); --date-separator-bg: var(--dm-date-separator-bg); --date-separator-text: var(--dm-date-separator-text); --focus-outline-color: var(--dm-focus-outline);
-             --select-bg: rgba(255, 255, 255, 0.08); --select-border: rgba(255, 255, 255, 0.15); --select-text: var(--dm-header-text); --select-arrow: var(--dm-header-icon-fill); --stop-button-fill: var(--dm-msg-action-icon-fill); --stop-button-hover-fill: var(--dm-msg-action-icon-hover-fill);
+             --bg-default: var(--dm-bg-default); --chat-bg: var(--dm-chat-bg); --header-bg: var(--dm-header-bg); --header-text: var(--dm-header-text); --header-icon-fill: var(--dm-header-icon-fill); --user-msg-bg: var(--dm-user-msg-bg); --ai-msg-bg: var(--dm-ai-msg-bg); --msg-text: var(--dm-msg-text); --input-area-bg: var(--dm-input-area-bg); --input-bg: var(--dm-input-bg); --input-text: var(--dm-input-text); --input-border: var(--dm-input-border); --input-border-focus: var(--dm-input-border-focus); --button-bg: var(--dm-button-bg); --button-hover-bg: var(--dm-button-hover-bg); --button-active-bg: var(--dm-button-active-bg); --button-icon-fill: var(--dm-button-icon-fill); --timestamp-color: var(--dm-timestamp-color); --model-indicator-color: var(--dm-model-indicator-color); --border-color: var(--dm-border-color); --icon-button-hover-bg: var(--dm-icon-button-hover-bg); --msg-action-icon-fill: var(--dm-msg-action-icon-fill); --msg-action-icon-hover-fill: var(--dm-msg-action-icon-hover-fill); --msg-action-icon-hover-bg: var(--dm-msg-action-icon-hover-bg); --scrollbar-thumb: var(--dm-scrollbar-thumb); --scrollbar-track: var(--dm-scrollbar-track); --link-color: var(--dm-link-color); --code-bg: var(--dm-code-bg); --code-text: var(--dm-code-text); --code-border: var(--dm-code-border); --code-copy-btn-bg: var(--dm-code-copy-btn-bg); --code-copy-btn-hover-bg: var(--dm-code-copy-btn-hover-bg); --code-copy-btn-copied-bg: var(--dm-code-copy-btn-copied-bg); --code-copy-btn-copied-text: var(--dm-code-copy-btn-copied-text); --loading-spinner-color1: var(--dm-loading-spinner-color1); --loading-spinner-color2: var(--dm-loading-spinner-color2); --shadow-light: var(--dm-shadow-light); --shadow-medium: var(--dm-shadow-medium); --scroll-btn-bg: var(--dm-scroll-btn-bg); --scroll-btn-icon: var(--dm-scroll-btn-icon); --scroll-btn-hover-bg: var(--dm-scroll-btn-hover-bg); --popover-bg: var(--dm-popover-bg); --popover-shadow: var(--dm-popover-shadow); --popover-border: var(--dm-popover-border); --menu-item-hover-bg: var(--dm-menu-item-hover-bg); --counter-bg: var(--dm-counter-bg); --counter-text: var(--dm-counter-text); --avatar-bg: var(--dm-avatar-bg); --whatsapp-bg-image: var(--dm-whatsapp-bg-image); --whatsapp-bg-size: var(--dm-whatsapp-bg-size); --whatsapp-bg-pos: var(--dm-whatsapp-bg-pos); --attach-icon-fill: var(--dm-attach-icon-fill);
         }
 
-        /* --- Base & Layout --- */
+        /* --- Base Styles --- */
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
-        body { font-family: var(--font-main); background-color: var(--bg-default); color: var(--msg-text); display: flex; flex-direction: column; transition: background-color var(--transition-medium), color var(--transition-medium); font-size: 14.5px; }
-        * { box-sizing: border-box; scroll-behavior: smooth; /* Base smooth scroll */ }
-        #chat-container { width: 100%; max-width: 950px; /* Even wider */ height: calc(100vh - 20px); margin: 10px auto; background-color: var(--chat-bg); display: flex; flex-direction: column; overflow: hidden; position: relative; transition: background-color var(--transition-medium), box-shadow var(--transition-medium); box-shadow: var(--shadow-medium); border-radius: var(--border-radius-medium); }
+        body { font-family: var(--font-main); background-color: var(--bg-default); color: var(--msg-text); display: flex; flex-direction: column; transition: background-color var(--transition-medium), color var(--transition-medium); font-size: 14.5px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        * { box-sizing: border-box; }
+        button, select, textarea { font-family: inherit; }
+        *:focus-visible { outline: 2px solid var(--button-bg); outline-offset: 2px; border-radius: var(--border-radius-small); }
+        textarea:focus-visible { outline: none; } /* Handled by border/shadow */
+        select:focus-visible { outline-offset: 1px; }
 
-        /* Compact Mode */
-        body.compact-mode { font-size: 13.5px; }
-        body.compact-mode #chat-container { max-width: 1100px; }
-        body.compact-mode .message { padding: 6px 12px; line-height: 1.45; }
-        body.compact-mode .message-wrapper { --message-spacing: 6px; --message-spacing-grouped: 2px; }
-        body.compact-mode .avatar-placeholder { --avatar-size: 26px; }
-        body.compact-mode #chat-input-area { padding: 8px 12px; --input-area-min-height: 56px; }
-        body.compact-mode #user-input { padding: 9px 15px; min-height: 38px; }
-        body.compact-mode #send-button { width: 38px; height: 38px; }
-        body.compact-mode #send-button::before { width: 20px; height: 20px; }
-        body.compact-mode #pinned-message { height: 35px; font-size: 12px; }
-        body.compact-mode #reply-preview { height: 45px; font-size: 12px; }
-        body.compact-mode #input-toolbar { height: 30px; }
-
-        /* Rounded Mode */
-        body.rounded-mode { --border-radius-medium: 16px; --border-radius-large: 24px; }
-        body.rounded-mode .avatar-placeholder { border-radius: 40%; } /* Squircle */
-        body.rounded-mode #user-input { border-radius: 22px; }
-        body.rounded-mode #send-button { border-radius: 22px; }
-        body.rounded-mode .date-separator { border-radius: 20px; }
-        body.rounded-mode #pinned-message { border-radius: var(--border-radius-medium); margin: 5px; height: calc(var(--pinned-message-height) - 10px);}
-        body.rounded-mode #reply-preview { border-top-left-radius: var(--border-radius-medium); border-top-right-radius: var(--border-radius-medium); }
-        body.rounded-mode .modal-content { border-radius: var(--border-radius-large); }
-
+        /* --- Chat Container --- */
+        #chat-container { width: 100%; max-width: 900px; /* קצת יותר רחב */ height: calc(100vh - 20px); margin: 10px auto; background-color: var(--chat-bg); display: flex; flex-direction: column; overflow: hidden; position: relative; transition: background-color var(--transition-medium), box-shadow var(--transition-medium); box-shadow: var(--shadow-medium); border-radius: var(--border-radius-medium); }
 
         /* --- Header --- */
-        #chat-header {
-            display: flex; /* Ensure flex for centering */
-            align-items: center; /* Vertical centering */
-            height: var(--header-height);
-            padding: 0 16px; /* Adjusted padding */
-            background-color: var(--header-bg);
-            background-image: var(--header-bg-image);
-            color: var(--header-text);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            z-index: 10;
-            position: relative;
-            flex-shrink: 0;
-            border-top-left-radius: var(--border-radius-medium); border-top-right-radius: var(--border-radius-medium);
-             transition: background-color var(--transition-medium), color var(--transition-medium), background-image var(--transition-medium), opacity var(--transition-fast);
-        }
-        #chat-header.model-changing { opacity: 0.8; }
-        #chat-header h1 { margin: 0; font-size: 18px; font-weight: 600; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
-        #chat-header h1:hover { opacity: 0.8; }
-        #chat-header h1:focus { outline: 1px dashed var(--header-text); } /* Focus style for editing */
-        .header-controls { display: flex; align-items: center; gap: 6px; }
-        .icon-button { background: none; border: none; padding: 8px; cursor: pointer; border-radius: var(--border-radius-round); display: flex; align-items: center; justify-content: center; transition: background-color var(--transition-fast), transform var(--transition-fast); color: var(--header-icon-fill); } /* Set color */
-        .icon-button:hover { background-color: var(--icon-button-hover-bg); transform: scale(1.05); }
-        .icon-button:active { transform: scale(0.92); }
-        .icon-button svg, .icon-button i { width: 22px; height: 22px; fill: var(--header-icon-fill); font-size: 20px; /* For FontAwesome */ }
-        #model-select { background-color: var(--select-bg); color: var(--select-text); border: 1px solid var(--select-border); border-radius: var(--border-radius-large); padding: 6px 28px 6px 12px; font-size: 13px; cursor: pointer; outline: none; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="%23ffffff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 18px; transition: background-color var(--transition-fast), border-color var(--transition-fast), background-image var(--transition-medium); }
-        #model-select:hover { background-color: color-mix(in srgb, var(--select-bg) 80%, #000000 20%); }
-        #model-select option { background-color: var(--chat-bg); color: var(--msg-text); }
-        body.dark-mode #model-select option { background-color: var(--input-bg); color: var(--msg-text); }
+        #chat-header { background-color: var(--header-bg); color: var(--header-text); padding: 10px 16px; display: flex; align-items: center; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); z-index: 10; transition: background-color var(--transition-medium), color var(--transition-medium); gap: 12px; flex-shrink: 0; border-top-left-radius: var(--border-radius-medium); border-top-right-radius: var(--border-radius-medium); position: relative; /* For popover positioning */ }
+        .header-avatar { width: var(--avatar-size); height: var(--avatar-size); border-radius: var(--border-radius-round); background-color: var(--avatar-bg); /* Placeholder */ flex-shrink: 0; /* Add an actual AI icon later */ background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-11h2v2h-2v-2zm0 4h2v4h-2v-4z"/></svg>'); background-size: 60%; background-position: center; background-repeat: no-repeat; }
+        #chat-header h1 { margin: 0; font-size: 17px; /* מעט קטן יותר */ font-weight: 500; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .header-controls { display: flex; align-items: center; gap: 6px; } /* Controls within the popover */
+        .icon-button { background: none; border: none; padding: 8px; cursor: pointer; border-radius: var(--border-radius-round); display: flex; align-items: center; justify-content: center; transition: background-color var(--transition-fast), transform var(--transition-fast); }
+        .icon-button:hover { background-color: var(--icon-button-hover-bg); }
+        .icon-button:active { transform: scale(0.92); background-color: color-mix(in srgb, var(--icon-button-hover-bg) 70%, #000000); }
+        .icon-button svg { width: 24px; height: 24px; /* סטנדרטי יותר */ fill: var(--header-icon-fill); transition: fill var(--transition-medium); }
+        #settings-button svg { width: 22px; height: 22px; } /* גלגל שיניים מעט קטן */
 
-        /* NEW: Search Bar in Header */
-        .header-search-container { display: none; align-items: center; background-color: var(--chat-bg); padding: 5px 10px; position: absolute; top: 0; left: 0; right: 0; height: 100%; z-index: 11; animation: slideDownFadeIn 0.3s ease forwards; }
-        .header-search-container.active { display: flex; }
-        @keyframes slideDownFadeIn { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: translateY(0); } }
-        #chat-search-input { flex-grow: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--border-radius-large); background-color: var(--input-bg); color: var(--input-text); outline: none; font-size: 14px; }
-        #search-results-count { font-size: 12px; color: var(--timestamp-color); margin: 0 8px; white-space: nowrap; }
-        #search-prev-button, #search-next-button, #search-close-button { padding: 6px; color: var(--msg-action-icon-fill); } /* Use message action color */
-        #search-prev-button:hover, #search-next-button:hover, #search-close-button:hover { background-color: var(--icon-button-hover-bg); color: var(--msg-action-icon-hover-fill); }
-
-        /* --- Pinned Message Area --- */
-        #pinned-message {
-            display: none; flex-shrink: 0; height: var(--pinned-message-height);
-            background-color: var(--pinned-bg); border-bottom: 1px solid var(--pinned-border);
-            padding: 0 16px; align-items: center; font-size: 13px;
-            color: var(--msg-text); cursor: pointer; overflow: hidden;
-            position: relative;
-            transition: background-color var(--transition-medium), border-color var(--transition-medium), color var(--transition-medium), height var(--transition-fast);
-        }
-        #pinned-message.visible { display: flex; }
-        #pinned-message:hover { background-color: color-mix(in srgb, var(--pinned-bg) 90%, var(--border-color)); }
-        #pinned-message .pinned-icon { margin-left: 8px; font-size: 14px; color: var(--timestamp-color); flex-shrink: 0; }
-        #pinned-message .pinned-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; }
-        #unpin-button { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; padding: 5px; cursor: pointer; border-radius: 50%; line-height: 0; display: flex; align-items: center; justify-content: center;}
-        #unpin-button:hover { background-color: rgba(0,0,0,0.1); }
-        #unpin-button svg, #unpin-button i { width: 16px; height: 16px; fill: var(--timestamp-color); color: var(--timestamp-color); }
-
+        /* --- Settings Popover --- */
+        #settings-popover {
+            position: absolute; top: calc(100% + 5px); /* מתחת לכותרת */ left: 10px; /* בצד שמאל */
+            background-color: var(--popover-bg); color: var(--msg-text); border: 1px solid var(--popover-border); border-radius: var(--border-radius-medium); box-shadow: var(--popover-shadow); padding: 12px; z-index: 100; min-width: 250px; opacity: 0; transform: translateY(-10px) scale(0.95); transition: opacity var(--transition-fast), transform var(--transition-fast); pointer-events: none; display: flex; flex-direction: column; gap: 15px; }
+        #settings-popover.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+        .popover-section { display: flex; flex-direction: column; gap: 8px; }
+        .popover-section label { font-size: 13px; font-weight: 500; color: var(--timestamp-color); margin-bottom: 2px; }
+        #settings-popover select { width: 100%; background-color: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border); border-radius: var(--border-radius-medium); padding: 8px 12px; font-size: 14px; cursor: pointer; outline: none; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="%23aebac1" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); background-repeat: no-repeat; background-position: left 8px center; background-size: 18px; direction: ltr; text-align: right; padding-left: 30px; /* Space for arrow */ }
+        #settings-popover select option { background-color: var(--popover-bg); color: var(--msg-text); direction: rtl; }
+        .popover-actions { display: flex; flex-direction: column; gap: 5px; margin-top: 5px; border-top: 1px solid var(--border-color); padding-top: 10px; }
+        .popover-actions button { background: none; border: none; color: var(--msg-text); padding: 8px 10px; text-align: right; border-radius: var(--border-radius-small); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: background-color var(--transition-fast); }
+        .popover-actions button:hover { background-color: var(--menu-item-hover-bg); }
+        .popover-actions button svg { width: 18px; height: 18px; fill: var(--msg-action-icon-fill); flex-shrink: 0; }
 
         /* --- Chat Output --- */
-        #chat-output {
-            flex-grow: 1; /* Takes remaining space */
-            padding: 15px 15px 5px 15px; overflow-y: auto;
-            display: flex; flex-direction: column; position: relative;
-            background-color: transparent; /* Base transparent */
-             /* Height calculation is handled by flex-grow */
-         }
-         /* Background images remain same */
-         body:not(.dark-mode) #chat-output { background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-repeat: repeat; }
-         body.dark-mode #chat-output { background-color: var(--chat-bg); }
-         /* Scrollbar styles remain same */
-        #chat-output::-webkit-scrollbar { width: 8px; }
+        #chat-output { flex-grow: 1; padding: 10px 15px 0 15px; /* פחות רווח תחתון */ overflow-y: auto; display: flex; flex-direction: column; scroll-behavior: auto; /* Let JS handle smooth scroll */ position: relative; background-color: transparent; background-image: var(--whatsapp-bg-image); background-size: var(--whatsapp-bg-size, auto); background-position: var(--whatsapp-bg-pos, center); background-repeat: repeat; }
+        #chat-output-inner { padding-bottom: 10px; /* Add padding at the bottom for spacing */ }
+
+        /* Scrollbar */
+        #chat-output::-webkit-scrollbar { width: 7px; }
         #chat-output::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 4px; }
-        #chat-output::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; border: 1px solid var(--scrollbar-track); }
+        #chat-output::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; border: 1px solid var(--chat-bg); }
         #chat-output::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--scrollbar-thumb) 70%, #000000); }
         #chat-output { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
 
-        /* --- Scroll Buttons --- */
-        #scroll-to-bottom, #scroll-to-top {
-            position: absolute; left: 20px;
-            background-color: var(--scroll-btn-bg); backdrop-filter: blur(5px);
-            border: 1px solid color-mix(in srgb, var(--border-color) 50%, transparent);
-            border-radius: var(--border-radius-round); width: 38px; height: 38px;
-            padding: 0; cursor: pointer; display: none; align-items: center; justify-content: center;
-            box-shadow: var(--shadow-medium); opacity: 0;
-            transition: opacity var(--transition-medium), transform var(--transition-medium), background-color var(--transition-fast);
-            z-index: 20; color: var(--scroll-btn-icon); /* Color for FontAwesome */
-        }
-        #scroll-to-bottom { bottom: 75px; transform: translateY(10px); }
-        #scroll-to-top { top: 70px; transform: translateY(-10px); } /* Position top */
-        #scroll-to-bottom.visible, #scroll-to-top.visible { display: flex; opacity: 0.85; transform: translateY(0); }
-        #scroll-to-bottom:hover, #scroll-to-top:hover { opacity: 1; background-color: var(--scroll-btn-hover-bg); transform: scale(1.05) translateY(0); }
-        #scroll-to-bottom svg, #scroll-to-top svg, #scroll-to-bottom i, #scroll-to-top i { width: 22px; height: 22px; fill: var(--scroll-btn-icon); font-size: 18px; }
-
-        /* Date Separator Styles remain same */
-        .date-separator { align-self: center; background-color: var(--date-separator-bg); color: var(--date-separator-text); padding: 3px 12px; border-radius: var(--border-radius-large); font-size: 11px; font-weight: 500; margin: 15px 0 10px 0; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: var(--shadow-light); opacity: 0; animation: fadeIn 0.5s ease forwards; }
-         @keyframes fadeIn { to { opacity: 1; } }
+        /* Scroll to Bottom Button */
+        #scroll-to-bottom { position: absolute; bottom: 80px; /* Higher due to input area */ left: 25px; background-color: var(--scroll-btn-bg); backdrop-filter: blur(5px); border: 1px solid color-mix(in srgb, var(--border-color) 50%, transparent); border-radius: var(--border-radius-round); width: 40px; height: 40px; padding: 0; cursor: pointer; display: none; /* Initially hidden */ align-items: center; justify-content: center; box-shadow: var(--shadow-medium); opacity: 0; transform: scale(0.8); transition: opacity var(--transition-medium), transform var(--transition-medium), background-color var(--transition-fast); z-index: 20; }
+        #scroll-to-bottom.visible { display: flex; opacity: 0.85; transform: scale(1); }
+        #scroll-to-bottom:hover { opacity: 1; background-color: var(--scroll-btn-hover-bg); transform: scale(1.05); }
+        #scroll-to-bottom svg { width: 22px; height: 22px; fill: var(--scroll-btn-icon); }
+        #new-message-counter { position: absolute; top: -3px; right: -3px; background-color: var(--counter-bg); color: var(--counter-text); border-radius: var(--border-radius-round); width: 18px; height: 18px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; line-height: 1; box-shadow: 0 1px 2px rgba(0,0,0,0.3); transform: scale(0); transition: transform var(--transition-fast); }
+        #scroll-to-bottom.has-new #new-message-counter { transform: scale(1); }
 
         /* --- Messages --- */
-        /* Wrapper, Avatar, Base Message styles remain largely same */
-        .message-wrapper { display: flex; margin-bottom: var(--message-spacing); opacity: 0; animation: fadeInSlideUp 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; align-items: flex-end; position: relative; /* For context menu */ }
-        .message-wrapper.grouped { margin-bottom: var(--message-spacing-grouped); }
-        .avatar-placeholder { width: var(--avatar-size); height: var(--avatar-size); border-radius: var(--border-radius-avatar); background-color: gray; flex-shrink: 0; margin-left: var(--message-horizontal-gap); box-shadow: var(--shadow-light); background-size: cover; background-position: center; }
-        .user-message-wrapper .avatar-placeholder { background-color: var(--avatar-user-bg); margin-left: 0; margin-right: var(--message-horizontal-gap); }
-        .ai-message-wrapper .avatar-placeholder { background-color: var(--avatar-ai-bg); }
-        .user-message-wrapper .avatar-placeholder::before { content: '👤'; display: flex; align-items: center; justify-content: center; height: 100%; font-size: calc(var(--avatar-size) * 0.6); color: rgba(0,0,0,0.6); }
-        .ai-message-wrapper .avatar-placeholder::before { content: '🤖'; display: flex; align-items: center; justify-content: center; height: 100%; font-size: calc(var(--avatar-size) * 0.6); color: rgba(255,255,255,0.7); }
-        body.dark-mode .user-message-wrapper .avatar-placeholder::before { color: rgba(255,255,255,0.7); }
-        body.dark-mode .ai-message-wrapper .avatar-placeholder::before { color: rgba(255,255,255,0.7); }
-        .user-message-wrapper { flex-direction: row-reverse; }
-        .ai-message-wrapper { flex-direction: row; }
-        .message { max-width: calc(78% - var(--avatar-size) - var(--message-horizontal-gap)); padding: 9px 15px; border-radius: var(--border-radius-large); word-wrap: break-word; line-height: 1.55; font-size: 14.8px; color: var(--msg-text); box-shadow: var(--shadow-light); transition: background-color var(--transition-medium), color var(--transition-medium), box-shadow var(--transition-medium); position: relative; outline: none; /* For tabindex focus */ }
-        .message:focus-visible { box-shadow: 0 0 0 2px var(--focus-outline-color); /* Focus indicator */ }
-        .user-message { background-color: var(--user-msg-bg); margin-left: auto; border-bottom-left-radius: var(--border-radius-medium); }
-        .ai-message { background-color: var(--ai-msg-bg); margin-right: auto; border: 1px solid var(--border-color); border-bottom-right-radius: var(--border-radius-medium); box-shadow: none; }
-        .message-wrapper.grouped .message { border-bottom-left-radius: var(--border-radius-large); border-bottom-right-radius: var(--border-radius-large); }
+        .message-wrapper { display: flex; margin-bottom: 2px; /* Reduced margin */ max-width: 85%; /* Limit width */ animation: fadeInSlideUp 0.4s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; opacity: 0; }
         @keyframes fadeInSlideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .message-wrapper.user-message-wrapper { margin-left: auto; flex-direction: row-reverse; /* Avatar on the left */ }
+        .message-wrapper.ai-message-wrapper { margin-right: auto; flex-direction: row; /* Avatar on the right */ }
 
-        /* Typing cursor style remains same */
-        .ai-message.typing-cursor .message-content::after { content: '▍'; display: inline-block; animation: blink-cursor 0.8s infinite; margin-right: 3px; color: var(--timestamp-color); }
-         @keyframes blink-cursor { 50% { opacity: 0; } }
+        .avatar { width: var(--avatar-size); height: var(--avatar-size); border-radius: var(--border-radius-round); background-color: var(--avatar-bg); flex-shrink: 0; margin-top: 5px; /* Align with top of bubble */ align-self: flex-start; }
+        .ai-message-wrapper .avatar { margin-left: 8px; /* Space between avatar and bubble */ /* Placeholder AI avatar */ background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23607d8b"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>'); background-size: 60%; background-position: center; background-repeat: no-repeat; }
+        .user-message-wrapper .avatar { margin-right: 8px; /* Placeholder User avatar */ background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234caf50"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>'); background-size: 60%; background-position: center; background-repeat: no-repeat; }
 
-        /* Content Styling (Markdown, Code, etc.) */
-        .message-content { padding-bottom: 2px; min-height: 1.55em; }
-        .message-content strong { font-weight: 600; }
-        .message-content em { font-style: italic; }
-        .message-content ul, .message-content ol { padding-right: 25px; margin: 8px 0; }
-        .message-content li { margin-bottom: 4px; }
-        .message-content a { color: var(--link-color); text-decoration: underline; text-underline-offset: 3px; }
-        .message-content a:hover { text-decoration: none; opacity: 0.8; }
-        .message-content a[target="_blank"]::after { /* External link icon */ content: ' \f08e'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 0.8em; margin-left: 3px; opacity: 0.7; }
-        .message-content code:not(pre > code) { background-color: color-mix(in srgb, var(--code-bg) 80%, var(--chat-bg)); color: var(--code-text); padding: 0.2em 0.5em; margin: 0 0.1em; font-size: 88%; border-radius: var(--border-radius-small); font-family: var(--font-code); direction: ltr; text-align: left; border: 1px solid var(--code-border); }
-        .message-content pre { background-color: var(--code-bg); color: var(--code-text); padding: 12px 16px; border-radius: var(--border-radius-medium); overflow-x: auto; font-family: var(--font-code); font-size: 13.5px; margin: 10px 0; direction: ltr; text-align: left; white-space: pre; border: 1px solid var(--code-border); position: relative; }
-        /* Highlight.js styles applied by library */
+
+        .message { position: relative; /* For tail and actions */ padding: 7px 12px; /* Adjusted padding */ border-radius: var(--border-radius-medium); /* Standard radius */ word-wrap: break-word; line-height: 1.5; font-size: 14.8px; color: var(--msg-text); box-shadow: var(--shadow-light); transition: background-color var(--transition-medium), color var(--transition-medium), box-shadow var(--transition-medium); }
+        .user-message { background-color: var(--user-msg-bg); border-bottom-left-radius: var(--border-radius-small); /* Sharper corner */ }
+        .ai-message { background-color: var(--ai-msg-bg); border: 1px solid var(--border-color); border-bottom-right-radius: var(--border-radius-small); box-shadow: none; }
+        body.dark-mode .ai-message { border: none; } /* No border for AI in dark mode */
+
+        /* Message Tail */
+        .message::before { content: ''; position: absolute; bottom: 0px; width: 8px; height: 12px; transition: border-color var(--transition-medium); }
+        .user-message::before { left: -8px; border-bottom-right-radius: 8px; background: radial-gradient(circle at 0 100%, transparent 8px, var(--user-msg-bg) 8.5px); }
+        .ai-message::before { right: -8px; border-bottom-left-radius: 8px; background: radial-gradient(circle at 100% 100%, transparent 8px, var(--ai-msg-bg) 8.5px); }
+        body.dark-mode .ai-message::before { background: radial-gradient(circle at 100% 100%, transparent 8px, var(--ai-msg-bg) 8.5px); } /* Ensure tail color updates */
+
+        .message-content { padding-bottom: 18px; /* Space for timestamp */ min-height: 1.5em; }
+        .ai-message.typing-cursor .message-content::after { content: '▍'; display: inline-block; animation: blink-cursor 0.8s infinite; margin-left: 2px; /* RTL adjustment */ color: var(--timestamp-color); vertical-align: bottom; }
+        @keyframes blink-cursor { 50% { opacity: 0; } }
+
+        .message-footer { position: absolute; bottom: 5px; /* Position timestamp at bottom */ font-size: 11.5px; color: var(--timestamp-color); opacity: 0.9; display: flex; align-items: center; gap: 6px; }
+        .user-message .message-footer { left: 10px; }
+        .ai-message .message-footer { right: 10px; flex-direction: row-reverse; } /* Model name first in RTL */
+        .model-indicator { font-weight: 500; color: var(--model-indicator-color); }
+        .user-message .model-indicator { display: none; }
+
+        /* Message Actions (Ellipsis Button) */
+        .message-actions-trigger { position: absolute; top: 4px; background: none; border: none; padding: 4px; cursor: pointer; border-radius: var(--border-radius-round); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity var(--transition-fast), background-color var(--transition-fast); z-index: 1; }
+        .message-wrapper:hover .message-actions-trigger { opacity: 0.8; }
+        .message-actions-trigger:hover { opacity: 1; background-color: var(--msg-action-icon-hover-bg); }
+        .message-actions-trigger svg { width: 18px; height: 18px; fill: var(--msg-action-icon-fill); }
+        .user-message-wrapper .message-actions-trigger { left: 6px; }
+        .ai-message-wrapper .message-actions-trigger { right: 6px; }
+
+        /* Message Actions Menu (Popover) */
+        .message-actions-menu { position: absolute; background-color: var(--popover-bg); color: var(--msg-text); border: 1px solid var(--popover-border); border-radius: var(--border-radius-medium); box-shadow: var(--popover-shadow); padding: 5px; z-index: 50; min-width: 120px; opacity: 0; transform: scale(0.95); transition: opacity var(--transition-fast), transform var(--transition-fast); pointer-events: none; display: flex; flex-direction: column; }
+        .message-actions-menu.visible { opacity: 1; transform: scale(1); pointer-events: auto; }
+        /* Positioning will be handled by JS based on trigger button */
+        .message-actions-menu button { background: none; border: none; color: var(--msg-text); padding: 7px 12px; text-align: right; border-radius: var(--border-radius-small); cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: background-color var(--transition-fast); }
+        .message-actions-menu button:hover { background-color: var(--menu-item-hover-bg); }
+        .message-actions-menu button svg { width: 16px; height: 16px; fill: var(--msg-action-icon-fill); flex-shrink: 0; }
+        .message-actions-menu button.copied svg { fill: var(--button-bg); }
+
+        /* Code Blocks */
+        .message-content pre { background-color: var(--code-bg); color: var(--code-text); padding: 12px 16px; border-radius: var(--border-radius-medium); overflow-x: auto; font-family: var(--font-code); font-size: 13.5px; margin: 8px 0; /* Reduced margin */ direction: ltr; text-align: left; white-space: pre; border: 1px solid var(--code-border); position: relative; }
         .message-content pre .copy-code-button { position: absolute; top: 8px; right: 8px; background-color: var(--code-copy-btn-bg); color: var(--code-text); border: none; border-radius: var(--border-radius-small); padding: 4px 8px; font-size: 11px; font-family: var(--font-main); cursor: pointer; opacity: 0; transition: opacity var(--transition-fast), background-color var(--transition-fast); z-index: 2; backdrop-filter: blur(2px); }
         .message-content pre:hover .copy-code-button { opacity: 0.8; }
         .message-content pre .copy-code-button:hover { opacity: 1; background-color: var(--code-copy-btn-hover-bg); }
         .message-content pre .copy-code-button.copied { background-color: var(--code-copy-btn-copied-bg); color: var(--code-copy-btn-copied-text); opacity: 1; }
-        .message-content img { max-width: 100%; height: auto; border-radius: var(--border-radius-medium); margin-top: 5px; cursor: pointer; }
-        /* Table styling */
-        .message-content table { width: 100%; border-collapse: collapse; margin: 10px 0; direction: rtl; text-align: right; }
-        .message-content th, .message-content td { border: 1px solid var(--border-color); padding: 6px 10px; }
-        .message-content th { background-color: var(--input-area-bg); font-weight: 600; }
-        /* KaTeX Math Styling */
-        .katex-display { overflow-x: auto; overflow-y: hidden; padding: 5px 0; } /* Allow horizontal scroll for wide equations */
-
-        /* Search Highlight */
-        .message.highlighted { /* Style when scrolled to via search */ box-shadow: 0 0 0 3px var(--accent-color); transition: box-shadow 0.5s ease; }
-        mark.search-highlight { /* Style for the specific term */ background-color: var(--search-highlight-bg); color: inherit; padding: 0.1em 0; border-radius: var(--border-radius-small); box-shadow: 0 0 0 1px var(--search-highlight-bg); }
-
-        /* Error Message Style */
-        .message.error-message { background-color: var(--error-msg-bg); border: 1px solid var(--error-msg-border); color: var(--error-msg-text); }
-        .message.error-message .model-indicator { color: var(--error-msg-text) !important; opacity: 0.8; }
-
-        /* Reply Context Style */
-        .reply-context {
-            background-color: var(--reply-context-bg);
-            padding: 5px 10px; margin: -5px -10px 8px -10px; /* Extend slightly into padding */
-            border-radius: var(--border-radius-medium) var(--border-radius-medium) 0 0;
-            border-bottom: 1px dashed color-mix(in srgb, var(--border-color) 50%, transparent);
-            font-size: 0.9em; opacity: 0.85; cursor: pointer;
-            display: flex; align-items: center; gap: 5px;
-            overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
-        }
-        .reply-context i { font-size: 0.9em; }
-        .reply-context strong { margin-left: 3px; }
-        .reply-context:hover { opacity: 1; }
-
-
-        /* Message Footer */
-        .message-footer { display: flex; align-items: center; font-size: 11.5px; margin-top: 6px; gap: 8px; transition: color var(--transition-medium); flex-wrap: wrap; opacity: 0.85; justify-content: flex-end; /* Default align end */ }
-        .ai-message .message-footer { justify-content: flex-start; /* AI aligns start */}
-        .model-indicator { color: var(--model-indicator-color); white-space: nowrap; font-weight: 500; margin-right: auto; /* Push left for AI */ }
-        .user-message .model-indicator { display: none; }
-        .timestamp { color: var(--timestamp-color); white-space: nowrap; }
-        /* Read receipts (Visual Only) */
-        .message-footer .read-receipts { margin-left: 5px; font-size: 14px; color: var(--timestamp-color); line-height: 1; order: 1; /* Ensure it's at the very end */ }
-        .message-footer .read-receipts.sent::before { content: '✓'; }
-        .message-footer .read-receipts.delivered::before { content: '✓✓'; }
-        .message-footer .read-receipts.read::before { content: '✓✓'; color: #4fc3f7; }
-        .ai-message .message-footer .read-receipts { display: none; }
-
-        /* Message Actions */
-        .message-actions { position: absolute; top: -12px; display: flex; gap: 5px; opacity: 0; transition: opacity var(--transition-fast), transform var(--transition-fast); background-color: color-mix(in srgb, var(--chat-bg) 90%, transparent); backdrop-filter: blur(4px); border-radius: var(--border-radius-large); padding: 4px 6px; z-index: 1; pointer-events: none; box-shadow: var(--shadow-medium); }
-        .user-message-wrapper .message-actions { left: -10px; transform: translateX(-100%) translateY(0) scale(0.9); }
-        .ai-message-wrapper .message-actions { right: -10px; transform: translateX(100%) translateY(0) scale(0.9); }
-        .message-wrapper:hover .message-actions, .message:focus-within ~ .message-actions /* Show on focus - Might need JS */ { opacity: 1; transform: translateX(0) translateY(0) scale(1); pointer-events: auto; }
-        .msg-action-button { background: none; border: none; padding: 5px; cursor: pointer; border-radius: var(--border-radius-round); display: flex; align-items: center; justify-content: center; transition: background-color var(--transition-fast), transform var(--transition-fast), color var(--transition-fast); color: var(--msg-action-icon-fill); position: relative; /* For spinner */ }
-        .msg-action-button i { font-size: 16px; line-height: 1; } /* Icon size */
-        .msg-action-button:hover { background-color: var(--msg-action-icon-hover-bg); transform: scale(1.1); color: var(--msg-action-icon-hover-fill); }
-        .msg-action-button:active { transform: scale(0.95); }
-        .msg-action-button.copied { animation: copied-feedback 0.6s ease-out; }
-        .msg-action-button.copied i::before { content: "\f00c"; /* Checkmark icon */ font-family: 'Font Awesome 6 Free'; font-weight: 900; } /* Show check on copy */
-        @keyframes copied-feedback { 0% { transform: scale(1.1); } 50% { transform: scale(1.3); background-color: var(--button-bg); } 100% { transform: scale(1.1); background-color: transparent;} }
-        .msg-action-button.active { background-color: var(--msg-action-icon-hover-bg); color: var(--accent-color); } /* Style for active pin/star */
-        /* Tooltip styles remain same */
-        .msg-action-button[title]::after { content: attr(title); position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background-color: var(--tooltip-bg); color: var(--tooltip-text); padding: 4px 8px; border-radius: var(--border-radius-small); font-size: 11px; white-space: nowrap; z-index: 10; pointer-events: none; opacity: 0; transition: opacity var(--transition-fast); box-shadow: var(--shadow-light); }
-        .msg-action-button[title]:hover::after { opacity: 1; transition-delay: 0.5s; /* Delay showing tooltip */ }
-        /* Action Spinner */
-        .action-spinner {
-            display: none; /* Hidden by default */
-            width: 12px; height: 12px; border-radius: 50%; margin: 0 2px;
-            border: 2px solid var(--action-spinner-color); border-top-color: transparent;
-            animation: cool-spinner 0.6s linear infinite;
-        }
-        .msg-action-button:disabled .action-spinner { display: inline-block; }
-        .msg-action-button:disabled i { display: none; } /* Hide icon when spinner shows */
-        @keyframes cool-spinner { to { transform: rotate(360deg); } }
-
-
-        /* Collapsible Code Block */
-        .message-content pre.collapsible { max-height: 200px; overflow: hidden; position: relative; transition: max-height var(--transition-medium); padding-bottom: 30px; /* Space for button */ }
-        .message-content pre.collapsible::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 50px; background: linear-gradient(to bottom, transparent, var(--code-bg)); pointer-events: none; transition: opacity 0.2s ease; }
-        .message-content pre.collapsible.expanded { max-height: 1000px; padding-bottom: 12px; }
-        .message-content pre.collapsible.expanded::after { opacity: 0; }
-        .expand-code-button { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); background-color: var(--code-copy-btn-hover-bg); color: var(--code-text); border: none; border-radius: var(--border-radius-small); padding: 3px 8px; font-size: 10px; cursor: pointer; z-index: 3; opacity: 0.7; transition: opacity var(--transition-fast), background-color var(--transition-fast); }
-         .expand-code-button:hover { opacity: 1; }
-        .message-content pre.collapsible.expanded .expand-code-button { display: none; } /* Hide when expanded */
-
+        .message-content code:not(pre > code) { background-color: color-mix(in srgb, var(--code-bg) 80%, var(--chat-bg)); color: var(--code-text); padding: 0.2em 0.5em; margin: 0 0.1em; font-size: 88%; border-radius: var(--border-radius-small); font-family: var(--font-code); direction: ltr; text-align: left; border: 1px solid var(--code-border); }
 
         /* --- Input Area --- */
-        /* Reply Preview */
-        #reply-preview {
-            display: none; height: var(--reply-preview-height);
-            background-color: var(--reply-bg); padding: 8px 14px;
-            border-top: 1px solid var(--border-color); flex-shrink: 0;
-            align-items: center; font-size: 13px; color: var(--msg-text);
-            position: relative; overflow: hidden;
-            transition: height var(--transition-fast), padding var(--transition-fast), opacity var(--transition-fast);
-             border-top-left-radius: var(--border-radius-medium); border-top-right-radius: var(--border-radius-medium); /* Rounded top */
-        }
-        #reply-preview.visible { display: flex; }
-        #reply-preview .reply-icon { margin-left: 8px; color: var(--accent-color); flex-shrink: 0;}
-        #reply-preview .reply-content-wrapper { flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; }
-        #reply-preview .reply-sender { font-weight: 600; font-size: 0.95em; }
-        #reply-preview .reply-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.8; }
-        #cancel-reply-button { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; padding: 5px; cursor: pointer; border-radius: 50%; line-height: 0; display: flex; align-items: center; justify-content: center;}
-        #cancel-reply-button:hover { background-color: rgba(0,0,0,0.1); }
-        #cancel-reply-button i { width: 16px; height: 16px; color: var(--timestamp-color); }
+        #chat-input-area { display: flex; align-items: flex-end; padding: 8px 12px; /* Reduced padding */ border-top: 1px solid var(--border-color); background-color: var(--input-area-bg); flex-shrink: 0; transition: background-color var(--transition-medium), border-color var(--transition-medium); gap: 8px; /* Reduced gap */ border-bottom-left-radius: var(--border-radius-medium); border-bottom-right-radius: var(--border-radius-medium); }
+        /* Optional Input Buttons */
+        .input-button { /* display: none; */ /* Hide by default */ background: none; border: none; padding: 8px; margin-bottom: 5px; /* Align with textarea bottom */ cursor: pointer; border-radius: var(--border-radius-round); display: flex; align-items: center; justify-content: center; transition: background-color var(--transition-fast); flex-shrink: 0; }
+        .input-button:hover { background-color: var(--icon-button-hover-bg); }
+        .input-button svg { width: 24px; height: 24px; fill: var(--attach-icon-fill); }
 
-        /* Input Toolbar */
-        #input-toolbar {
-            display: flex;
-            height: 0; overflow: hidden;
-            opacity: 0; visibility: hidden; /* Use visibility for transition */
-            background-color: var(--toolbar-bg); padding: 0 10px;
-            border-top: 1px solid var(--border-color); flex-shrink: 0;
-            align-items: center; gap: 5px;
-            transition: height var(--transition-fast), opacity var(--transition-fast) 0.05s, padding var(--transition-fast), visibility 0s var(--transition-fast); /* Delay hiding */
-        }
-        #input-toolbar.visible {
-            height: var(--toolbar-height);
-            opacity: 1;
-            padding: 0 10px;
-            visibility: visible;
-            transition-delay: 0s; /* Show immediately */
-         }
-        .toolbar-button { background: none; border: none; padding: 6px; cursor: pointer; border-radius: var(--border-radius-small); color: var(--msg-action-icon-fill); display: flex; align-items: center; justify-content: center; }
-        .toolbar-button:hover { background-color: var(--toolbar-button-hover); color: var(--msg-action-icon-hover-fill); }
-        .toolbar-button i { font-size: 16px; line-height: 1; }
+        #user-input { flex-grow: 1; padding: 10px 16px; /* Adjusted padding */ border: 1px solid var(--input-border); border-radius: var(--border-radius-large); font-size: 15px; background-color: var(--input-bg); color: var(--input-text); outline: none; transition: background-color var(--transition-medium), color var(--transition-medium), box-shadow var(--transition-fast), height var(--transition-fast), border-color var(--transition-fast); resize: none; overflow-y: hidden; min-height: 42px; max-height: 140px; line-height: 1.4; box-sizing: border-box; box-shadow: 0 1px 1px rgba(0,0,0,0.04) inset; }
+        #user-input:focus { border-color: var(--input-border-focus); box-shadow: 0 0 0 2px color-mix(in srgb, var(--button-bg) 20%, transparent), 0 1px 1px rgba(0,0,0,0.04) inset; }
+        #send-button { width: 42px; height: 42px; padding: 0; background-color: var(--button-bg); border: none; border-radius: var(--border-radius-round); cursor: pointer; font-size: 0; display: flex; justify-content: center; align-items: center; transition: background-color var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast), box-shadow var(--transition-fast); flex-shrink: 0; align-self: flex-end; box-shadow: none; /* Removed default shadow */ }
+        #send-button:hover { background-color: var(--button-hover-bg); transform: scale(1.05); }
+        #send-button:active { background-color: var(--button-active-bg); transform: scale(0.95); }
+        #send-button::before { content: ''; display: block; width: 22px; height: 22px; background-color: var(--button-icon-fill); mask-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"%3E%3Cpath d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/%3E%3C/svg%3E'); mask-size: contain; mask-repeat: no-repeat; mask-position: center; -webkit-mask-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"%3E%3Cpath d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/%3E%3C/svg%3E'); -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; transition: background-color var(--transition-medium); }
+        #send-button:disabled { opacity: 0.5; cursor: not-allowed; background-color: color-mix(in srgb, var(--button-bg) 50%, var(--input-area-bg)); transform: scale(1); }
 
-        /* Main Input Area */
-        #chat-input-area { display: flex; flex-direction: column; background-color: var(--input-area-bg); flex-shrink: 0; transition: background-color var(--transition-medium), border-color var(--transition-medium); border-bottom-left-radius: var(--border-radius-medium); border-bottom-right-radius: var(--border-radius-medium); border-top: 1px solid var(--border-color); /* Add top border here */ }
-        #chat-input-area::before { display: none; }
-
-        .input-main-row { display: flex; align-items: flex-end; gap: 10px; width: 100%; padding: 10px 14px; /* Standard padding here */ }
-
-        /* Prefix Buttons */
-        .input-prefix-buttons { display: flex; align-items: center; gap: 5px; align-self: flex-end; margin-bottom: 5px; }
-        .input-prefix-buttons .icon-button { padding: 6px; color: var(--timestamp-color); }
-        .input-prefix-buttons .icon-button:hover { color: var(--msg-action-icon-hover-fill); background-color: var(--icon-button-hover-bg); }
-        .input-prefix-buttons .icon-button i { font-size: 20px; }
-
-        #user-input {
-            flex-grow: 1; padding: 11px 18px; border: 1px solid var(--input-border); border-radius: var(--border-radius-large); font-size: 15px; background-color: var(--input-bg); color: var(--input-text); outline: none;
-            transition: background-color var(--transition-medium), color var(--transition-medium), box-shadow var(--transition-fast), height 0.1s ease-out, /* Faster height transition */ border-color var(--transition-fast), opacity var(--transition-medium);
-            resize: none; overflow-y: hidden; min-height: 44px; max-height: 180px; /* Increased max height */ line-height: 1.45; box-sizing: border-box; box-shadow: 0 1px 1px rgba(0,0,0,0.04) inset;
-        }
-         #user-input:focus { border-color: var(--input-border-focus); box-shadow: 0 0 0 2px color-mix(in srgb, var(--button-bg) 20%, transparent), 0 1px 1px rgba(0,0,0,0.04) inset; }
-         #user-input::placeholder { transition: opacity var(--transition-fast); }
-         #user-input:focus::placeholder { opacity: 0.5; }
-
-        /* Char Counter */
-        #char-counter { font-size: 11px; color: var(--timestamp-color); text-align: left; padding: 0 19px 5px 0; /* Align near send button */ height: 15px; transition: color 0.2s; }
-        #char-counter.limit-exceeded { color: red; font-weight: bold; }
-
-        #send-button {
-            width: 44px; height: 44px; padding: 0; background-color: var(--button-bg); border: none; border-radius: var(--border-radius-round); cursor: pointer; font-size: 0; display: flex; justify-content: center; align-items: center;
-            transition: background-color var(--transition-fast), transform var(--transition-medium), opacity var(--transition-medium), box-shadow var(--transition-fast); /* Smoother transform/opacity */
-            flex-shrink: 0; align-self: flex-end; box-shadow: var(--shadow-light);
-            opacity: 0.5;
-            transform: scale(0.95);
-         }
-         #send-button:not(:disabled) {
-             opacity: 1;
-             transform: scale(1);
-         }
-         #send-button:not(:disabled):hover { background-color: var(--button-hover-bg); transform: scale(1.05); box-shadow: var(--shadow-medium); }
-         #send-button:not(:disabled):active { background-color: var(--button-active-bg); transform: scale(0.95); box-shadow: none; }
-         #send-button::before { content: ''; display: block; width: 22px; height: 22px; background-color: var(--button-icon-fill); mask-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"%3E%3Cpath d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/%3E%3C/svg%3E'); mask-size: contain; mask-repeat: no-repeat; mask-position: center; -webkit-mask-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"%3E%3Cpath d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/%3E%3C/svg%3E'); -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; transition: background-color var(--transition-medium); }
-         #send-button:disabled { cursor: not-allowed; background-color: color-mix(in srgb, var(--button-bg) 40%, var(--input-area-bg)); box-shadow: none; opacity: 0.4; transform: scale(0.95); }
-
-         /* Animation for send icon */
-        #send-button.sending::before { animation: pulse-send-icon 0.5s ease-out; }
-        @keyframes pulse-send-icon { 0% { transform: scale(1); } 50% { transform: scale(1.2) rotate(10deg); } 100% { transform: scale(1); } }
-
-
-        /* --- Modals (Settings, Confirmation, Lightbox) --- */
-        /* Base Modal styles remain same */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); z-index: 100; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity var(--transition-medium); }
-        .modal-overlay.visible { display: flex; opacity: 1; }
-        .modal-content { background-color: var(--modal-bg); color: var(--msg-text); padding: 25px 30px; border-radius: var(--border-radius-medium); box-shadow: var(--modal-shadow); max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative; transform: scale(0.95); transition: transform var(--transition-medium); }
-        .modal-overlay.visible .modal-content { transform: scale(1); }
-        .modal-content h2 { margin-top: 0; margin-bottom: 20px; font-size: 1.3em; color: var(--msg-text); }
-        .modal-close-button { position: absolute; top: 10px; left: 10px; background: none; border: none; font-size: 24px; color: var(--timestamp-color); cursor: pointer; padding: 5px; line-height: 1; border-radius: 50%; }
-        .modal-close-button:hover { background-color: var(--icon-button-hover-bg); color: var(--msg-action-icon-hover-fill); }
-        .modal-actions { margin-top: 25px; display: flex; justify-content: flex-end; gap: 10px; }
-        .modal-button { padding: 8px 16px; border-radius: var(--border-radius-medium); cursor: pointer; font-weight: 500; transition: background-color var(--transition-fast), color var(--transition-fast); border: 1px solid transparent; /* Base border */ }
-        .modal-button.primary { background-color: var(--button-bg); color: var(--button-icon-fill); border-color: var(--button-bg); }
-        .modal-button.primary:hover { background-color: var(--button-hover-bg); border-color: var(--button-hover-bg); }
-        .modal-button.secondary { background-color: transparent; color: var(--button-bg); border: 1px solid var(--button-bg); }
-        .modal-button.secondary:hover { background-color: color-mix(in srgb, var(--button-bg) 10%, transparent); }
-        .modal-button.danger { background-color: #dc3545; color: white; border-color: #dc3545; }
-        .modal-button.danger:hover { background-color: #c82333; border-color: #c82333; }
-        /* Settings Modal Specifics */
-        .settings-section { margin-bottom: 20px; }
-        .settings-section label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.95em; }
-        .settings-section select, .settings-section input, .settings-section textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--input-border); border-radius: var(--border-radius-medium); background-color: var(--input-bg); color: var(--input-text); font-size: 1em; margin-bottom: 5px; }
-        .settings-section input[type="range"] { padding: 0; }
-        .settings-section input[type="color"] { padding: 2px; height: 38px; /* Align height */ }
-        .settings-section .range-value { font-size: 0.9em; color: var(--timestamp-color); margin-left: 10px; }
-        .settings-section textarea { min-height: 80px; resize: vertical; }
-        .setting-toggle { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-        /* Basic Toggle Switch Style */
-        .toggle-switch { appearance: none; width: 40px; height: 20px; background-color: var(--input-border); border-radius: 10px; position: relative; cursor: pointer; transition: background-color 0.2s ease; }
-        .toggle-switch::before { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background-color: white; top: 2px; right: 2px; transition: transform 0.2s ease; }
-        .toggle-switch:checked { background-color: var(--accent-color); }
-        .toggle-switch:checked::before { transform: translateX(-20px); }
-
-        /* Image Lightbox Styles remain same */
-        #image-lightbox .modal-content { background:none; box-shadow:none; padding:10px; max-width: 90vw; max-height: 90vh; }
-        #lightbox-image { max-width:100%; max-height:100%; object-fit: contain; display:block; }
-
-        /* --- Skeleton Loaders --- */
-        .skeleton {
-             background-color: var(--skeleton-bg);
-             border-radius: var(--border-radius-medium);
-             animation: pulse-skeleton 1.5s infinite ease-in-out;
-         }
-         @keyframes pulse-skeleton { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-         .message-wrapper.skeleton-loading .avatar-placeholder { background-color: var(--skeleton-bg); animation: pulse-skeleton 1.5s infinite ease-in-out; }
-         .message-wrapper.skeleton-loading .message { background-color: transparent !important; box-shadow: none; border: none; pointer-events: none; }
-        .message-wrapper.skeleton-loading .message-content { min-height: 3em; background-color: var(--skeleton-bg); border-radius: var(--border-radius-medium); animation: pulse-skeleton 1.5s infinite ease-in-out; }
-        .message-wrapper.skeleton-loading .message-footer,
-        .message-wrapper.skeleton-loading .message-actions,
-        .message-wrapper.skeleton-loading .reply-context { display: none; }
-
-        /* Reduce motion preference */
-        @media (prefers-reduced-motion: reduce) {
-          * {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-            scroll-behavior: auto !important;
-          }
-          #send-button.sending::before { animation: none; }
-        }
+        /* --- Loading Indicator --- */
+        .typing-indicator .message-content { color: var(--timestamp-color); padding-bottom: 5px; }
+        .cool-loading-container { display: flex; align-items: center; justify-content: flex-start; gap: 8px; padding: 4px 0; }
+        .cool-loading-container .loading-model-name { font-size: 0.9em; font-weight: 500; animation: pulse-text 1.5s infinite ease-in-out; white-space: nowrap; }
+        .loading-spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--loading-spinner-color1); border-top-color: transparent; animation: cool-spinner 1s linear infinite; flex-shrink: 0; }
+        @keyframes cool-spinner { to { transform: rotate(360deg); } }
+        @keyframes pulse-text { 0%, 100% { opacity: 0.6; } 50% { opacity: 0.9; } }
+        #stop-generation-button { background: none; border: none; padding: 0; margin: 0 5px 0 0; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: var(--border-radius-round); transition: background-color var(--transition-fast), transform var(--transition-fast); }
+        #stop-generation-button svg { width: 14px; height: 14px; fill: var(--msg-action-icon-fill); transition: fill var(--transition-fast); }
+        #stop-generation-button:hover { background-color: var(--msg-action-icon-hover-bg); }
+        #stop-generation-button:hover svg { fill: var(--msg-action-icon-hover-fill); }
+        #stop-generation-button:active { transform: scale(0.9); }
 
     </style>
 </head>
-<body > <!-- Add classes dynamically: compact-mode, rounded-mode -->
+<body>
 
 <div id="chat-container">
     <div id="chat-header">
-        <!-- Search container -->
-        <div class="header-search-container" id="header-search-area">
-             <input type="text" id="chat-search-input" placeholder="חפש בהודעות...">
-             <span id="search-results-count">0/0</span>
-             <button class="icon-button" id="search-prev-button" title="התוצאה הקודמת" aria-label="התוצאה הקודמת"><i class="fas fa-chevron-up"></i></button>
-             <button class="icon-button" id="search-next-button" title="התוצאה הבאה" aria-label="התוצאה הבאה"><i class="fas fa-chevron-down"></i></button>
-             <button class="icon-button" id="search-close-button" title="סגור חיפוש" aria-label="סגור חיפוש"><i class="fas fa-times"></i></button>
-        </div>
-        <!-- Original Header Content -->
-        <h1 id="chat-title" title="לחץ לעריכת שם השיחה">צ'אט AI אולטימטיבי</h1>
-        <div class="header-controls">
-            <button class="icon-button" id="search-open-button" title="חפש בשיחה" aria-label="חפש בשיחה"><i class="fas fa-search"></i></button>
-            <select id="model-select" aria-label="בחר מודל AI">
-                 <option value="main-ai.php">Gemini 1.5 Flash</option>
-                 <option value="gemini25.php">Gemini 1.5 Pro</option>
-            </select>
-            <button class="icon-button" id="settings-button" title="הגדרות" aria-label="הגדרות"><i class="fas fa-cog"></i></button>
-            <button class="icon-button" id="dark-mode-toggle" title="שנה ערכת נושא" aria-label="שנה ערכת נושא">
-                <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18v-8a2 2 0 0 0-2-2H4.08A8 8 0 0 1 12 4v8a2 2 0 0 0 2 2h5.92A8 8 0 0 1 12 20z"/></svg>
-                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.64 5.64c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L5.64 5.64zm12.73 12.73c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41l-1.41-1.41zM19.78 4.22c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41zm-12.73 12.73c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41z"/></svg>
-            </button>
-            <button class="icon-button" id="download-chat" title="הורד צ'אט" aria-label="הורד צ'אט">
-                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-            </button>
-            <button class="icon-button" id="clear-chat" title="נקה צ'אט" aria-label="נקה צ'אט">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        <div class="header-avatar"></div>
+        <h1>צ'אט AI</h1>
+        <div class="header-controls-trigger"> <!-- Renamed for clarity -->
+            <button class="icon-button" id="settings-button" title="הגדרות" aria-label="הגדרות ופעולות נוספות">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.08-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
             </button>
         </div>
+        <!-- Settings Popover - Initially Hidden -->
+        <div id="settings-popover">
+             <div class="popover-section">
+                 <label for="model-select">מודל AI:</label>
+                 <select id="model-select" aria-label="בחר מודל AI">
+                     <option value="main-ai.php">Gemini Flash</option>
+                     <option value="gemini25.php">Gemini 2.5 Pro</option>
+                 </select>
+             </div>
+             <div class="popover-section">
+                  <label for="style-select">סגנון שיחה:</label>
+                  <select id="style-select" aria-label="בחר סגנון שיחה">
+                     <option value="">רגיל</option>
+                     <option value="ענה תמיד בעברית, בצורה מעניינת ומקצועית, אך עם טון קליל ונעים 😌. תשמור על רצינות בשאלות חשובות, אבל אל תשכח להוסיף סמיילים ואמוג'ים כדי להקל את השיחה 🎯✨. תהיה יצירתי וענייני, ותן תשובות שמספקות מידע מועיל, אך עם נגיעה אישית וחיובית 💬😊. תמיד שמור על אווירה נעימה וקשוב, ואל תיקח את עצמך יותר מדי ברצינות 😉">ידידותי</option>
+                     <option value="ענה תמיד בעברית, באופן מקצועי, רשמי ומדויק. התמקד במתן מידע עובדתי ופתרונות מבוססים. הימנע משימוש בסלנג, אמוג'ים או טון אישי מדי. שמור על ניסוח בהיר, תמציתי ומאורגן.">מקצועי</option>
+                     <option value="ענה בעברית פשוטה וברורה. תן תשובות ישירות ולעניין, ללא הרחבות מיותרות. הימנע ממונחים טכניים מורכבים ככל האפשר.">ישיר</option>
+                     <option value="הגב בעברית בצורה יצירתית ומלאת דמיון. השתמש בדימויים, מטפורות ורעיונות מקוריים. אל תחשוש לחשוב מחוץ לקופסה ולהציע פרספקטיבות לא שגרתיות. שמור על טון מעורר השראה.">יצירתי</option>
+                      <option value="ענה בעברית בסבלנות ובפירוט, כאילו אתה מסביר נושא מורכב לתלמיד. פרק את התשובה לשלבים, השתמש בדוגמאות והסברים בהירים. עודד שאלות נוספות וודא שהמשתמש הבין את הנושא לעומק.">מורה</option>
+                      <option value="הגב בעברית עם הומור ושנינות. השתמש במשחקי מילים, בדיחות קלות ואנקדוטות משעשעות (בטוב טעם). שמור על אווירה קלילה ומשעשעת, אך עדיין ספק תשובה רלוונטית לשאלה.">הומוריסטי</option>
+                      <option value="ענה בעברית בצורה תמציתית ככל האפשר. ספק את המידע המרכזי בלבד, תוך הימנעות מפרטים שוליים. השתמש במשפטים קצרים וברורים.">תמציתי</option>
+                      <option value="הגב בעברית בסגנון פואטי ולירי. השתמש בשפה עשירה, דימויים ציוריים ומקצבים. נסה להעביר את המסר דרך יופי מילולי ורגש.">פואטי</option>
+                      <option value="ענה בעברית מתוך פרספקטיבה פילוסופית. העלה שאלות עומק, בחן הנחות יסוד והצע זוויות מחשבה מופשטות. חפש את המשמעות הרחבה יותר של הנושא.">פילוסופי</option>
+                 </select>
+             </div>
+             <div class="popover-actions">
+                 <button id="dark-mode-toggle" aria-label="שנה ערכת נושא">
+                     <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM12 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-2 8c-.83 0-1.5.67-1.5 1.5S15.17 18 16 18s1.5-.67 1.5-1.5S16.83 15 16 15zM4 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm2 7c-.83 0-1.5.67-1.5 1.5S5.17 18 6 18s1.5-.67 1.5-1.5S6.83 15 6 15z"/></svg> <!-- Moon Icon -->
+                     <svg id="sun-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.64 5.64c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L5.64 5.64zm12.73 12.73c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41l-1.41-1.41zM19.78 4.22c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41zm-12.73 12.73c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41z"/></svg>
+                     <span id="theme-toggle-text">ערכת נושא כהה</span>
+                 </button>
+                 <button id="download-chat" aria-label="הורד צ'אט">
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                     <span>הורד שיחה</span>
+                 </button>
+                 <button id="clear-chat" aria-label="נקה צ'אט">
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                     <span>נקה שיחה</span>
+                 </button>
+             </div>
+        </div>
     </div>
-
-    <!-- Pinned Message -->
-    <div id="pinned-message">
-        <i class="fas fa-thumbtack pinned-icon"></i>
-        <span class="pinned-text"></span> <!-- Text set by JS -->
-        <button id="unpin-button" title="בטל נעיצה" aria-label="בטל נעיצה">
-             <i class="fas fa-times"></i> <!-- Use a simple X -->
-        </button>
-    </div>
-
-
-    <div id="chat-output" aria-live="polite" role="log">
-         <!-- Initial Message -->
-         <div class="message-wrapper ai-message-wrapper" data-sender="ai" data-message-id="initial-0">
-             <div class="avatar-placeholder"></div>
-             <div class="message ai-message" tabindex="0">
-                 <div class="message-content"><span>👋 שלום! אני מוכן לעזור. בחר מודל AI והתחל לשוחח. השתמש ב-Shift+Enter לשורה חדשה.</span></div>
-                 <div class="message-footer"><span class="timestamp">התחל</span></div>
+    <div id="chat-output" aria-live="polite">
+        <div id="chat-output-inner"> <!-- Inner div for padding -->
+            <div class="message-wrapper ai-message-wrapper initial-message" data-message-id="initial-0">
+                 <div class="avatar"></div>
+                 <div class="message ai-message">
+                     <div class="message-content"><span>שלום! בחר מודל וסגנון שיחה בהגדרות (⚙️) והתחל לשוחח.</span></div>
+                     <div class="message-footer"><span class="timestamp">התחל</span></div>
+                 </div>
              </div>
          </div>
-         <!-- Messages will be added here -->
-         <button id="scroll-to-bottom" title="גלול לתחתית" aria-label="גלול לתחתית"><i class="fas fa-chevron-down"></i></button>
-         <button id="scroll-to-top" title="גלול לראש השיחה" aria-label="גלול לראש השיחה" ><i class="fas fa-chevron-up"></i></button>
+         <button id="scroll-to-bottom" title="גלול לתחתית" aria-label="גלול לתחתית">
+             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/><path fill="none" d="M0 0h24v24H0V0z"/></svg>
+             <span id="new-message-counter">0</span>
+         </button>
     </div>
-
     <div id="chat-input-area">
-        <!-- Reply Preview Area -->
-        <div id="reply-preview">
-             <i class="fas fa-reply reply-icon"></i>
-             <div class="reply-content-wrapper">
-                 <span class="reply-sender"></span>
-                 <span class="reply-text"></span>
-             </div>
-             <button id="cancel-reply-button" title="בטל תגובה" aria-label="בטל תגובה"><i class="fas fa-times"></i></button>
-        </div>
-
-        <!-- Input Toolbar -->
-        <div id="input-toolbar">
-             <button class="toolbar-button" data-format="bold" title="מודגש (Ctrl+B)"><i class="fas fa-bold"></i></button>
-             <button class="toolbar-button" data-format="italic" title="נטוי (Ctrl+I)"><i class="fas fa-italic"></i></button>
-             <button class="toolbar-button" data-format="code" title="קוד מוטבע"><i class="fas fa-code"></i></button>
-             <button class="toolbar-button" data-format="ul" title="רשימה"><i class="fas fa-list-ul"></i></button>
-             <button class="toolbar-button" data-format="link" title="קישור"><i class="fas fa-link"></i></button>
-        </div>
-
-        <!-- Main Input Row -->
-        <div class="input-main-row">
-            <div class="input-prefix-buttons">
-                 <button class="icon-button" id="emoji-picker-button" title="בחר אימוג'י (UI)" aria-label="בחר אימוג'י"><i class="far fa-smile"></i></button>
-                 <button class="icon-button" id="attachment-button" title="צרף קובץ (UI)" aria-label="צרף קובץ"><i class="fas fa-paperclip"></i></button>
-            </div>
-            <textarea id="user-input" placeholder="הקלד/י הודעה..." rows="1" aria-label="הודעת משתמש" aria-describedby="char-counter"></textarea>
-            <button id="send-button" aria-label="שלח" disabled></button> <!-- Icon set by CSS -->
-        </div>
-         <!-- Character Counter -->
-        <div id="char-counter">0</div>
+         <!-- Optional Buttons (Hidden by default) -->
+         <!--
+         <button class="input-button" id="emoji-button" aria-label="בחר אמוג'י" title="אמוג'י">
+             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+         </button>
+         <button class="input-button" id="attach-button" aria-label="צרף קובץ" title="צרף">
+             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
+         </button>
+         -->
+        <textarea id="user-input" placeholder="הקלד/י הודעה..." rows="1" aria-label="הודעת משתמש"></textarea>
+        <button id="send-button" aria-label="שלח"></button>
     </div>
-</div>
 
-<!-- Settings Modal -->
-<div class="modal-overlay" id="settings-modal">
-    <div class="modal-content">
-        <button class="modal-close-button" aria-label="סגור הגדרות">&times;</button>
-        <h2>הגדרות שיחה</h2>
-
-        <div class="settings-section">
-            <label for="system-prompt">הנחיית מערכת (System Prompt)</label>
-            <textarea id="system-prompt" rows="3" placeholder="לדוגמה: תמיד תענה בצורה ידידותית ומפורטת."></textarea>
-        </div>
-
-        <div class="settings-section">
-            <label for="temperature-slider">טמפרטורה (יצירתיות): <span class="range-value" id="temperature-value">0.7</span></label>
-            <input type="range" id="temperature-slider" min="0" max="1" step="0.1" value="0.7">
-        </div>
-
-         <div class="settings-section">
-             <label>מצב תצוגה</label>
-             <div class="setting-toggle">
-                 <span>מצב קומפקטי</span>
-                 <input type="checkbox" id="compact-mode-toggle" class="toggle-switch">
-             </div>
-             <div class="setting-toggle">
-                 <span>פינות מעוגלות</span>
-                 <input type="checkbox" id="rounded-mode-toggle" class="toggle-switch">
-             </div>
-             <div class="setting-toggle">
-                <span>צלילי התראות (מושבת)</span>
-                <input type="checkbox" id="sound-toggle" disabled class="toggle-switch">
-            </div>
-         </div>
-
-        <div class="settings-section">
-            <label for="accent-color-picker">צבע הדגשה</label>
-            <input type="color" id="accent-color-picker" value="#008069">
-        </div>
-
-        <div class="modal-actions">
-            <button class="modal-button secondary" id="settings-cancel-button">ביטול</button>
-            <button class="modal-button primary" id="settings-save-button">שמור שינויים</button>
+    <!-- Message Actions Menu Template (Hidden) -->
+    <div id="message-actions-menu-template" style="display: none;">
+        <div class="message-actions-menu">
+            <button class="action-copy">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                <span>העתק</span>
+            </button>
+            <button class="action-regenerate" style="display: none;"> <!-- Hidden by default -->
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                <span>צור מחדש</span>
+            </button>
+            <!-- Add other actions here later (e.g., Edit, Delete) -->
         </div>
     </div>
+
 </div>
-
-<!-- Confirmation Modal -->
-<div class="modal-overlay" id="confirmation-modal">
-     <div class="modal-content" role="alertdialog" aria-labelledby="confirmation-title" aria-describedby="confirmation-message">
-         <h2 id="confirmation-title"></h2>
-         <p id="confirmation-message"></p>
-         <div class="modal-actions">
-             <button class="modal-button secondary" id="confirmation-cancel-button">ביטול</button>
-             <button class="modal-button danger" id="confirmation-confirm-button">אישור</button>
-         </div>
-     </div>
-</div>
-
-<!-- Image Lightbox (Basic) -->
-<div class="modal-overlay" id="image-lightbox">
-    <div class="modal-content" style="background:none; box-shadow:none; padding:10px; max-width: 90vw; max-height: 90vh;">
-         <button class="modal-close-button" style="color:white; background:rgba(0,0,0,0.5);">&times;</button>
-        <img id="lightbox-image" src="" alt="תצוגה מקדימה" style="max-width:100%; max-height:100%; object-fit: contain; display:block;">
-    </div>
-</div>
-
-
-<!-- Include Libraries -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<!-- Optional: Load specific languages for highlight.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script> <!-- For HTML -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
-<!-- KaTeX JS (Optional) -->
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="initKatex()"></script>
-
 
 <script>
-    // --- V4.0+ Enhanced Code ---
     document.addEventListener('DOMContentLoaded', () => {
-        // --- Element References (Extensive List) ---
-        const body = document.body;
+        // --- Element References ---
         const chatContainer = document.getElementById('chat-container');
-        const chatHeader = document.getElementById('chat-header');
-        const chatTitle = document.getElementById('chat-title');
         const chatOutput = document.getElementById('chat-output');
+        const chatOutputInner = document.getElementById('chat-output-inner');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
+        const settingsButton = document.getElementById('settings-button');
+        const settingsPopover = document.getElementById('settings-popover');
         const modelSelect = document.getElementById('model-select');
+        const styleSelect = document.getElementById('style-select');
         const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const themeIconLight = document.getElementById('theme-icon-light');
+        const themeToggleText = document.getElementById('theme-toggle-text');
+        const themeIconLight = document.getElementById('theme-icon-light'); // Moon
         const sunIcon = document.getElementById('sun-icon');
         const downloadChatButton = document.getElementById('download-chat');
         const clearChatButton = document.getElementById('clear-chat');
         const scrollToBottomButton = document.getElementById('scroll-to-bottom');
-        const scrollToTopButton = document.getElementById('scroll-to-top');
-        const pinnedMessageArea = document.getElementById('pinned-message');
-        const pinnedMessageText = pinnedMessageArea.querySelector('.pinned-text');
-        const unpinButton = document.getElementById('unpin-button');
-        const replyPreviewArea = document.getElementById('reply-preview');
-        const replySenderSpan = replyPreviewArea.querySelector('.reply-sender');
-        const replyTextSpan = replyPreviewArea.querySelector('.reply-text');
-        const cancelReplyButton = document.getElementById('cancel-reply-button');
-        const inputToolbar = document.getElementById('input-toolbar');
-        const emojiPickerButton = document.getElementById('emoji-picker-button');
-        const attachmentButton = document.getElementById('attachment-button');
-        const charCounter = document.getElementById('char-counter');
-        const settingsButton = document.getElementById('settings-button');
-        const settingsModal = document.getElementById('settings-modal');
-        const settingsCancelButton = document.getElementById('settings-cancel-button');
-        const settingsSaveButton = document.getElementById('settings-save-button');
-        const systemPromptInput = document.getElementById('system-prompt');
-        const temperatureSlider = document.getElementById('temperature-slider');
-        const temperatureValue = document.getElementById('temperature-value');
-        const compactModeToggle = document.getElementById('compact-mode-toggle');
-        const roundedModeToggle = document.getElementById('rounded-mode-toggle');
-        const accentColorPicker = document.getElementById('accent-color-picker');
-        const confirmationModal = document.getElementById('confirmation-modal');
-        const confirmationTitle = document.getElementById('confirmation-title');
-        const confirmationMessage = document.getElementById('confirmation-message');
-        const confirmationCancelButton = document.getElementById('confirmation-cancel-button');
-        const confirmationConfirmButton = document.getElementById('confirmation-confirm-button');
-        const imageLightbox = document.getElementById('image-lightbox');
-        const lightboxImage = document.getElementById('lightbox-image');
-        const searchOpenButton = document.getElementById('search-open-button');
-        const searchArea = document.getElementById('header-search-area');
-        const searchInput = document.getElementById('chat-search-input');
-        const searchResultsCount = document.getElementById('search-results-count');
-        const searchPrevButton = document.getElementById('search-prev-button');
-        const searchNextButton = document.getElementById('search-next-button');
-        const searchCloseButton = document.getElementById('search-close-button');
-
+        const newMessageCounter = document.getElementById('new-message-counter');
+        const messageActionsMenuTemplate = document.getElementById('message-actions-menu-template');
 
         // --- State Variables ---
-        const BASE_API_URL = 'https://php-render-test.onrender.com/'; // Replace if needed
-        let messageCounter = 0;
+        const BASE_API_URL = 'https://php-render-test.onrender.com/'; // Verify URL
+        let messageCounterId = 0; // Use a simple incrementing ID for internal tracking
         let currentAbortController = null;
         let typingTimeout = null;
-        let lastMessageSender = null;
-        let lastMessageTimestamp = null;
-        let isAutoScrolling = true;
-        let userScrolledUp = false;
-        let currentReplyMessageId = null;
-        let inputHistory = JSON.parse(localStorage.getItem('inputHistory') || '[]');
-        let inputHistoryIndex = inputHistory.length;
-        let draftMessage = localStorage.getItem('draftMessage') || '';
-        let pinnedMessageId = localStorage.getItem('pinnedMessageId');
-        let currentSearchTerm = '';
-        let searchResults = [];
-        let currentSearchIndex = -1;
-        let confirmationCallback = null;
-        let katexInitialized = false;
-
-        const TYPING_SPEED = 8;
-        const SCROLL_THRESHOLD = 150;
-        const SCROLL_LOCK_THRESHOLD = 50; // Not actively used in this version's scroll logic
-        const MAX_INPUT_HISTORY = 50;
-        const MAX_CHAR_COUNT = 4000;
-
+        let activeMessageMenu = null; // Track the currently open message menu
+        let newMessagesCount = 0; // Counter for new messages while scrolled up
+        let isScrolledToBottom = true; // Track if user is at the bottom
+        const TYPING_SPEED = 15; // Slightly slower typing
+        const SCROLL_THRESHOLD = 150; // Pixels from bottom to trigger button/counter
 
         // --- Utility Functions ---
-        function getCurrentTimestamp() { const now = new Date(); const hours = now.getHours().toString().padStart(2, '0'); const minutes = now.getMinutes().toString().padStart(2, '0'); return `${hours}:${minutes}`; }
-        function getCurrentDateString(date = new Date()) { return date.toLocaleDateString('en-CA'); /* YYYY-MM-DD */ }
-        function generateMessageId() { return `msg-${Date.now()}-${messageCounter++}`; }
-        function sanitizeHtml(html) { /* Implement robust sanitization if needed */ return html; }
-        function formatDateSeparator(dateStr) { const today = new Date();const yesterday = new Date(today);yesterday.setDate(yesterday.getDate() - 1);const messageDate = new Date(dateStr + 'T00:00:00'); if (getCurrentDateString(messageDate) === getCurrentDateString(today)) { return 'היום'; } else if (getCurrentDateString(messageDate) === getCurrentDateString(yesterday)) { return 'אתמול'; } else { return messageDate.toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric' }); }}
+        function getCurrentTimestamp() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+        function generateMessageId() { return `msg-${Date.now()}-${messageCounterId++}`; }
 
-        function scrollToBottom(behavior = 'smooth', force = false) {
-             if (force || (!userScrolledUp && isNearBottom())) { // Check if near bottom or forced
-                 const scrollOptions = { top: chatOutput.scrollHeight, behavior: behavior };
-                 chatOutput.scrollTo(scrollOptions);
-                 isAutoScrolling = true; // Re-enable auto-scroll
-                 userScrolledUp = false; // Reset flag
-             } else {
-                 // If user scrolled up, don't auto-scroll unless forced
-                 isAutoScrolling = false;
-             }
-         }
-         // Helper to check if near bottom
-         function isNearBottom(threshold = SCROLL_THRESHOLD) {
-            return chatOutput.scrollHeight - chatOutput.scrollTop - chatOutput.clientHeight < threshold;
-         }
+        function smoothScrollToBottom() {
+            chatOutput.scrollTo({ top: chatOutput.scrollHeight, behavior: 'smooth' });
+            resetNewMessageCounter(); // Reset counter when explicitly scrolling down
+        }
 
-        function scrollToTop(behavior = 'smooth') { chatOutput.scrollTo({ top: 0, behavior }); }
+        function instantScrollToBottom() {
+             chatOutput.scrollTop = chatOutput.scrollHeight;
+             resetNewMessageCounter();
+        }
 
-        // --- Debounce Function ---
-        function debounce(func, wait) { let timeout; return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); }; };
+        function updateScrollState() {
+            const scrollBottom = chatOutput.scrollHeight - chatOutput.scrollTop - chatOutput.clientHeight;
+            isScrolledToBottom = scrollBottom < 5; // Allow a small tolerance
+            const showScrollButton = scrollBottom > SCROLL_THRESHOLD;
+            scrollToBottomButton.classList.toggle('visible', showScrollButton);
 
-         // --- Show/Hide Modal ---
-         function showModal(modalElement) { modalElement.classList.add('visible'); /* Add focus trapping later */ }
-         function hideModal(modalElement) { modalElement.classList.remove('visible'); if (confirmationCallback) { confirmationCallback = null; } }
-
-         // --- Show Confirmation Modal ---
-         function showConfirmation(title, message, confirmText = 'אישור', confirmClass = 'danger', callback) { confirmationTitle.textContent = title; confirmationMessage.textContent = message; confirmationConfirmButton.textContent = confirmText; confirmationConfirmButton.className = `modal-button ${confirmClass}`; confirmationCallback = callback; showModal(confirmationModal); }
-
-        // --- Initialize KaTeX ---
-        function initKatex() {
-            if (typeof renderMathInElement === 'function') {
-                katexInitialized = true;
-                console.log("KaTeX Initialized. Rendering existing messages.");
-                renderAllMessagesMath();
-            } else {
-                console.warn("KaTeX auto-render function not found.");
+            // If user scrolls back to bottom manually, hide counter
+            if (isScrolledToBottom && newMessagesCount > 0) {
+                resetNewMessageCounter();
             }
         }
 
-        // --- Render Math in a specific element ---
-        function renderSingleElementMath(element) {
-             if (katexInitialized && typeof renderMathInElement === 'function') {
-                 try {
-                     renderMathInElement(element, {
-                         delimiters: [ {left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}, {left: '\\(', right: '\\)', display: false}, {left: '\\[', right: '\\]', display: true} ],
-                         throwOnError : false
-                     });
-                 } catch (e) { console.error("KaTeX rendering error:", e); }
-             }
-         }
-         // --- Render Math in all existing messages ---
-         function renderAllMessagesMath() {
-            if (!katexInitialized) return;
-            chatOutput.querySelectorAll('.message-content').forEach(renderSingleElementMath);
-         }
+        function incrementNewMessageCounter() {
+            if (!isScrolledToBottom) {
+                newMessagesCount++;
+                newMessageCounter.textContent = newMessagesCount > 9 ? '9+' : newMessagesCount;
+                scrollToBottomButton.classList.add('has-new');
+                // Ensure the button is visible if there are new messages
+                if (!scrollToBottomButton.classList.contains('visible')) {
+                    scrollToBottomButton.classList.add('visible');
+                }
+            }
+        }
 
+        function resetNewMessageCounter() {
+            newMessagesCount = 0;
+            newMessageCounter.textContent = '0';
+            scrollToBottomButton.classList.remove('has-new');
+            // Keep button visible only if scroll position demands it
+             updateScrollState();
+        }
 
-        // --- Add Date Separator ---
-        function addDateSeparatorIfNeeded(messageTimestamp) { const messageDateStr = getCurrentDateString(new Date(messageTimestamp)); const lastDateStr = lastMessageTimestamp ? getCurrentDateString(new Date(lastMessageTimestamp)) : null; if (!lastDateStr || messageDateStr !== lastDateStr) { const separator = document.createElement('div'); separator.className = 'date-separator'; separator.textContent = formatDateSeparator(messageDateStr); chatOutput.insertBefore(separator, scrollToBottomButton); lastMessageTimestamp = messageTimestamp; return true; } return false; }
-
-
-        // --- Get Chat History ---
-        function getChatHistory(currentUserMessage, forRegeneration = false, regenerationTargetMsgId = null) { const history = []; const messages = chatOutput.querySelectorAll('.message:not(.typing-indicator)'); messages.forEach((msg) => { const wrapper = msg.closest('.message-wrapper'); if (!wrapper || wrapper.classList.contains('skeleton-loading')) return; const sender = wrapper.dataset.sender; const timestamp = msg.dataset.timestamp; const messageId = msg.dataset.messageId; if (timestamp === 'התחל' && sender === 'ai') return; if (forRegeneration && messageId === regenerationTargetMsgId && sender === 'ai') return; let content = msg.dataset.rawMarkdown || msg.querySelector('.message-content')?.textContent || ''; content = content.trim(); if (content) { const role = sender === 'user' ? 'user' : 'model'; history.push({ role: role, content: content }); } }); return history; }
-
-
-        // --- Add Skeleton Message ---
-        function addSkeletonMessage(sender = 'ai') {
-             const messageId = `skeleton-${Date.now()}-${messageCounter++}`; // Ensure unique ID
-             const messageWrapper = document.createElement('div');
-             messageWrapper.classList.add('message-wrapper', `${sender}-message-wrapper`, 'skeleton-loading');
-             messageWrapper.dataset.messageId = messageId; // Use this ID for replacement
-
-             const avatarDiv = document.createElement('div');
-             avatarDiv.classList.add('avatar-placeholder', 'skeleton');
-
-             const messageDiv = document.createElement('div');
-             messageDiv.classList.add('message', sender === 'ai' ? 'ai-message' : 'user-message');
-
-             const contentDiv = document.createElement('div');
-             contentDiv.classList.add('message-content', 'skeleton');
-             contentDiv.style.width = `${Math.random() * 40 + 40}%`; // Random width
-
-             messageDiv.appendChild(contentDiv);
-             messageWrapper.appendChild(avatarDiv);
-             messageWrapper.appendChild(messageDiv);
-
-             const insertionPoint = chatOutput.querySelector('#scroll-to-bottom');
-             chatOutput.insertBefore(messageWrapper, insertionPoint);
-             scrollToBottom('auto', true);
-             return messageId;
-         }
-
-         // --- Replace Skeleton Message ---
-         function replaceSkeletonMessage(skeletonId, text, sender, options) {
-             const skeletonWrapper = chatOutput.querySelector(`.message-wrapper[data-message-id="${skeletonId}"]`);
-             if (skeletonWrapper) {
-                 console.log(`Replacing skeleton: ${skeletonId}`);
-                 // Create the real message element using addMessageToChat
-                 // Pass the skeletonId as providedId so the new message gets the same ID
-                 const realMessageDiv = addMessageToChat(text, sender, { ...options, providedId: skeletonId });
-                 const realMessageWrapper = realMessageDiv.closest('.message-wrapper');
-
-                 if (realMessageWrapper) {
-                     // Replace the skeleton wrapper in the DOM
-                     skeletonWrapper.parentNode.replaceChild(realMessageWrapper, skeletonWrapper);
-                     // Ensure the new message also has the correct ID on its wrapper
-                     realMessageWrapper.dataset.messageId = skeletonId;
-                 } else {
-                     console.error("Could not find wrapper for the newly created real message.");
-                     skeletonWrapper.remove(); // Fallback: just remove skeleton
-                 }
+        // --- Settings Popover Logic ---
+        function toggleSettingsPopover(show) {
+             if (show) {
+                 settingsPopover.classList.add('visible');
+                 // Close message menus if open
+                 closeMessageActionMenu();
              } else {
-                console.warn(`Skeleton message with ID ${skeletonId} not found for replacement.`);
+                 settingsPopover.classList.remove('visible');
              }
          }
 
+        settingsButton.addEventListener('click', (e) => {
+             e.stopPropagation(); // Prevent body click listener
+             toggleSettingsPopover(!settingsPopover.classList.contains('visible'));
+         });
 
-        // --- Add Message to Chat Function (Enhanced for Reply, Skeleton, Actions) ---
+         // Close popover if clicking outside
+         document.body.addEventListener('click', (e) => {
+             if (!settingsPopover.contains(e.target) && !settingsButton.contains(e.target)) {
+                 toggleSettingsPopover(false);
+             }
+             // Close message menu if clicking outside of it
+             if (activeMessageMenu && !activeMessageMenu.contains(e.target) && !e.target.closest('.message-actions-trigger')) {
+                closeMessageActionMenu();
+             }
+         });
+
+
+        // --- Message Actions Menu Logic ---
+        function openMessageActionMenu(triggerButton, messageElement) {
+            closeMessageActionMenu(); // Close any existing menu
+
+            const menuNode = messageActionsMenuTemplate.firstElementChild.cloneNode(true);
+            menuNode.dataset.targetMessageId = messageElement.dataset.messageId; // Link menu to message
+
+            // Customize menu content based on message type
+            const isAiMsg = messageElement.classList.contains('ai-message');
+            const regenerateButton = menuNode.querySelector('.action-regenerate');
+
+            if (isAiMsg && messageElement.dataset.userQuery && messageElement.dataset.modelValue) {
+                regenerateButton.style.display = 'flex'; // Show regenerate button
+            } else {
+                regenerateButton.style.display = 'none'; // Hide for user messages or initial AI msg
+            }
+
+            // Append menu to chat container for correct positioning context
+            chatContainer.appendChild(menuNode);
+            activeMessageMenu = menuNode; // Track the active menu
+
+            // Position the menu
+            const triggerRect = triggerButton.getBoundingClientRect();
+            const containerRect = chatContainer.getBoundingClientRect();
+            const menuRect = menuNode.getBoundingClientRect();
+
+            let top = triggerRect.bottom - containerRect.top + 5;
+            let left = triggerRect.left - containerRect.left;
+
+            // Adjust if menu goes off-screen
+            if (left + menuRect.width > containerRect.width - 10) {
+                left = triggerRect.right - containerRect.left - menuRect.width;
+            }
+            if (top + menuRect.height > containerRect.height - 10) {
+                 top = triggerRect.top - containerRect.top - menuRect.height - 5;
+            }
+             // Ensure minimum distance from edges
+             left = Math.max(10, left);
+             top = Math.max(10, top);
+
+            menuNode.style.top = `${top}px`;
+            menuNode.style.left = `${left}px`;
+
+            // Add event listeners to menu items
+            menuNode.querySelector('.action-copy').addEventListener('click', handleCopyClick);
+            if (regenerateButton.style.display !== 'none') {
+                 regenerateButton.addEventListener('click', handleRegenerateClick);
+            }
+
+            // Make visible after positioning
+            requestAnimationFrame(() => {
+                menuNode.classList.add('visible');
+            });
+        }
+
+        function closeMessageActionMenu() {
+            if (activeMessageMenu) {
+                activeMessageMenu.remove();
+                activeMessageMenu = null;
+            }
+        }
+
+
+        // --- Get Chat History Function (Unchanged) ---
+         function getChatHistory(currentUserMessage, forRegeneration = false, regenerationTargetMsgId = null) {
+             const history = [];
+             // Select message divs directly inside the inner container
+             const messages = chatOutputInner.querySelectorAll('.message-wrapper:not(.initial-message)');
+             messages.forEach((msgWrapper) => {
+                 const messageDiv = msgWrapper.querySelector('.message');
+                 if (!messageDiv) return;
+
+                 const sender = messageDiv.classList.contains('user-message') ? 'user' : 'ai';
+                 const messageId = msgWrapper.dataset.messageId;
+
+                 // Skip the AI message being regenerated
+                 if (forRegeneration && messageId === regenerationTargetMsgId && sender === 'ai') return;
+
+                 const contentElement = messageDiv.querySelector('.message-content');
+                 let content = '';
+                 if (contentElement) {
+                     // Simple text extraction for history
+                     content = contentElement.textContent || contentElement.innerText || '';
+                 }
+                 content = content.trim();
+
+                 if (content) {
+                     const role = sender === 'user' ? 'user' : 'model';
+                     history.push({ role: role, content: content });
+                 }
+             });
+             return history;
+         }
+
+        // --- Add Message to Chat Function (Updated for new structure) ---
         function addMessageToChat(text, sender, options = {}) {
-             const { isLoading = false, isError = false, timestamp: providedTimestamp = null, modelNameUsed = null, userQuery = null, modelValue = null, rawMarkdown = null, messageId: providedId = null, isStarred = false, // Star status might be passed if loading history
-                     replyToId = null, // Received reply ID
-              } = options;
+            const { isLoading = false, timestamp = null, modelNameUsed = null, userQuery = null, modelValue = null } = options;
 
-             const messageTimestamp = Date.now();
-             const displayTimestamp = providedTimestamp || getCurrentTimestamp();
-             // Ensure date separator is added *before* the message wrapper
-             addDateSeparatorIfNeeded(messageTimestamp);
+            const messageId = generateMessageId();
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('message-wrapper', sender === 'user' ? 'user-message-wrapper' : 'ai-message-wrapper');
+            messageWrapper.dataset.messageId = messageId; // ID on the wrapper
 
-             const messageId = providedId || generateMessageId();
-             const messageWrapper = document.createElement('div');
-             messageWrapper.classList.add('message-wrapper', `${sender}-message-wrapper`);
-             messageWrapper.dataset.sender = sender;
-             messageWrapper.dataset.timestampMs = messageTimestamp;
-             messageWrapper.dataset.messageId = messageId; // Add ID to wrapper
+            const avatarDiv = document.createElement('div');
+            avatarDiv.classList.add('avatar');
+            // Specific avatar styles/icons could be added here or kept in CSS
 
-             const avatarDiv = document.createElement('div');
-             avatarDiv.classList.add('avatar-placeholder');
-
-             const messageDiv = document.createElement('div');
-             messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
-             if (isError) messageDiv.classList.add('error-message');
-             // Apply starred class based on state (needs function to check)
-             // if (checkStarredStatus(messageId)) messageDiv.classList.add('starred');
-             messageDiv.dataset.messageId = messageId;
-             messageDiv.dataset.timestamp = displayTimestamp;
-             if (userQuery) messageDiv.dataset.userQuery = userQuery; // Store original query for AI msgs
-             if (modelValue) messageDiv.dataset.modelValue = modelValue; // Store model used for AI msgs
-             if (modelNameUsed) messageDiv.dataset.modelName = modelNameUsed; // Store model name used for AI msgs
-             messageDiv.setAttribute('tabindex', '0');
-
-             // Grouping Logic
-             const lastVisibleWrapper = Array.from(chatOutput.querySelectorAll('.message-wrapper:not(.skeleton-loading)')).pop();
-             const lastVisibleSender = lastVisibleWrapper?.dataset.sender;
-             const isGrouped = sender === lastVisibleSender; // Simplified grouping check
-             if (isGrouped && lastVisibleWrapper) {
-                 lastVisibleWrapper.classList.add('grouped'); // Add to previous
-                 // messageWrapper.classList.add('grouped'); // Add to current as well for tail removal
-             }
-             // Always update lastMessageSender for the *next* message check
-             lastMessageSender = sender;
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
+            // Store data attributes on the main message div for easier access
+            if (sender === 'ai' && modelNameUsed) {
+                messageDiv.dataset.userQuery = userQuery || '';
+                messageDiv.dataset.modelName = modelNameUsed || '';
+                messageDiv.dataset.modelValue = modelValue || '';
+            }
 
 
-             if (isLoading) {
-                 messageDiv.classList.add('typing-indicator');
-                 const selectedModelName = modelSelect.options[modelSelect.selectedIndex].text;
-                 const contentDiv = document.createElement('div');
-                 contentDiv.classList.add('message-content');
-                 contentDiv.innerHTML = `
-                     <div class="cool-loading-container">
-                         <div class="loading-spinner"></div>
-                         <span>מעבד עם ${selectedModelName}...</span>
-                         <button id="stop-generation-button" class="msg-action-button stop-button" title="עצור יצירה" aria-label="עצור יצירה">
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13H7v-2h10v2z"/></svg>
-                         </button>
-                     </div>`;
-                 messageDiv.appendChild(contentDiv);
-                 const stopButton = messageDiv.querySelector('#stop-generation-button');
-                 if (stopButton) { stopButton.addEventListener('click', stopTypingAndGeneration); }
-             }
-             else {
-                  // Store raw markdown if provided
-                  if (rawMarkdown) messageDiv.dataset.rawMarkdown = rawMarkdown;
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('message-content');
 
-                 // Add Reply Context UI if applicable
-                 if (replyToId) {
-                     const repliedMsgElement = chatOutput.querySelector(`.message[data-message-id="${replyToId}"]`);
-                     if (repliedMsgElement) {
-                         const replyContextDiv = document.createElement('div');
-                         replyContextDiv.classList.add('reply-context');
-                         const repliedSender = repliedMsgElement.closest('.message-wrapper')?.dataset.sender === 'user' ? 'אתה' : 'AI';
-                         const repliedText = (repliedMsgElement.dataset.rawMarkdown || repliedMsgElement.querySelector('.message-content')?.textContent || '').substring(0, 50) + '...';
-                         replyContextDiv.innerHTML = `<i class="fas fa-reply"></i> <strong>${repliedSender}:</strong> ${repliedText}`;
-                         replyContextDiv.addEventListener('click', () => {
-                            repliedMsgElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            repliedMsgElement.classList.add('highlighted');
-                            setTimeout(() => repliedMsgElement.classList.remove('highlighted'), 1500);
-                         });
-                         messageDiv.appendChild(replyContextDiv);
-                     }
-                 }
-
-
-                 const contentDiv = document.createElement('div');
-                 contentDiv.classList.add('message-content');
-
-                 // Render content (Plain text for user, Markdown for AI/Error)
-                 if (sender === 'user') {
-                    contentDiv.textContent = text;
+            if (isLoading) {
+                messageDiv.classList.add('typing-indicator');
+                const cleanModelName = modelNameUsed || 'AI'; // Use provided name or fallback
+                contentDiv.innerHTML = `
+                    <div class="cool-loading-container">
+                        <div class="loading-spinner"></div>
+                        <span class="loading-model-name">${cleanModelName} חושב...</span>
+                        <button id="stop-generation-button" class="stop-button" title="עצור יצירה" aria-label="עצור יצירה">
+                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13H7v-2h10v2z"/></svg>
+                        </button>
+                    </div>`;
+                messageDiv.appendChild(contentDiv);
+                const stopButton = messageDiv.querySelector('#stop-generation-button');
+                if (stopButton) {
+                    stopButton.addEventListener('click', stopTypingAndGeneration);
+                }
+            } else {
+                 // Basic text rendering (Replace with Markdown later if needed)
+                 if (text) {
+                    contentDiv.textContent = text; // Safer default
+                     // Simple link detection (example only, needs robust library)
+                     // contentDiv.innerHTML = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
                  } else {
-                    marked.setOptions({ breaks: true, gfm: true /*, sanitize: true */ });
-                    try {
-                        contentDiv.innerHTML = marked.parse(text || ''); // Assuming marked's sanitize is enough or handled elsewhere
-                    } catch (e) { console.error("Markdown parsing error:", e); contentDiv.textContent = text; }
+                    contentDiv.textContent = " "; // Prevent empty div collapse issues
                  }
-                 messageDiv.appendChild(contentDiv);
-
-                 // Render Math (after content is added)
-                 renderSingleElementMath(contentDiv);
-
-                 // Render Images (after content is added)
-                  contentDiv.querySelectorAll('a').forEach(link => {
-                     if (/\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(link.href)) {
-                         const img = document.createElement('img');
-                         img.src = link.href;
-                         img.alt = "תמונה שסופקה"; // More generic alt
-                         img.loading = 'lazy';
-                         img.addEventListener('click', () => showImageLightbox(img.src));
-                         link.parentNode.replaceChild(img, link);
-                     } else if (!link.href.startsWith(window.location.origin) && !link.href.startsWith('mailto:')) {
-                        link.target = '_blank';
-                        link.rel = 'noopener noreferrer';
-                     }
-                  });
 
 
-                 // Footer (with Read Receipts)
-                 const footerDiv = document.createElement('div');
-                 footerDiv.classList.add('message-footer');
-                 if (sender === 'ai' && modelNameUsed && displayTimestamp !== 'התחל') {
+                messageDiv.appendChild(contentDiv);
+
+                // Footer (Timestamp & Model)
+                const footerDiv = document.createElement('div');
+                footerDiv.classList.add('message-footer');
+                const currentTimestamp = timestamp || getCurrentTimestamp();
+                messageDiv.dataset.timestamp = currentTimestamp; // Store timestamp
+
+                if (sender === 'ai' && modelNameUsed && timestamp !== 'התחל') {
                     const modelSpan = document.createElement('span');
                     modelSpan.classList.add('model-indicator');
                     modelSpan.textContent = `(${modelNameUsed})`;
-                    if(isError) { modelSpan.textContent = `(${modelNameUsed || 'שגיאה'})`; modelSpan.style.color = 'var(--error-msg-text)';} // Error indicator
                     footerDiv.appendChild(modelSpan);
-                  }
-                 const timestampSpan = document.createElement('span');
-                 timestampSpan.classList.add('timestamp');
-                 timestampSpan.textContent = displayTimestamp;
-                 // Read Receipts (Mockup for user messages)
-                 if(sender === 'user' && displayTimestamp !== 'התחל') {
-                     const receiptsSpan = document.createElement('span');
-                     receiptsSpan.classList.add('read-receipts', 'sent'); // Start as 'sent'
-                     receiptsSpan.setAttribute('aria-label', 'נשלח');
-                     footerDiv.appendChild(receiptsSpan);
+                }
+                const timestampSpan = document.createElement('span');
+                timestampSpan.classList.add('timestamp');
+                timestampSpan.textContent = currentTimestamp;
+                footerDiv.appendChild(timestampSpan);
+                messageDiv.appendChild(footerDiv);
+
+                // Add Ellipsis Trigger Button (if not loading indicator)
+                 const actionsTrigger = document.createElement('button');
+                 actionsTrigger.classList.add('message-actions-trigger');
+                 actionsTrigger.title = "פעולות נוספות";
+                 actionsTrigger.setAttribute('aria-label', "פעולות נוספות");
+                 actionsTrigger.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>';
+                 actionsTrigger.addEventListener('click', (e) => {
+                     e.stopPropagation();
+                     openMessageActionMenu(actionsTrigger, messageDiv);
+                 });
+                 messageDiv.appendChild(actionsTrigger);
+
+                 // Add copy buttons to code blocks after content is set
+                 contentDiv.querySelectorAll('pre').forEach(addCopyButtonToCodeBlock);
+            }
+
+            // Assemble the wrapper
+            if (sender === 'user') {
+                messageWrapper.appendChild(messageDiv);
+                messageWrapper.appendChild(avatarDiv);
+            } else {
+                messageWrapper.appendChild(avatarDiv);
+                messageWrapper.appendChild(messageDiv);
+            }
+
+
+            // Append to the inner container
+            chatOutputInner.appendChild(messageWrapper);
+
+
+            // Scroll logic and counter
+            const shouldScroll = isScrolledToBottom || isLoading; // Scroll if at bottom or loading
+            if (shouldScroll) {
+                // Use instant scroll for loading indicator for immediate visibility
+                if (isLoading) instantScrollToBottom();
+                else setTimeout(smoothScrollToBottom, 50); // Slight delay for render
+            } else if (!isLoading) {
+                 // Increment counter only for non-loading, non-initial AI messages
+                 if (sender === 'ai' && messageDiv.dataset.timestamp !== 'התחל') {
+                    incrementNewMessageCounter();
                  }
-                 footerDiv.appendChild(timestampSpan); // Timestamp is usually last visually in RTL
-                 messageDiv.appendChild(footerDiv);
+            }
 
+            return messageDiv; // Return the main message div for typing effect reference
+        }
 
-                 // Actions (Only if not initial message)
-                 if (displayTimestamp !== 'התחל') {
-                     const actionsDiv = document.createElement('div');
-                     actionsDiv.classList.add('message-actions');
-
-                     actionsDiv.appendChild(createActionButton('copy-button', 'העתק הודעה', 'fas fa-copy', handleCopyClick));
-                     actionsDiv.appendChild(createActionButton('reply-button', 'הגב', 'fas fa-reply', handleReplyClick));
-
-                     if (sender === 'ai' && !isError) {
-                         const regenButton = createActionButton('regenerate-button', 'צור תגובה מחדש', 'fas fa-sync-alt', handleRegenerateClick);
-                         const spinner = document.createElement('div'); spinner.className = 'action-spinner'; regenButton.appendChild(spinner);
-                         actionsDiv.appendChild(regenButton);
-                     }
-                     if (sender === 'user') {
-                         actionsDiv.appendChild(createActionButton('edit-button', 'ערוך (UI)', 'fas fa-pencil-alt', handleEditClick));
-                         actionsDiv.appendChild(createActionButton('delete-button', 'מחק (UI)', 'fas fa-trash-alt', handleDeleteClick));
-                     }
-
-                     const isCurrentlyPinned = pinnedMessageId === messageId;
-                     const pinButton = createActionButton('pin-button', isCurrentlyPinned ? 'בטל נעיצה' : 'נעל הודעה', 'fas fa-thumbtack', handlePinClick);
-                     if (isCurrentlyPinned) pinButton.classList.add('active');
-                     actionsDiv.appendChild(pinButton);
-
-                     // Star needs state from somewhere (e.g., localStorage array)
-                     // let isCurrentlyStarred = checkStarredStatus(messageId); // Hypothetical function
-                     const starButton = createActionButton('star-button', isStarred ? 'בטל כוכב' : 'סמן בכוכב', isStarred ? 'fas fa-star' : 'far fa-star', handleStarClick);
-                     if (isStarred) starButton.classList.add('active'); // Initial state if passed
-                     actionsDiv.appendChild(starButton);
-
-                     messageDiv.appendChild(actionsDiv);
-                     finalizeMessageRendering(contentDiv); // Highlight code, etc.
-                 }
-             }
-
-             messageWrapper.appendChild(avatarDiv);
-             messageWrapper.appendChild(messageDiv);
-
-             return messageDiv; // Return the core message div
-         }
-
-
-         // --- Create Action Button Helper ---
-         function createActionButton(className, title, iconClass, clickHandler) { const button = document.createElement('button'); button.className = `msg-action-button ${className}`; button.title = title; button.setAttribute('aria-label', title); button.innerHTML = `<i class="${iconClass}"></i>`; button.type = 'button'; /* Good practice */ button.addEventListener('click', clickHandler); return button; }
-
-
-        // --- AI Typing Effect (Render instantly) ---
-        // Simplified: Render full parsed markdown immediately, apply cursor briefly
-         function typeAiResponse(messageElement, fullMarkdownText) {
+        // --- AI Typing Effect Function (Simplified for Text Content) ---
+        function typeAiResponse(messageElement, fullText) {
              const contentDiv = messageElement.querySelector('.message-content');
              if (!contentDiv) { console.error("Content div not found for typing"); return; }
 
-             messageElement.dataset.rawMarkdown = fullMarkdownText; // Store raw
-             messageElement.classList.add('typing-cursor'); // Show cursor
-
-             marked.setOptions({ breaks: true, gfm: true /*, sanitize: true */ });
-             let htmlContent = '';
-             try {
-                 htmlContent = marked.parse(fullMarkdownText || '');
-             } catch (e) { htmlContent = fullMarkdownText; console.error("Markdown parsing error:", e); }
-
-             contentDiv.innerHTML = htmlContent; // Render immediately
-             finalizeMessageRendering(contentDiv); // Add copy buttons, highlight, math, etc.
-             renderSingleElementMath(contentDiv); // Ensure math renders if KaTeX loaded late
-
+             contentDiv.textContent = ''; // Clear previous content
+             messageElement.classList.add('typing-cursor');
+             let currentIndex = 0;
              clearTimeout(typingTimeout);
-             typingTimeout = setTimeout(() => { // Remove cursor after short delay
-                 finalizeAiMessage(messageElement);
-             }, 150);
 
-             scrollToBottom('auto'); // Keep scrolling down
+             function typeCharacter() {
+                 if (currentIndex < fullText.length) {
+                     contentDiv.textContent += fullText[currentIndex];
+                     currentIndex++;
+                     // Scroll only if near bottom during typing
+                     if (chatOutput.scrollHeight - chatOutput.scrollTop - chatOutput.clientHeight < SCROLL_THRESHOLD * 1.5) {
+                         chatOutput.scrollTop = chatOutput.scrollHeight;
+                     }
+                     typingTimeout = setTimeout(typeCharacter, TYPING_SPEED);
+                 } else {
+                     finalizeAiMessage(messageElement, contentDiv);
+                 }
+             }
+             typeCharacter();
          }
 
-        // --- Finalize Rendering (Highlight, Copy, Math, Collapse) ---
-        function finalizeMessageRendering(contentDiv) { if (!contentDiv) return; contentDiv.querySelectorAll('pre').forEach(pre => { if (!pre.querySelector('code')) { const code = document.createElement('code'); const langClass = Array.from(pre.classList).find(c => c.startsWith('language-')); if (langClass) code.className = langClass; code.textContent = pre.textContent; pre.textContent = ''; pre.appendChild(code); } addCopyButtonToCodeBlock(pre); if (pre.scrollHeight > 210 && !pre.querySelector('.expand-code-button')) { pre.classList.add('collapsible'); const expandButton = document.createElement('button'); expandButton.className = 'expand-code-button'; expandButton.textContent = 'הצג יותר'; expandButton.type = 'button'; expandButton.onclick = (e) => { e.stopPropagation(); pre.classList.toggle('expanded'); expandButton.textContent = pre.classList.contains('expanded') ? 'הצג פחות' : 'הצג יותר'; }; pre.appendChild(expandButton); } }); contentDiv.querySelectorAll('pre code').forEach((block) => { if (typeof hljs !== 'undefined') try { hljs.highlightElement(block); } catch(e){console.error("Highlight error",e)} }); /* Render Math (now called in addMessage/typeResponse) */ }
 
-        // --- Finalize AI Message ---
-        function finalizeAiMessage(messageElement) { clearTimeout(typingTimeout); typingTimeout = null; if (messageElement) messageElement.classList.remove('typing-cursor'); scrollToBottom('smooth'); enableInput(); }
+        // --- Finalize AI Message after typing/rendering ---
+        function finalizeAiMessage(messageElement, contentDiv) {
+             clearTimeout(typingTimeout); typingTimeout = null;
+             if (messageElement) {
+                 messageElement.classList.remove('typing-cursor');
+                 // Re-add copy buttons if content was dynamically generated
+                 contentDiv.querySelectorAll('pre').forEach(addCopyButtonToCodeBlock);
+                 // Maybe re-render using Markdown here if needed
+             }
+             // Smooth scroll to bottom after typing finishes, if user was near bottom
+             if (isScrolledToBottom) {
+                 setTimeout(smoothScrollToBottom, 100);
+             }
 
-        // --- Stop Generation ---
-        function stopTypingAndGeneration() { console.log('Stopping generation...'); clearTimeout(typingTimeout); typingTimeout = null; const typingIndicator = chatOutput.querySelector('.typing-indicator'); if (typingIndicator) typingIndicator.closest('.message-wrapper')?.remove(); const typingCursorMsg = chatOutput.querySelector('.ai-message.typing-cursor'); if(typingCursorMsg) typingCursorMsg.classList.remove('typing-cursor'); if (currentAbortController) { currentAbortController.abort(); currentAbortController = null; console.log('Abort signal sent.'); /* Error handled in fetch catch */ } else { console.log('No active fetch to abort.'); enableInput(); } }
+             if (!document.querySelector('.typing-indicator') && !typingTimeout) {
+                 userInput.disabled = false;
+                 sendButton.disabled = false;
+                 userInput.style.opacity = '1';
+                 if (document.activeElement !== sendButton &&
+                     !document.activeElement.closest('#settings-popover') && // Check if focus is in popover
+                     !document.activeElement.closest('.message-actions-menu')) { // Check if focus is in message menu
+                     userInput.focus();
+                 }
+             }
+        }
 
-        // --- Add Copy Button to Code ---
-        function addCopyButtonToCodeBlock(preElement) { if (!preElement || preElement.querySelector('.copy-code-button')) return; const copyButton = document.createElement('button'); copyButton.textContent = 'העתק קוד'; copyButton.className = 'copy-code-button'; copyButton.setAttribute('aria-label', 'העתק קוד'); copyButton.type = 'button'; copyButton.addEventListener('click', (e) => { e.stopPropagation(); const codeElement = preElement.querySelector('code'); if (!codeElement) return; const codeToCopy = codeElement.textContent || ''; navigator.clipboard.writeText(codeToCopy).then(() => { copyButton.textContent = 'הועתק!'; copyButton.classList.add('copied'); setTimeout(() => { copyButton.textContent = 'העתק קוד'; copyButton.classList.remove('copied'); }, 1500); }).catch(err => { console.error('שגיאה בהעתקת קוד: ', err); copyButton.textContent = 'שגיאה'; }); }); preElement.appendChild(copyButton); }
+        // --- Stop Typing and Fetch Request ---
+         function stopTypingAndGeneration() {
+             console.log('Stopping generation...');
+             clearTimeout(typingTimeout); typingTimeout = null;
 
-        // --- Disable/Enable Input ---
-        function disableInput() { userInput.disabled = true; sendButton.disabled = true; userInput.style.opacity = '0.6'; sendButton.classList.remove('sending'); }
-        function enableInput() { if (!currentAbortController && !typingTimeout && !document.querySelector('.typing-indicator')) { userInput.disabled = false; userInput.style.opacity = '1'; adjustTextareaHeight(); if (document.activeElement === document.body || document.activeElement === chatOutput) { try { userInput.focus(); } catch(e){} } } }
+             const typingIndicatorWrapper = chatOutputInner.querySelector('.typing-indicator')?.closest('.message-wrapper');
+             if (typingIndicatorWrapper) typingIndicatorWrapper.remove();
 
-        // --- Send Message (Enhanced with Skeleton UI) ---
+             const typingCursorMsg = chatOutputInner.querySelector('.typing-cursor');
+             if(typingCursorMsg) {
+                 finalizeAiMessage(typingCursorMsg, typingCursorMsg.querySelector('.message-content'));
+             }
+
+             if (currentAbortController) {
+                 currentAbortController.abort();
+                 currentAbortController = null;
+                 console.log('Fetch request aborted.');
+             } else {
+                 console.log('No active fetch request to abort.');
+             }
+             // Always re-enable input after stopping
+             userInput.disabled = false;
+             sendButton.disabled = false;
+             userInput.style.opacity = '1';
+             userInput.focus();
+         }
+
+
+        // --- Add Copy Button to Code Blocks (Unchanged) ---
+        function addCopyButtonToCodeBlock(preElement) {
+             if (!preElement || preElement.querySelector('.copy-code-button')) return;
+             const copyButton = document.createElement('button');
+             copyButton.textContent = 'העתק'; // Shorter text
+             copyButton.className = 'copy-code-button';
+             copyButton.setAttribute('aria-label', 'העתק קוד');
+             copyButton.addEventListener('click', (e) => {
+                 e.stopPropagation();
+                 const codeElement = preElement.querySelector('code') || preElement;
+                 const codeToCopy = codeElement.textContent || '';
+                 navigator.clipboard.writeText(codeToCopy).then(() => {
+                     copyButton.textContent = 'הועתק!';
+                     copyButton.classList.add('copied');
+                     setTimeout(() => {
+                         copyButton.textContent = 'העתק';
+                         copyButton.classList.remove('copied');
+                     }, 1500);
+                 }).catch(err => { console.error('שגיאה בהעתקת קוד: ', err); copyButton.textContent = 'שגיאה'; });
+             });
+             preElement.appendChild(copyButton);
+         }
+
+        // --- Send Message Function (Updated) ---
         async function sendMessage(textToSend, options = {}, skipResponse = false) {
              const { isRegeneration = false, originalAiMsgId = null, modelValueOverride = null, modelNameOverride = null } = options;
-             let currentText = textToSend !== undefined ? textToSend.trim() : userInput.value.trim();
+             const currentText = textToSend !== undefined ? textToSend.trim() : userInput.value.trim();
 
-             if (currentText === '' || currentAbortController || typingTimeout) return;
+             if (currentText === '' || document.querySelector('.typing-indicator')) return; // Prevent sending empty or while loading
 
-             disableInput();
-             sendButton.classList.add('sending');
-             isAutoScrolling = true; // Ensure auto-scroll for new messages
+             closeMessageActionMenu(); // Close message menu if open
+             toggleSettingsPopover(false); // Close settings if open
 
-             // Handle History & Draft
-             if (!isRegeneration) {
-                 if (currentText !== inputHistory[inputHistory.length - 1]) {
-                     inputHistory.push(currentText);
-                     if (inputHistory.length > MAX_INPUT_HISTORY) inputHistory.shift();
-                     localStorage.setItem('inputHistory', JSON.stringify(inputHistory));
-                 }
-                 inputHistoryIndex = inputHistory.length;
-                 draftMessage = ''; localStorage.removeItem('draftMessage');
-             }
+             const selectedStyleInstruction = styleSelect.value.trim();
+             userInput.disabled = true; sendButton.disabled = true; userInput.style.opacity = '0.7';
 
-             // Prepare message options (including reply)
-             const messageOptions = { replyToId: currentReplyMessageId };
+             // Find the original message *div* to remove/replace if regenerating
+             const originalAiMsgDiv = originalAiMsgId ? chatOutputInner.querySelector(`.message-wrapper[data-message-id="${originalAiMsgId}"] .message.ai-message`) : null;
+
 
              if (!isRegeneration) {
-                 // Add user message directly (no skeleton needed typically)
-                 addMessageToChat(currentText, 'user', messageOptions);
-                 userInput.value = ''; adjustTextareaHeight(); sendButton.disabled = true; charCounter.textContent = '0';
-                 if (currentReplyMessageId) hideReplyPreview();
-             } else {
-                 // Remove old AI message if regenerating
-                const oldAiMsgWrapper = chatOutput.querySelector(`.message-wrapper[data-message-id="${originalAiMsgId}"]`);
-                if (oldAiMsgWrapper) oldAiMsgWrapper.remove();
-                 lastMessageSender = null; lastMessageTimestamp = null; // Reset grouping/date check
-                 // updateGrouping(); // Update previous message's grouping if needed
+                 addMessageToChat(currentText, 'user', { timestamp: getCurrentTimestamp() });
+                 userInput.value = ''; adjustTextareaHeight();
+             } else if (originalAiMsgDiv) {
+                 // Remove the entire wrapper of the message being regenerated
+                 originalAiMsgDiv.closest('.message-wrapper')?.remove();
              }
 
-             if (skipResponse && !isRegeneration) { enableInput(); return; }
 
-             // --- Fetch Logic ---
-             const historyArray = getChatHistory( null, isRegeneration, originalAiMsgId );
-             const systemPrompt = localStorage.getItem('systemPrompt') || '';
-             const temperature = parseFloat(localStorage.getItem('temperature') || '0.7');
-             const selectedOption = modelValueOverride ? Array.from(modelSelect.options).find(opt => opt.value === modelValueOverride) || modelSelect.options[modelSelect.selectedIndex] : modelSelect.options[modelSelect.selectedIndex];
-             const modelName = modelNameOverride || selectedOption.text; const selectedModelFile = selectedOption.value; const currentApiUrl = BASE_API_URL + selectedModelFile;
+             if (skipResponse && !isRegeneration) {
+                 console.log('Initial URL message added, skipping AI response fetch.');
+                 userInput.disabled = false; sendButton.disabled = false; userInput.style.opacity = '1'; userInput.focus();
+                 instantScrollToBottom(); // Scroll down to see the added message
+                 return;
+             }
 
-             // Show AI Skeleton Message
-             const aiSkeletonId = addSkeletonMessage('ai');
+             const historyArray = getChatHistory(null, isRegeneration, originalAiMsgId);
+             let historyStringPart = "";
+             historyArray.forEach(message => { historyStringPart += `[ROLE=${message.role}] ${message.content}\n`; });
+             historyStringPart = historyStringPart.trim();
+
+             let combinedStructuredText = "";
+             if (selectedStyleInstruction) { combinedStructuredText += `[SYSTEM_STYLE_INSTRUCTION_START]\n${selectedStyleInstruction}\n[SYSTEM_STYLE_INSTRUCTION_END]\n`; }
+             combinedStructuredText += `[USER_INPUT_START]\n${currentText}\n[USER_INPUT_END]\n`;
+             if (historyStringPart) { combinedStructuredText += `[CHAT_HISTORY_START]\n${historyStringPart}\n[CHAT_HISTORY_END]`; }
+
+             const selectedOption = modelValueOverride
+                 ? (Array.from(modelSelect.options).find(opt => opt.value === modelValueOverride) || modelSelect.options[modelSelect.selectedIndex])
+                 : modelSelect.options[modelSelect.selectedIndex];
+             const modelName = modelNameOverride || selectedOption.text; // Use full text like "Gemini Flash"
+             const selectedModelFile = selectedOption.value;
+             const currentApiUrl = BASE_API_URL + selectedModelFile;
+
+             const typingIndicatorElement = addMessageToChat(null, 'ai', { isLoading: true, modelNameUsed: modelName }); // Pass model name here
              currentAbortController = new AbortController(); const signal = currentAbortController.signal;
 
              try {
-                 console.log(`Sending to ${currentApiUrl} with model ${modelName}`);
-                 const requestPayload = { text: currentText, history: historyArray, system_prompt: systemPrompt, temperature: temperature, /* reply_context: ... */ };
-                 const response = await fetch(currentApiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestPayload), signal });
+                 const requestBody = { text: combinedStructuredText };
+                 const response = await fetch(currentApiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody), signal });
+                 const wasAborted = signal.aborted; currentAbortController = null;
 
-                 const wasAborted = signal.aborted;
+                 // Remove indicator only if it still exists
+                  const currentIndicatorWrapper = chatOutputInner.querySelector('.typing-indicator')?.closest('.message-wrapper');
+                  if (currentIndicatorWrapper) currentIndicatorWrapper.remove();
 
-                 if (wasAborted) {
-                      console.log('Fetch aborted by user.');
-                      // Replace skeleton with stopped message only if skeleton still exists
-                      replaceSkeletonMessage(aiSkeletonId, 'היצירה הופסקה.', 'ai', { modelNameUsed: 'מערכת', isError: true, timestamp: getCurrentTimestamp() });
-                      currentAbortController = null; // Clear controller here
-                      enableInput(); // Enable input after handling abort
-                      return;
-                 }
 
-                 if (!response.ok) {
-                     let errorText = `שגיאת שרת: ${response.status} ${response.statusText}`;
-                     try { const errorData = await response.json(); if(errorData && (errorData.error || errorData.message)) errorText += ` - ${errorData.error || errorData.message}`; } catch (e) {}
-                     throw new Error(errorText);
-                 }
+                 if (wasAborted) throw new DOMException('Aborted by user', 'AbortError');
+                 if (!response.ok) { /* Error handling as before */ throw new Error(`Server Error: ${response.status} ${response.statusText}`); }
 
                  const data = await response.json();
-                 console.log("Received data:", data);
-
                  if (data && data.text) {
-                     // Replace Skeleton with real message
-                     replaceSkeletonMessage(aiSkeletonId, data.text, 'ai', {
-                         timestamp: getCurrentTimestamp(),
-                         modelNameUsed: modelName,
-                         userQuery: currentText, // Pass original query
-                         modelValue: selectedModelFile, // Pass model value
-                         rawMarkdown: data.text,
-                         replyToId: isRegeneration ? null : currentReplyMessageId
-                     });
-                     // Trigger Math rendering again for the new message content
-                     const newMsgElement = chatOutput.querySelector(`.message[data-message-id="${aiSkeletonId}"] .message-content`);
-                     if (newMsgElement) renderSingleElementMath(newMsgElement);
-                 } else {
-                     throw new Error("תגובה לא צפויה מהשרת (טקסט חסר).");
-                 }
-
+                     const aiMessageElement = addMessageToChat(data.text, 'ai', { timestamp: getCurrentTimestamp(), modelNameUsed: modelName, userQuery: currentText, modelValue: selectedModelFile });
+                     if (aiMessageElement) { typeAiResponse(aiMessageElement, data.text); }
+                     else { /* Handle error if element not added */ }
+                 } else { /* Handle invalid data */ addMessageToChat("תגובה לא תקינה מהשרת.", 'ai', { modelNameUsed: modelName }); if (!typingTimeout) { userInput.disabled = false; sendButton.disabled = false; userInput.style.opacity = '1'; userInput.focus(); } }
              } catch (error) {
-                 console.error("Error caught in sendMessage:", error);
-                 if (error.name !== 'AbortError') {
-                     const userFriendlyError = formatErrorForUser(error);
-                     replaceSkeletonMessage(aiSkeletonId, userFriendlyError, 'ai', { modelNameUsed: 'שגיאה', isError: true, timestamp: getCurrentTimestamp() });
-                 } else {
-                    // AbortError already handled above, or cleanup if needed
-                    const skel = chatOutput.querySelector(`.message-wrapper[data-message-id="${aiSkeletonId}"]`);
-                    skel?.remove();
-                 }
-             } finally {
-                 // Ensure controller is cleared and input enabled AFTER potential replacement
                  currentAbortController = null;
-                 enableInput();
-                 sendButton.classList.remove('sending');
-             }
-         }
+                 // Ensure indicator is removed on error too
+                 const errorIndicatorWrapper = chatOutputInner.querySelector('.typing-indicator')?.closest('.message-wrapper');
+                 if (errorIndicatorWrapper) errorIndicatorWrapper.remove();
 
-        // --- Format Error ---
-        function formatErrorForUser(error) { let userFriendlyError = "אופס! משהו השתבש."; if (error.message) { if (error.message.includes("שגיאת שרת:")) { userFriendlyError = `${error.message.replace('שגיאת שרת:','שגיאת שרת (')}). נסה שוב מאוחר יותר.`; } else if (error.message.toLowerCase().includes("networkerror") || error.message.toLowerCase().includes("failed to fetch")) { userFriendlyError = "שגיאת רשת. בדוק את חיבור האינטרנט ונסה שוב."; } else { console.error("Specific Error:", error.message); userFriendlyError = `אירעה שגיאה: ${error.message}`; } } return userFriendlyError; }
+                 if (error.name === 'AbortError') { console.log('Request aborted.'); }
+                 else { console.error("Error sending/receiving message:", error); addMessageToChat(`שגיאה: ${error.message}`, 'ai', { modelNameUsed: modelName }); }
+                 // Re-enable input on error/abort if nothing else is loading
+                 if (!document.querySelector('.typing-indicator') && !typingTimeout) { userInput.disabled = false; sendButton.disabled = false; userInput.style.opacity = '1'; userInput.focus(); }
+             }
+        }
 
         // --- UI Interaction Functions ---
-        function toggleDarkMode(forceMode) { const body = document.body; let isDark; if (forceMode) isDark = (forceMode === 'dark'); else isDark = !body.classList.contains('dark-mode'); body.classList.toggle('dark-mode', isDark); themeIconLight.style.display = isDark ? 'none' : 'inline-block'; sunIcon.style.display = isDark ? 'inline-block' : 'none'; localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled'); updateSelectArrowColor(); updateHighlightTheme(isDark); applyAccentColor(localStorage.getItem('accentColor')); }
-        function updateHighlightTheme(isDark) { /* Needs proper implementation for dynamic theme switching */ }
-        function updateSelectArrowColor() { const getEncodedColor = () => { try { const colorValue = getComputedStyle(document.documentElement).getPropertyValue('--select-arrow').trim(); const hexColor = colorValue.startsWith('#') ? colorValue.substring(1) : 'ffffff'; const validHex = /^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(hexColor); return encodeURIComponent(validHex ? hexColor : 'ffffff'); } catch (e) { console.error("Error getting computed style for --select-arrow", e); return 'ffffff'; } }; const encodedColor = getEncodedColor(); modelSelect.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg fill="%23${encodedColor}" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>')`; }
-        function downloadChat() { let chatContent = `# ${chatTitle.textContent}\n\nModel: ${modelSelect.options[modelSelect.selectedIndex].text}\nTimestamp: ${new Date().toLocaleString('he-IL')}\n\n---\n\n`; const messages = chatOutput.querySelectorAll('.message:not(.typing-indicator)'); messages.forEach(msg => { const wrapper = msg.closest('.message-wrapper'); if (!wrapper || wrapper.classList.contains('skeleton-loading')) return; const sender = wrapper.dataset.sender === 'user' ? 'User' : 'AI'; const timestamp = msg.dataset.timestamp || ''; const modelInfo = msg.dataset.modelName && sender === 'AI' ? ` (${msg.dataset.modelName})` : ''; let textContent = msg.dataset.rawMarkdown || msg.querySelector('.message-content')?.innerText || ''; if (timestamp === "התחל" && sender === "AI") return; const replyContext = msg.querySelector('.reply-context'); let replyInfo = ''; if (replyContext) { replyInfo = `> ${replyContext.textContent.trim()}\n\n`; } chatContent += `**[${timestamp}] ${sender}${modelInfo}:**\n${replyInfo}${textContent.trim()}\n\n`; }); const blob = new Blob([chatContent], { type: 'text/markdown;charset=utf-8' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); const now = new Date(); const filename = `ai_chat_log_${now.toISOString().split('T')[0]}.md`; link.download = filename; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); }
-        function handleClearChatClick() { showConfirmation( 'אישור מחיקת שיחה', 'האם אתה בטוח שברצונך למחוק לצמיתות את כל ההודעות בשיחה זו?', 'מחק הכל', 'danger', () => { clearChat(); hideModal(confirmationModal); } ); }
-        function clearChat() { console.log("Clearing chat..."); stopTypingAndGeneration(); while (chatOutput.firstChild && chatOutput.firstChild !== scrollToBottomButton && chatOutput.firstChild !== scrollToTopButton) { chatOutput.removeChild(chatOutput.firstChild); } addMessageToChat("👋 שלום! אני מוכן לעזור...", 'ai', { timestamp: 'התחל' }); messageCounter = 0; lastMessageSender = null; lastMessageTimestamp = null; pinnedMessageId = null; localStorage.removeItem('pinnedMessageId'); updatePinnedMessageDisplay(); hideReplyPreview(); scrollToBottomButton.classList.remove('visible'); scrollToTopButton.style.display = 'none'; isAutoScrolling = true; userScrolledUp = false; userInput.value = ''; draftMessage = ''; localStorage.removeItem('draftMessage'); localStorage.removeItem('inputHistory'); inputHistory = []; inputHistoryIndex = 0; adjustTextareaHeight(); enableInput(); console.log("Chat cleared."); }
-        function handleUrlParameter() { const urlParams = new URLSearchParams(window.location.search); const conversationText = urlParams.get('conversation'); if (conversationText) { const decodedText = decodeURIComponent(conversationText).trim(); if (decodedText) { setTimeout(() => sendMessage(decodedText, {}, true), 100); const nextURL = window.location.pathname; window.history.replaceState({}, document.title, nextURL); } } }
-        function adjustTextareaHeight() { const currentLength = userInput.value.length; const scrollHeight = userInput.scrollHeight; const maxHeight = parseInt(window.getComputedStyle(userInput).maxHeight, 10); userInput.style.height = 'auto'; userInput.style.height = `${Math.min(scrollHeight, maxHeight)}px`; userInput.style.overflowY = scrollHeight > maxHeight ? 'auto' : 'hidden'; charCounter.textContent = `${currentLength}${MAX_CHAR_COUNT ? `/${MAX_CHAR_COUNT}` : ''}`; charCounter.classList.toggle('limit-exceeded', MAX_CHAR_COUNT && currentLength > MAX_CHAR_COUNT); sendButton.disabled = userInput.value.trim().length === 0 || (MAX_CHAR_COUNT && currentLength > MAX_CHAR_COUNT) || currentAbortController !== null || typingTimeout !== null; }
-        const debouncedAdjustHeight = debounce(adjustTextareaHeight, 50);
-        function handleCopyClick(event) { const button = event.currentTarget; const messageElement = button.closest('.message'); if (!messageElement) return; let textToCopy = messageElement.dataset.rawMarkdown || ''; if (!textToCopy) { const contentElement = messageElement.querySelector('.message-content'); if (!contentElement) return; const tempDiv = document.createElement('div'); tempDiv.innerHTML = contentElement.innerHTML; tempDiv.querySelectorAll('br').forEach(br => br.replaceWith('\n')); textToCopy = tempDiv.textContent || tempDiv.innerText || ''; } navigator.clipboard.writeText(textToCopy.trim()).then(() => { button.innerHTML = '<i class="fas fa-check"></i>'; button.classList.add('copied'); button.title = 'הועתק!'; setTimeout(() => { button.innerHTML = '<i class="fas fa-copy"></i>'; button.classList.remove('copied'); button.title = 'העתק הודעה'; }, 1500); }).catch(err => { console.error('Failed to copy message: ', err); }); }
-        function handleRegenerateClick(event) { if (currentAbortController || typingTimeout) return; const button = event.currentTarget; const spinner = button.querySelector('.action-spinner'); const messageElement = button.closest('.message'); if (!messageElement) return; const userQuery = messageElement.dataset.userQuery; const modelValue = messageElement.dataset.modelValue; const modelName = messageElement.dataset.modelName; const messageId = messageElement.dataset.messageId; if (!userQuery || !modelValue || !modelName || !messageId) return; button.disabled = true; spinner.style.display = 'inline-block'; sendMessage(userQuery, { isRegeneration: true, originalAiMsgId: messageId, modelValueOverride: modelValue, modelNameOverride: modelName }) .finally(() => { setTimeout(() => { const newButton = chatOutput.querySelector(`.message[data-message-id="${messageId}"] .regenerate-button`); if(newButton) { newButton.disabled = false; const newSpinner = newButton.querySelector('.action-spinner'); if (newSpinner) newSpinner.style.display = 'none'; } else { enableInput(); } }, 100); }); }
-        function handleReplyClick(event) { const button = event.currentTarget; const messageElement = button.closest('.message'); if (!messageElement) return; currentReplyMessageId = messageElement.dataset.messageId; showReplyPreview(messageElement); userInput.focus(); }
-        function showReplyPreview(messageElement) { const sender = messageElement.closest('.message-wrapper')?.dataset.sender === 'user' ? 'אתה' : 'AI'; const content = (messageElement.dataset.rawMarkdown || messageElement.querySelector('.message-content')?.textContent || '').substring(0, 70) + '...'; replySenderSpan.textContent = `${sender}:`; replyTextSpan.textContent = content; replyPreviewArea.classList.add('visible'); adjustChatOutputHeight(); }
-        function hideReplyPreview() { if (!replyPreviewArea.classList.contains('visible')) return; replyPreviewArea.classList.remove('visible'); currentReplyMessageId = null; adjustChatOutputHeight(); }
-        function handlePinClick(event) { const button = event.currentTarget; const messageElement = button.closest('.message'); const messageId = messageElement?.dataset.messageId; if (!messageId) return; if (pinnedMessageId === messageId) { pinnedMessageId = null; localStorage.removeItem('pinnedMessageId'); updatePinnedMessageDisplay(); button.classList.remove('active'); button.title = 'נעל הודעה'; button.querySelector('i').className = 'fas fa-thumbtack'; } else { const oldPinnedMessageId = pinnedMessageId; pinnedMessageId = messageId; localStorage.setItem('pinnedMessageId', messageId); updatePinnedMessageDisplay(); button.classList.add('active'); button.title = 'בטל נעיצה'; if (oldPinnedMessageId) { const oldPinButton = chatOutput.querySelector(`.message[data-message-id="${oldPinnedMessageId}"] .pin-button`); if(oldPinButton) { oldPinButton.classList.remove('active'); oldPinButton.title = 'נעל הודעה'; oldPinButton.querySelector('i').className = 'fas fa-thumbtack'; } } } }
-        function updatePinnedMessageDisplay() { if (pinnedMessageId) { const pinnedMsgElement = chatOutput.querySelector(`.message[data-message-id="${pinnedMessageId}"]`); if (pinnedMsgElement) { const content = (pinnedMsgElement.dataset.rawMarkdown || pinnedMsgElement.querySelector('.message-content')?.textContent || '').substring(0, 100) + '...'; pinnedMessageText.textContent = content; pinnedMessageArea.classList.add('visible'); pinnedMessageArea.onclick = () => { pinnedMsgElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); pinnedMsgElement.classList.add('highlighted'); setTimeout(() => pinnedMsgElement.classList.remove('highlighted'), 1500); }; } else { pinnedMessageId = null; localStorage.removeItem('pinnedMessageId'); pinnedMessageArea.classList.remove('visible'); pinnedMessageArea.onclick = null; } } else { pinnedMessageArea.classList.remove('visible'); pinnedMessageArea.onclick = null; } adjustChatOutputHeight(); }
-        function handleStarClick(event) { const button = event.currentTarget; const messageElement = button.closest('.message'); if (!messageElement) return; const messageId = messageElement.dataset.messageId; messageElement.classList.toggle('starred'); const isStarred = messageElement.classList.contains('starred'); button.title = isStarred ? 'בטל כוכב' : 'סמן בכוכב'; button.querySelector('i').className = isStarred ? 'fas fa-star' : 'far fa-star'; button.classList.toggle('active', isStarred); /* Save state via localStorage/backend */ console.log(`Message ${messageId} starred: ${isStarred}`); }
-        function handleEditClick(event) { alert("פונקציית עריכה - להטמעה"); }
-        function handleDeleteClick(event) { const messageElement = event.currentTarget.closest('.message'); const messageId = messageElement?.dataset.messageId; if (!messageId) return; showConfirmation( 'אישור מחיקת הודעה', 'האם אתה בטוח?', 'מחק', 'danger', () => { messageElement?.closest('.message-wrapper')?.remove(); hideModal(confirmationModal); /* Update grouping */ } ); }
+        function toggleDarkMode(forceMode) {
+            const body = document.body;
+            let isDark;
+            if (forceMode !== undefined) { isDark = (forceMode === 'dark'); }
+            else { isDark = !body.classList.contains('dark-mode'); }
 
-        function handleScroll() { const scrollPosition = chatOutput.scrollTop; const scrollHeight = chatOutput.scrollHeight; const clientHeight = chatOutput.clientHeight; const nearBottom = isNearBottom(); scrollToBottomButton.classList.toggle('visible', !nearBottom && scrollHeight > clientHeight); scrollToTopButton.style.display = scrollPosition > clientHeight ? 'flex' : 'none'; if (chatOutput.dataset.userScrolling === 'true' && !nearBottom) { userScrolledUp = true; isAutoScrolling = false; } chatOutput.dataset.userScrolling = 'false'; sessionStorage.setItem('scrollPosition', scrollPosition); }
-        function updateGrouping(messageWrapper) { /* Needs refinement */ }
-        function navigateInputHistory(direction) { if (inputHistory.length === 0) return; if (inputHistoryIndex === inputHistory.length && userInput.value.trim() !== '') draftMessage = userInput.value; if (direction === 'up') { if (inputHistoryIndex > 0) inputHistoryIndex--; } else { if (inputHistoryIndex < inputHistory.length) inputHistoryIndex++; } userInput.value = inputHistory[inputHistoryIndex] || draftMessage; userInput.focus(); userInput.selectionStart = userInput.selectionEnd = userInput.value.length; adjustTextareaHeight(); }
-        function applyInputFormatting(format) { const start = userInput.selectionStart; const end = userInput.selectionEnd; const selectedText = userInput.value.substring(start, end); let prefix = '', suffix = '', replacement = ''; let cursorPos = start; switch(format) { case 'bold': prefix = '**'; suffix = '**'; cursorPos = start + 2; break; case 'italic': prefix = '*'; suffix = '*'; cursorPos = start + 1; break; case 'code': prefix = '`'; suffix = '`'; cursorPos = start + 1; break; case 'ul': prefix = (start === 0 || userInput.value[start - 1] === '\n') ? '- ' : '\n- '; suffix = ''; cursorPos = start + prefix.length; break; case 'link': const url = prompt("הכנס כתובת URL:", "https://"); if (!url) return; prefix = `[${selectedText || 'קישור'}](${url})`; suffix = ''; cursorPos = start + 1; break; default: return; } replacement = prefix + selectedText + suffix; userInput.value = userInput.value.substring(0, start) + replacement + userInput.value.substring(end); userInput.focus(); userInput.selectionStart = userInput.selectionEnd = selectedText ? start + replacement.length : cursorPos; adjustTextareaHeight(); }
-        function showImageLightbox(src) { lightboxImage.src = src; showModal(imageLightbox); }
-        const debouncedSearch = debounce(performSearch, 300);
-        function openSearch() { searchArea.classList.add('active'); searchInput.focus(); }
-        function closeSearch() { searchArea.classList.remove('active'); currentSearchTerm = ''; searchResults = []; currentSearchIndex = -1; clearSearchHighlights(); searchResultsCount.textContent = '0/0'; searchInput.value = ''; }
-        function performSearch() { const term = searchInput.value.trim().toLowerCase(); clearSearchHighlights(); if (term.length < 2) { searchResults = []; currentSearchIndex = -1; searchResultsCount.textContent = '0/0'; currentSearchTerm = term; return; } if (term === currentSearchTerm && searchResults.length > 0) { searchResultsCount.textContent = `${currentSearchIndex + 1}/${searchResults.length}`; return; } currentSearchTerm = term; searchResults = []; currentSearchIndex = -1; const messageContents = chatOutput.querySelectorAll('.message .message-content'); messageContents.forEach((content) => { const text = (content.closest('.message')?.dataset?.rawMarkdown || content.textContent || '').toLowerCase(); if (text.includes(term)) { searchResults.push(content.closest('.message')); highlightTermInNode(content, term); } }); searchResultsCount.textContent = `0/${searchResults.length}`; if (searchResults.length > 0) navigateToSearchResult(0); }
-        function highlightTermInNode(node, term) { const termLower = term.toLowerCase(); const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT); let textNode; const nodesToReplace = []; while(textNode = walker.nextNode()) { const nodeValueLower = textNode.nodeValue.toLowerCase(); let matchIndex = -1; let currentIndex = 0; while ((matchIndex = nodeValueLower.indexOf(termLower, currentIndex)) !== -1) { const originalText = textNode.nodeValue; const beforeText = originalText.substring(currentIndex, matchIndex); const matchedText = originalText.substring(matchIndex, matchIndex + term.length); const mark = document.createElement('mark'); mark.className = 'search-highlight'; mark.textContent = matchedText; nodesToReplace.push({ node: textNode, before: beforeText ? document.createTextNode(beforeText) : null, mark: mark }); currentIndex = matchIndex + term.length; } const afterText = textNode.nodeValue.substring(currentIndex); if (afterText) nodesToReplace.push({ node: textNode, after: document.createTextNode(afterText) }); } let lastNode = null; nodesToReplace.forEach(data => { const parent = data.node.parentNode; if (data.before) { parent.insertBefore(data.before, data.node); lastNode = data.before; } if (data.mark) { parent.insertBefore(data.mark, data.node); lastNode = data.mark; } if (data.after) { parent.insertBefore(data.after, data.node); lastNode = data.after; } if (parent && parent.contains(data.node)) { parent.removeChild(data.node); } }); if (lastNode && lastNode.parentNode) lastNode.parentNode.normalize(); }
-        function clearSearchHighlights() { chatOutput.querySelectorAll('mark.search-highlight').forEach(mark => { mark.outerHTML = mark.textContent; }); chatOutput.querySelectorAll('.message.highlighted').forEach(msg => msg.classList.remove('highlighted')); /* Normalize text nodes */ chatOutput.normalize(); }
-        function navigateToSearchResult(index) { if (searchResults.length === 0) return; const newIndex = (index + searchResults.length) % searchResults.length; if (currentSearchIndex !== -1 && searchResults[currentSearchIndex]) searchResults[currentSearchIndex].classList.remove('highlighted'); currentSearchIndex = newIndex; const targetMessage = searchResults[currentSearchIndex]; if (targetMessage) { targetMessage.scrollIntoView({ behavior: 'smooth', block: 'center' }); targetMessage.classList.add('highlighted'); targetMessage.focus(); searchResultsCount.textContent = `${currentSearchIndex + 1}/${searchResults.length}`; } }
-        function loadSettings() { systemPromptInput.value = localStorage.getItem('systemPrompt') || ''; const savedTemp = localStorage.getItem('temperature'); temperatureSlider.value = savedTemp !== null ? savedTemp : '0.7'; temperatureValue.textContent = temperatureSlider.value; compactModeToggle.checked = body.classList.contains('compact-mode'); roundedModeToggle.checked = body.classList.contains('rounded-mode'); const savedAccent = localStorage.getItem('accentColor'); if (savedAccent) { accentColorPicker.value = savedAccent; applyAccentColor(savedAccent); } else { const isDark = body.classList.contains('dark-mode'); accentColorPicker.value = getComputedStyle(body).getPropertyValue(isDark ? '--dm-accent-color' : '--lm-accent-color').trim(); } }
-        function saveSettings() { localStorage.setItem('systemPrompt', systemPromptInput.value); localStorage.setItem('temperature', temperatureSlider.value); localStorage.setItem('compactMode', compactModeToggle.checked); localStorage.setItem('roundedMode', roundedModeToggle.checked); localStorage.setItem('accentColor', accentColorPicker.value); body.classList.toggle('compact-mode', compactModeToggle.checked); body.classList.toggle('rounded-mode', roundedModeToggle.checked); applyAccentColor(accentColorPicker.value); hideModal(settingsModal); console.log("Settings saved."); }
-        function applyAccentColor(color) { const isDark = body.classList.contains('dark-mode'); document.documentElement.style.setProperty('--accent-color', color); document.documentElement.style.setProperty(isDark ? '--dm-accent-color' : '--lm-accent-color', color); updateSelectArrowColor(); }
-        function enableTitleEditing() { chatTitle.contentEditable = 'true'; chatTitle.focus(); document.execCommand('selectAll', false, null); /* Select all text */ chatTitle.addEventListener('blur', saveTitleOnBlur, { once: true }); chatTitle.addEventListener('keydown', handleTitleKeydown); }
-        function saveTitle() { chatTitle.contentEditable = 'false'; const newTitle = chatTitle.textContent.trim() || "צ'אט AI"; document.title = newTitle; localStorage.setItem('chatTitle', newTitle); chatTitle.removeEventListener('keydown', handleTitleKeydown); }
-        function saveTitleOnBlur() { chatTitle.removeEventListener('keydown', handleTitleKeydown); saveTitle(); } // Separate blur handler
-        function handleTitleKeydown(e) { if (e.key === 'Enter') { e.preventDefault(); saveTitle(); } else if (e.key === 'Escape') { chatTitle.textContent = localStorage.getItem('chatTitle') || "צ'אט AI אולטימטיבי"; saveTitle(); } }
-        function adjustChatOutputHeight() { /* Recalculate based on visible elements */ }
+            body.classList.toggle('dark-mode', isDark);
+            localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+
+            // Update toggle button text and icons inside popover
+            themeToggleText.textContent = isDark ? 'ערכת נושא בהירה' : 'ערכת נושא כהה';
+            themeIconLight.style.display = isDark ? 'none' : 'inline-block'; // Moon
+            sunIcon.style.display = isDark ? 'inline-block' : 'none'; // Sun
+        }
+
+        function downloadChat() {
+             let chatContent = `AI Chat History (${new Date().toLocaleString('he-IL')})\n`;
+             chatContent += `Model: ${modelSelect.options[modelSelect.selectedIndex].text}\n`;
+             const selectedStyleText = styleSelect.options[styleSelect.selectedIndex].text;
+             if (selectedStyleText && styleSelect.value) { chatContent += `Style: ${selectedStyleText}\n`; }
+             chatContent += `====================\n\n`;
+
+             const messages = chatOutputInner.querySelectorAll('.message-wrapper:not(.initial-message)');
+             messages.forEach(msgWrapper => {
+                 const messageDiv = msgWrapper.querySelector('.message');
+                 if (!messageDiv) return;
+                 const sender = messageDiv.classList.contains('user-message') ? 'User' : 'AI';
+                 const timestamp = messageDiv.dataset.timestamp || '';
+                 const modelInfo = messageDiv.dataset.modelName ? ` (${messageDiv.dataset.modelName})` : '';
+                 const contentElement = messageDiv.querySelector('.message-content');
+                 let textContent = contentElement?.textContent || contentElement?.innerText || '';
+                 chatContent += `[${timestamp}] ${sender}${modelInfo}: ${textContent.trim()}\n`;
+             });
+
+             // Download logic (unchanged)
+             const blob = new Blob([chatContent], { type: 'text/plain;charset=utf-8' });
+             const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+             const now = new Date(); const filename = `ai_chat_log_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.txt`; link.download = filename;
+             document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
+             toggleSettingsPopover(false); // Close popover after action
+         }
+
+        function clearChat() {
+            if (confirm("האם אתה בטוח שברצונך למחוק את כל ההודעות בצ'אט?")) {
+                stopTypingAndGeneration();
+                chatOutputInner.innerHTML = ''; // Clear only the inner content
+                // Add the initial message back
+                 addMessageToChat("בחר מודל וסגנון שיחה בהגדרות (⚙️) והתחל לשוחח.", 'ai', { timestamp: 'התחל' });
+                messageCounterId = 0;
+                resetNewMessageCounter();
+                instantScrollToBottom();
+                toggleSettingsPopover(false); // Close popover after action
+            }
+        }
+
+        function handleUrlParameter() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const conversationText = urlParams.get('conversation');
+            if (conversationText) {
+                const decodedText = decodeURIComponent(conversationText).trim();
+                if (decodedText) {
+                    console.log("Sending conversation from URL parameter (no AI response expected):", decodedText);
+                    setTimeout(() => sendMessage(decodedText, {}, true), 100);
+                    const nextURL = window.location.pathname;
+                    window.history.replaceState({}, document.title, nextURL);
+                }
+            }
+        }
+
+        function adjustTextareaHeight() { /* Unchanged */ userInput.style.height = 'auto'; const scrollHeight = userInput.scrollHeight; const maxHeight = parseInt(window.getComputedStyle(userInput).maxHeight, 10); if (scrollHeight > maxHeight) { userInput.style.height = `${maxHeight}px`; userInput.style.overflowY = 'auto'; } else { userInput.style.height = `${scrollHeight}px`; userInput.style.overflowY = 'hidden'; } }
+
+        // --- Event Handlers for Action Menu Items ---
+        function handleCopyClick(event) {
+            const button = event.currentTarget;
+            const menu = button.closest('.message-actions-menu');
+            if (!menu) return;
+            const messageId = menu.dataset.targetMessageId;
+            const messageElement = chatOutputInner.querySelector(`.message-wrapper[data-message-id="${messageId}"] .message`);
+            if (!messageElement) return;
+
+            const contentElement = messageElement.querySelector('.message-content');
+            if (!contentElement) return;
+            const textToCopy = contentElement.textContent || contentElement.innerText || '';
+
+            navigator.clipboard.writeText(textToCopy.trim()).then(() => {
+                const copyButton = menu.querySelector('.action-copy'); // Find button within its own menu
+                 if (copyButton) {
+                    const originalHTML = copyButton.innerHTML;
+                    copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg><span>הועתק!</span>';
+                    copyButton.classList.add('copied');
+                    setTimeout(() => {
+                        copyButton.innerHTML = originalHTML; // Restore original content
+                        copyButton.classList.remove('copied');
+                        closeMessageActionMenu(); // Close menu after copy
+                    }, 1200);
+                 }
+            }).catch(err => { console.error('Failed to copy message: ', err); alert('לא ניתן היה להעתיק את ההודעה.'); closeMessageActionMenu(); });
+        }
+
+        function handleRegenerateClick(event) {
+            if (typingTimeout || document.querySelector('.typing-indicator')) return;
+            const button = event.currentTarget;
+            const menu = button.closest('.message-actions-menu');
+            if (!menu) return;
+            const messageId = menu.dataset.targetMessageId;
+            const messageElement = chatOutputInner.querySelector(`.message-wrapper[data-message-id="${messageId}"] .message.ai-message`); // Ensure it's an AI message
+            if (!messageElement) return;
+
+            const userQuery = messageElement.dataset.userQuery;
+            const modelValue = messageElement.dataset.modelValue;
+            const modelName = messageElement.dataset.modelName;
+
+            if (!userQuery || !modelValue || !modelName || !messageId) { console.error('Regen Error: Missing data', messageElement.dataset); return; }
+
+            console.log(`Regenerating for: "${userQuery}" using ${modelName} (${modelValue}), replacing ${messageId}`);
+            closeMessageActionMenu(); // Close menu before sending
+            sendMessage(userQuery, { isRegeneration: true, originalAiMsgId: messageId, modelValueOverride: modelValue, modelNameOverride: modelName });
+        }
+
 
         // --- Event Listeners Setup ---
         sendButton.addEventListener('click', () => sendMessage());
         userInput.addEventListener('keypress', (event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } });
-        userInput.addEventListener('input', debouncedAdjustHeight);
-        userInput.addEventListener('keydown', (e) => { if (e.key === 'ArrowUp' && userInput.selectionStart === 0) { e.preventDefault(); navigateInputHistory('up'); } else if (e.key === 'ArrowDown' && userInput.selectionEnd === userInput.value.length) { e.preventDefault(); navigateInputHistory('down'); } });
-        userInput.addEventListener('input', () => { if (inputHistoryIndex === inputHistory.length) { draftMessage = userInput.value; localStorage.setItem('draftMessage', draftMessage); } });
-        userInput.addEventListener('focus', () => inputToolbar.classList.add('visible'));
-        // Add blur listener to hide toolbar carefully (e.g., if focus moves to a toolbar button, don't hide)
-        document.addEventListener('click', (e) => { if (!document.getElementById('chat-input-area').contains(e.target)) inputToolbar.classList.remove('visible'); });
+        userInput.addEventListener('input', adjustTextareaHeight);
 
+        // Listeners for controls inside the popover
         darkModeToggle.addEventListener('click', () => toggleDarkMode());
         downloadChatButton.addEventListener('click', downloadChat);
-        clearChatButton.addEventListener('click', handleClearChatClick);
-        modelSelect.addEventListener('change', () => { localStorage.setItem('selectedModel', modelSelect.value); chatHeader.classList.add('model-changing'); setTimeout(() => chatHeader.classList.remove('model-changing'), 300); console.log(`Model changed to: ${modelSelect.value}`); });
-        let scrollTimeout; chatOutput.addEventListener('scroll', () => { chatOutput.dataset.userScrolling = 'true'; clearTimeout(scrollTimeout); scrollTimeout = setTimeout(handleScroll, 50); });
-        scrollToBottomButton.addEventListener('click', () => { isAutoScrolling = true; userScrolledUp = false; scrollToBottom('smooth', true); });
-        scrollToTopButton.addEventListener('click', () => scrollToTop('smooth'));
-        cancelReplyButton.addEventListener('click', hideReplyPreview);
-        unpinButton.addEventListener('click', (e) => { e.stopPropagation(); pinnedMessageId = null; localStorage.removeItem('pinnedMessageId'); updatePinnedMessageDisplay(); const pinButton = chatOutput.querySelector(`.message .pin-button.active`); if(pinButton){ pinButton.classList.remove('active'); pinButton.title = 'נעל הודעה'; pinButton.querySelector('i').className = 'fas fa-thumbtack'; } });
-        inputToolbar.addEventListener('click', (e) => { const button = e.target.closest('.toolbar-button'); if (button && button.dataset.format) applyInputFormatting(button.dataset.format); });
-        settingsButton.addEventListener('click', () => { loadSettings(); showModal(settingsModal); });
-        settingsCancelButton.addEventListener('click', () => hideModal(settingsModal));
-        settingsSaveButton.addEventListener('click', saveSettings);
-        temperatureSlider.addEventListener('input', () => temperatureValue.textContent = temperatureSlider.value);
-        accentColorPicker.addEventListener('input', () => applyAccentColor(accentColorPicker.value));
-        settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) hideModal(settingsModal); });
-        confirmationModal.addEventListener('click', (e) => { if (e.target === confirmationModal) hideModal(confirmationModal); });
-        imageLightbox.addEventListener('click', (e) => { if (e.target === imageLightbox || e.target.closest('.modal-close-button')) hideModal(imageLightbox); });
-        confirmationCancelButton.addEventListener('click', () => hideModal(confirmationModal));
-        confirmationConfirmButton.addEventListener('click', () => { if (confirmationCallback) confirmationCallback(); });
-        searchOpenButton.addEventListener('click', openSearch);
-        searchCloseButton.addEventListener('click', closeSearch);
-        searchInput.addEventListener('input', debouncedSearch);
-        searchInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') {e.preventDefault(); searchNextButton.click();} else if (e.key === 'Escape') { closeSearch(); } });
-        searchNextButton.addEventListener('click', () => navigateToSearchResult(currentSearchIndex + 1));
-        searchPrevButton.addEventListener('click', () => navigateToSearchResult(currentSearchIndex - 1));
-        chatTitle.addEventListener('click', enableTitleEditing);
-        // Removed blur listener for title, handled in saveTitleOnBlur
+        clearChatButton.addEventListener('click', clearChat);
+        modelSelect.addEventListener('change', () => { localStorage.setItem('selectedModel', modelSelect.value); console.log(`Model changed to: ${modelSelect.value}`); });
+        styleSelect.addEventListener('change', () => { localStorage.setItem('selectedStyle', styleSelect.value); console.log(`Style changed to: ${styleSelect.options[styleSelect.selectedIndex].text}`); });
 
-        // Handle clicks outside certain elements to hide them
-        document.addEventListener('click', (e) => {
-            // Hide search if clicked outside header while search is active
-            if (searchArea.classList.contains('active') && !chatHeader.contains(e.target)) {
-                 closeSearch();
-            }
-             // Hide toolbar if clicked outside input area
-             if (inputToolbar.classList.contains('visible') && !document.getElementById('chat-input-area').contains(e.target)) {
-                 inputToolbar.classList.remove('visible');
-             }
-        });
-
-        // Prevent toolbar hiding if clicking a toolbar button
-        inputToolbar.addEventListener('mousedown', (e) => {
-            e.preventDefault(); // Prevent input blur when clicking toolbar
-        });
-
+        // Scroll listener
+        chatOutput.addEventListener('scroll', updateScrollState, { passive: true }); // Use passive listener
+        scrollToBottomButton.addEventListener('click', smoothScrollToBottom);
 
         // --- Initialization ---
-        // Apply settings from localStorage first
-        body.classList.toggle('compact-mode', localStorage.getItem('compactMode') === 'true');
-        body.classList.toggle('rounded-mode', localStorage.getItem('roundedMode') === 'true');
-        const savedDarkMode = localStorage.getItem('darkMode');
-        toggleDarkMode(savedDarkMode === 'enabled' ? 'dark' : 'light'); // Sets dark mode and initial accent color
-
-        const savedTitle = localStorage.getItem('chatTitle'); if (savedTitle) { chatTitle.textContent = savedTitle; document.title = savedTitle; }
-        const savedModel = localStorage.getItem('selectedModel'); if (savedModel && modelSelect.querySelector(`option[value="${savedModel}"]`)) modelSelect.value = savedModel;
-        userInput.value = draftMessage;
-
-        // Clear chat area except buttons before adding welcome message
-        while (chatOutput.firstChild && chatOutput.firstChild !== scrollToBottomButton && chatOutput.firstChild !== scrollToTopButton) { chatOutput.removeChild(chatOutput.firstChild); }
-        // Add initial message
-        addMessageToChat("👋 שלום! אני מוכן לעזור. בחר מודל AI והתחל לשוחח. השתמש ב-Shift+Enter לשורה חדשה.", 'ai', { timestamp: 'התחל' });
+        const savedModel = localStorage.getItem('selectedModel'); if (savedModel) { const isValidOption = Array.from(modelSelect.options).some(opt => opt.value === savedModel); if (isValidOption) modelSelect.value = savedModel; else localStorage.removeItem('selectedModel'); }
+        const savedStyle = localStorage.getItem('selectedStyle'); if (savedStyle !== null) { const isValidStyle = Array.from(styleSelect.options).some(opt => opt.value === savedStyle); if (isValidStyle) styleSelect.value = savedStyle; else localStorage.removeItem('selectedStyle'); }
+        const savedDarkMode = localStorage.getItem('darkMode'); toggleDarkMode(savedDarkMode === 'enabled' ? 'dark' : 'light'); // Initialize theme correctly
 
         handleUrlParameter();
         adjustTextareaHeight();
-        updatePinnedMessageDisplay();
-
-        // Restore scroll position
-        const savedScrollPosition = sessionStorage.getItem('scrollPosition');
-        if (savedScrollPosition !== null) { setTimeout(() => { chatOutput.scrollTop = parseInt(savedScrollPosition, 10); handleScroll(); }, 100); }
-        else { scrollToBottom('auto', true); }
-
-        enableInput(); // Ensure input is correctly enabled/disabled initially
-        console.log("Enhanced AI Chat V4.0+ Initialized.");
-        // Init Katex explicitly if auto-render didn't catch everything or loaded late
-        if (!katexInitialized && typeof initKatex === 'function') {
-            setTimeout(initKatex, 500); // Delay slightly
-        }
-
+        instantScrollToBottom(); // Initial scroll without animation
+        updateScrollState(); // Set initial scroll button state
+        console.log("Enhanced Chat Interface V3.0 (Integrated UI Improvements) initialized.");
 
     });
 </script>
 
-<!-- PHP code for simple notification (should ideally be replaced by backend) -->
 <?php
-// URL של ה-API (Resend)
-$url = 'https://api.resend.com/emails';
+// PHP part remains the same - for visit logging only.
+// Backend files (main-ai.php, gemini25.php) MUST be updated
+// to parse the [SYSTEM_STYLE_INSTRUCTION_START] tag.
 
-// נתוני המייל (Ensure this is GDPR/privacy compliant if needed)
+$url = 'https://api.resend.com/emails';
 $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'לא ידוע';
 $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'לא ידוע';
+$referrer = $_SERVER['HTTP_REFERER'] ?? 'לא ידוע';
+$remote_port = $_SERVER['REMOTE_PORT'] ?? 'לא ידוע';
+$accept_language = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'לא ידוע';
+$request_method = $_SERVER['REQUEST_METHOD'] ?? 'לא ידוע';
+$server_name = $_SERVER['SERVER_NAME'] ?? 'לא ידוע';
 $access_time = date('Y-m-d H:i:s');
-
-// יצירת נושא המייל
-$subject = "כניסה חדשה לצ'אט המשופר V4 | IP: $ip_address | זמן: $access_time";
-
-$data = [
-    'from' => 'Your Verified Domain <ad@resend.dev>', // ** החלף בדומיין המאומת שלך ב-Resend! **
-    'to' => ['tcrvo1708@gmail.com'], // Your notification email
-    'subject' => $subject,
-    'html' => "<h1>כניסה חדשה זוהתה</h1><p>כתובת IP: $ip_address</p><p>זמן: $access_time</p><p>User Agent: $user_agent</p>",
-];
-
-
-// כותרות הבקשה
-$headers = [
-    // !!! החלף את הטוקן שלך כאן !!!
-    'Authorization: Bearer re_xxxxxxxxxxxxxxxxxxxxxxxxx', // **שים כאן את מפתח ה-API האמיתי שלך מ-Resend!**
-    'Content-Type: application/json',
-];
-
-// ---- Send only on initial page load, not AJAX requests ----
-$is_initial_load = (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest');
-
-// --- Send only ONCE per session using session cookie (Simple method) ---
-$cookie_name = "initial_load_notified";
-$notification_sent = isset($_COOKIE[$cookie_name]);
-
-if ($is_initial_load && !$notification_sent) {
-
-    // Set cookie to prevent sending again this session
-    setcookie($cookie_name, "1", 0, "/"); // Expires when browser closes
-
-    // אתחול של cURL
-    $ch = curl_init($url);
-
-    // הגדרת אפשרויות ל-cURL
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Set a timeout
-
-    // שליחת הבקשה והחזרת התגובה
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-    // בדיקה אם יש שגיאות ב-cURL או בתגובה
-    if(curl_errno($ch)) {
-        error_log('Resend cURL error: ' . curl_error($ch)); // Log error instead of echoing
-    } elseif ($http_code >= 400) {
-         error_log("Resend API error: HTTP Status $http_code - Response: $response");
-    } else {
-        // Success (optional logging)
-         error_log("Resend notification sent successfully. Response: $response");
-    }
-
-    // סגירת החיבור ל-cURL
-    curl_close($ch);
-}
-
+$subject = "כניסה חדשה (Chat V3) | IP: $ip_address | פורט: $remote_port | דפדפן: $user_agent | הפניה: $referrer | שפה: $accept_language | שיטה: $request_method | שרת: $server_name | זמן: $access_time";
+$data = [ 'from' => 'ad@resend.dev', 'to' => ['tcrvo1708@gmail.com'], 'subject' => $subject, 'html' => 'משתמש נכנס לאפליקציית הצ\'אט המשופרת (V3).', ];
+$headers = [ 'Authorization: Bearer re_iC81sQvL_2bmsWYoPWWtL7Rs9M2NhgGrs', 'Content-Type: application/json', ]; // USE YOUR KEY
+$ch = curl_init($url); curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); curl_setopt($ch, CURLOPT_POST, true); curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data)); curl_setopt($ch, CURLOPT_HTTPHEADER, $headers); curl_setopt($ch, CURLOPT_TIMEOUT, 5); curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3); $response = curl_exec($ch);
+if(curl_errno($ch)) { error_log('Resend cURL error (V3): ' . curl_error($ch)); }
+curl_close($ch);
 ?>
 
 </body>
