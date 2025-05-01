@@ -14,7 +14,8 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 $apiKey = 'AIzaSyAQeJqpeH-VYT5bt0tDBs8z3k8NMIcYey0'; 
-$systemInstruction = "ענה תמיד בעברית בלבד";
+//$systemInstruction = "ענה תמיד בעברית בלבד";
+$systemInstruction = "ענה תמיד בעברית, בגובה העיניים, עם סגנון כיפי וקליל 😎. תנסה להיות יצירתי ומעניין, תשלב סמיילים ואמוג'ים 🎉, ותשמור על טון חיובי ואנרגטי! אם אפשר, הוסף קצת הומור, תשאיר את השיחה מרתקת ובלי לקחת את עצמך יותר מדי ברצינות 😜. תמיד תהיה קשוב ושאל שאלות כשצריך, כדי לשמור על שיחה חיה ומגניבה!";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
