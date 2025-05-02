@@ -80,7 +80,7 @@
     <div id="splash-logo">
         <span></span> <!-- Central Core -->
     </div>
-    <div id="splash-text">טוען AI...😎</div>
+    <div id="splash-text">טוען בינה...</div>
 </div>
 
 <!-- Chat Container -->
@@ -109,10 +109,37 @@
                       <!-- Options populated by JS -->
                   </select>
              </div>
-
-
               <div class="popover-section"> <label>התנהגות:</label> <div class="popover-checkbox" role="menuitemcheckbox" aria-checked="true" tabindex="0" id="send-on-enter-container"> <input type="checkbox" id="send-on-enter-checkbox" tabindex="-1" checked> <label for="send-on-enter-checkbox">שלח הודעה בלחיצת Enter</label> </div> </div>
               <div class="popover-section"> <label>מראה:</label> <div class="popover-checkbox" role="menuitemcheckbox" aria-checked="false" tabindex="0" id="dark-mode-container"> <input type="checkbox" id="dark-mode-checkbox" tabindex="-1"> <label for="dark-mode-checkbox" id="theme-toggle-text">ערכת נושא כהה</label> <span id="theme-icon-placeholder" style="margin-right: auto; display: flex; align-items: center;"></span> </div> </div>
+
+              <!-- START: Added Advanced Settings Section -->
+              <div class="popover-section advanced-settings">
+                  <label>הגדרות מתקדמות:</label>
+                  <div class="advanced-setting">
+                      <label for="temperature-slider">טמפרטורה (יצירתיות):</label>
+                      <div class="slider-container">
+                          <input type="range" id="temperature-slider" min="0" max="1" step="0.05" value="0.7">
+                          <input type="number" id="temperature-value" class="slider-value" min="0" max="1" step="0.05" value="0.7">
+                      </div>
+                  </div>
+                  <div class="advanced-setting">
+                      <label for="top-p-slider">Top-P (פוקוס):</label>
+                      <div class="slider-container">
+                          <input type="range" id="top-p-slider" min="0" max="1" step="0.01" value="0.95">
+                          <input type="number" id="top-p-value" class="slider-value" min="0" max="1" step="0.01" value="0.95">
+                      </div>
+                  </div>
+                   <div class="advanced-setting">
+                       <label for="max-output-tokens">מקסימום טוקנים בתגובה:</label>
+                       <input type="number" id="max-output-tokens" min="1" placeholder="ברירת מחדל (ללא הגבלה)">
+                   </div>
+                   <div class="advanced-setting">
+                       <label for="stop-sequence">רצפי עצירה (מופרד בפסיק):</label>
+                       <input type="text" id="stop-sequence" placeholder="למשל: סוף, END">
+                   </div>
+              </div>
+              <!-- END: Added Advanced Settings Section -->
+
               <div class="popover-section shortcuts"> <label>קיצורי מקשים:</label> <ul> <li><span>הגדרות:</span> <kbd>Alt</kbd> + <kbd>S</kbd></li> <li><span>מיקוד קלט:</span> <kbd>Alt</kbd> + <kbd>I</kbd></li> <li><span>שליחה:</span> <kbd>Ctrl</kbd> + <kbd>Enter</kbd></li> <li><span>שורה חדשה:</span> <kbd>Shift</kbd> + <kbd>Enter</kbd></li> <li><span>ניקוי קלט:</span> <kbd>Alt</kbd> + <kbd>X</kbd></li> <li><span>גלילה לתחתית:</span> <kbd>End</kbd></li> <li><span>גלילה ללמעלה:</span> <kbd>Home</kbd></li> </ul> </div>
               <div class="popover-actions"> <button type="button" class="popover-button" id="download-chat-txt" title="הורד שיחה כקובץ טקסט"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> הורד TXT </button> <button type="button" class="popover-button" id="clear-chat-settings" title="נקה את כל השיחה"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> ניקוי שיחה </button> </div>
         </div>
@@ -133,7 +160,7 @@
     // Wrap entire script in a self-executing function
     (function() {
         // --- Constants ---
-        const BASE_API_URL = 'https://php-render-test.onrender.com/';
+        const BASE_API_URL = 'https://ai-apis.netlify.app/.netlify/functions/'; // Example URL - Replace if needed
         const TYPING_SPEED = 7; const SCROLL_THRESHOLD = 200; const DEBOUNCE_DELAY = 100;
         const MAX_HISTORY_LENGTH = 15; const SPLASH_DURATION = 800;
 
@@ -162,7 +189,30 @@
             // console.log("Initializing elements..."); // Debug log
             splashScreen = getElement('splash-screen'); chatContainer = getElement('chat-container'); chatOutput = getElement('chat-output'); chatOutputInner = getElement('chat-output-inner'); userInput = getElement('user-input'); sendButton = getElement('send-button'); chatInputArea = getElement('chat-input-area'); settingsButton = getElement('settings-button'); settingsPopover = getElement('settings-popover'); modelSelect = getElement('model-select'); styleSelect = getElement('style-select'); sendOnEnterCheckbox = getElement('send-on-enter-checkbox'); sendOnEnterContainer = getElement('send-on-enter-container'); darkModeCheckbox = getElement('dark-mode-checkbox'); darkModeContainer = getElement('dark-mode-container'); themeToggleText = getElement('theme-toggle-text'); themeIconPlaceholder = getElement('theme-icon-placeholder'); downloadChatButtonTxt = getElement('download-chat-txt'); clearChatButtonSettings = getElement('clear-chat-settings'); scrollToBottomButton = getElement('scroll-to-bottom'); clearInputButton = getElement('clear-input-button'); customDialogTemplate = getElement('custom-dialog-template'); chatTitle = getElement('chat-title');
             temperatureSlider = getElement('temperature-slider'); temperatureValue = getElement('temperature-value'); topPSlider = getElement('top-p-slider'); topPValue = getElement('top-p-value'); maxOutputTokensInput = getElement('max-output-tokens'); stopSequenceInput = getElement('stop-sequence');
-            if (!chatContainer || !chatOutput || !chatOutputInner || !userInput || !sendButton || !settingsButton || !settingsPopover || !modelSelect || !styleSelect || !splashScreen || !customDialogTemplate || !clearChatButtonSettings || !temperatureSlider || !temperatureValue || !topPSlider || !topPValue || !maxOutputTokensInput || !stopSequenceInput) { throw new Error("Critical chat elements missing."); }
+            // Now this check should pass if the HTML is correct
+            if (!chatContainer || !chatOutput || !chatOutputInner || !userInput || !sendButton || !settingsButton || !settingsPopover || !modelSelect || !styleSelect || !splashScreen || !customDialogTemplate || !clearChatButtonSettings || !temperatureSlider || !temperatureValue || !topPSlider || !topPValue || !maxOutputTokensInput || !stopSequenceInput) {
+                // Construct meaningful error message *before* throwing
+                let missing = [];
+                if (!chatContainer) missing.push('chat-container');
+                if (!chatOutput) missing.push('chat-output');
+                if (!chatOutputInner) missing.push('chat-output-inner');
+                if (!userInput) missing.push('user-input');
+                if (!sendButton) missing.push('send-button');
+                if (!settingsButton) missing.push('settings-button');
+                if (!settingsPopover) missing.push('settings-popover');
+                if (!modelSelect) missing.push('model-select');
+                if (!styleSelect) missing.push('style-select');
+                if (!splashScreen) missing.push('splash-screen');
+                if (!customDialogTemplate) missing.push('custom-dialog-template');
+                if (!clearChatButtonSettings) missing.push('clear-chat-settings');
+                if (!temperatureSlider) missing.push('temperature-slider');
+                if (!temperatureValue) missing.push('temperature-value');
+                if (!topPSlider) missing.push('top-p-slider');
+                if (!topPValue) missing.push('top-p-value');
+                if (!maxOutputTokensInput) missing.push('max-output-tokens');
+                if (!stopSequenceInput) missing.push('stop-sequence');
+                throw new Error(`Critical chat elements missing: ${missing.join(', ')}`);
+             }
             // console.log("Elements initialized successfully."); // Debug log
         }
 
@@ -177,7 +227,8 @@
                 const getCurrentTimestamp = (iso = false) => { const n = new Date(); return iso ? n.toISOString() : `${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`; };
                 const generateMessageId = () => `msg-${Date.now()}-${messageCounterId++}`;
                 const focusElement = (el) => { if(el && !userInteracted) setTimeout(() => el.focus(), 50); };
-                const escapeHtml = (unsafe) => (typeof unsafe === 'string' ? unsafe.replace(/</g, "<").replace(/>/g, ">") : '');
+                // Define escapeHtml here so it's available even if initialization fails later but *after* this point
+                const escapeHtml = (unsafe) => (typeof unsafe === 'string' ? unsafe.replace(/</g, "&lt;").replace(/>/g, "&gt;") : unsafe);
                 const generateAvatarContent = (name) => name ? name.substring(0, 2).toUpperCase() : '??';
                 const scrollToBottom = (b='smooth') => { setTimeout(() => { if(chatOutput) chatOutput.scrollTo({top: chatOutput.scrollHeight, behavior: b}); }, 50); };
                 const instantScrollToBottom = () => scrollToBottom('auto');
@@ -207,11 +258,16 @@
                 // --- Settings ---
                 const saveSettings = () => {
                     try {
+                        // Ensure elements exist before accessing .value
                         const settings = {
-                            model: modelSelect.value, style: styleSelect.value, sendOnEnter: sendOnEnterCheckbox.checked, darkMode: darkModeCheckbox.checked,
-                            temperature: parseFloat(temperatureSlider.value), topP: parseFloat(topPSlider.value),
-                            maxOutputTokens: parseInt(maxOutputTokensInput.value) || null,
-                            stopSequence: stopSequenceInput.value
+                            model: modelSelect?.value,
+                            style: styleSelect?.value,
+                            sendOnEnter: sendOnEnterCheckbox?.checked,
+                            darkMode: darkModeCheckbox?.checked,
+                            temperature: temperatureSlider ? parseFloat(temperatureSlider.value) : 0.7,
+                            topP: topPSlider ? parseFloat(topPSlider.value) : 0.95,
+                            maxOutputTokens: maxOutputTokensInput ? (parseInt(maxOutputTokensInput.value) || null) : null,
+                            stopSequence: stopSequenceInput?.value || ''
                         };
                         localStorage.setItem('aiChatSettings_v8_adv', JSON.stringify(settings));
                     } catch (e) { console.warn("Save settings failed:", e); }
@@ -223,38 +279,43 @@
                         const defaultSettings = { temp: 0.7, topP: 0.95, maxTokens: null, stopSeq: '' };
                         let sets = s ? JSON.parse(s) : {}; // Parse if exists, otherwise empty object
 
-                        // Ensure sets is an object (might be null if JSON.parse failed on invalid data)
+                        // Ensure sets is an object
                         if (typeof sets !== 'object' || sets === null) {
                             console.warn("Invalid settings found in localStorage, using defaults.");
                             sets = {};
                         }
 
-                        // Basic settings
-                        modelSelect.value = (sets.model && Array.from(modelSelect.options).some(o=>o.value === sets.model)) ? sets.model : modelSelect.options[0].value;
+                        // Basic settings (with checks for element existence)
+                        if (modelSelect) modelSelect.value = (sets.model && Array.from(modelSelect.options).some(o=>o.value === sets.model)) ? sets.model : modelSelect.options[0]?.value;
                         currentStyle = (sets.style && conversationStyles[sets.style]) ? sets.style : 'default';
-                        styleSelect.value = currentStyle;
-                        sendOnEnterCheckbox.checked = sets.sendOnEnter !== false; sendOnEnter = sendOnEnterCheckbox.checked;
-                        darkModeCheckbox.checked = sets.darkMode === true; applyDarkMode(darkModeCheckbox.checked, false);
+                        if (styleSelect) styleSelect.value = currentStyle;
+                        if (sendOnEnterCheckbox) sendOnEnterCheckbox.checked = sets.sendOnEnter !== false; sendOnEnter = sendOnEnterCheckbox?.checked !== false;
+                        if (darkModeCheckbox) darkModeCheckbox.checked = sets.darkMode === true; applyDarkMode(darkModeCheckbox?.checked === true, false);
 
-                        // Advanced Settings (with defaults and type checking)
+                        // Advanced Settings (with defaults, type checking, and existence checks)
                         const temp = (typeof sets.temperature === 'number' && !isNaN(sets.temperature)) ? sets.temperature : defaultSettings.temp;
-                        temperatureSlider.value = temp; temperatureValue.value = temp;
+                        if (temperatureSlider) temperatureSlider.value = temp;
+                        if (temperatureValue) temperatureValue.value = temp;
 
                         const topP = (typeof sets.topP === 'number' && !isNaN(sets.topP)) ? sets.topP : defaultSettings.topP;
-                        topPSlider.value = topP; topPValue.value = topP;
+                        if (topPSlider) topPSlider.value = topP;
+                        if (topPValue) topPValue.value = topP;
 
-                        // Check for number or null/undefined before assigning empty string
-                        maxOutputTokensInput.value = (typeof sets.maxOutputTokens === 'number' && !isNaN(sets.maxOutputTokens)) ? sets.maxOutputTokens : (sets.maxOutputTokens === null || sets.maxOutputTokens === undefined) ? '' : defaultSettings.maxTokens ?? '';
-                        stopSequenceInput.value = sets.stopSequence ?? defaultSettings.stopSeq;
+                        if (maxOutputTokensInput) {
+                            maxOutputTokensInput.value = (typeof sets.maxOutputTokens === 'number' && !isNaN(sets.maxOutputTokens)) ? sets.maxOutputTokens : (sets.maxOutputTokens === null || sets.maxOutputTokens === undefined) ? '' : (defaultSettings.maxTokens ?? '');
+                        }
+                         if (stopSequenceInput) {
+                            stopSequenceInput.value = sets.stopSequence ?? defaultSettings.stopSeq;
+                         }
                         // console.log("Settings loaded successfully."); // Debug log
 
                     } catch (e) {
                          console.error("Load settings failed:", e); // Use error for critical failures
                          // Apply defaults on critical error
-                         sendOnEnterCheckbox.checked = true; sendOnEnter = true; currentStyle = 'default'; styleSelect.value = 'default'; applyDarkMode(false, false);
-                         temperatureSlider.value = 0.7; temperatureValue.value = 0.7;
-                         topPSlider.value = 0.95; topPValue.value = 0.95;
-                         maxOutputTokensInput.value = ''; stopSequenceInput.value = '';
+                         if (sendOnEnterCheckbox) sendOnEnterCheckbox.checked = true; sendOnEnter = true; currentStyle = 'default'; if (styleSelect) styleSelect.value = 'default'; applyDarkMode(false, false);
+                         if (temperatureSlider) temperatureSlider.value = 0.7; if (temperatureValue) temperatureValue.value = 0.7;
+                         if (topPSlider) topPSlider.value = 0.95; if (topPValue) topPValue.value = 0.95;
+                         if (maxOutputTokensInput) maxOutputTokensInput.value = ''; if (stopSequenceInput) stopSequenceInput.value = '';
                          console.log("Applied default settings due to load error."); // Debug log
                      }
                  };
@@ -285,10 +346,10 @@
                 const handleRegenerateClick = (e) => { if(typingTimeout || currentAbortController) { showCustomDialog({ title: "פעולה חסומה", message: "לא ניתן לחדש תגובה בזמן שה-AI מגיב." }); return; } const button = e.currentTarget; const wrapper = button.closest('.message-wrapper'); if(!wrapper) return; const msg = wrapper.querySelector('.ai-message'); if(!msg) return; const originalUserQuery=msg.dataset.userQuery, modelValueUsed=msg.dataset.modelValue, modelNameUsed=msg.dataset.modelName, originalAiMsgId=wrapper.dataset.messageId; if(!originalUserQuery || !modelValueUsed || !modelNameUsed || !originalAiMsgId) { showCustomDialog({ title: "שגיאה", message: "לא ניתן לשחזר תגובה זו." }); return; } sendMessage(originalUserQuery, { isRegeneration: true, originalAiMsgId: originalAiMsgId, modelValueOverride: modelValueUsed, modelNameOverride: modelNameUsed }, false); };
 
                 // --- Send Message ---
-                const sendMessage = async (textToSend, options = {}, skipResponse = false) => { if (!userInput || !chatOutputInner || !modelSelect) return; const { isRegeneration = false, originalAiMsgId = null, modelValueOverride = null, modelNameOverride = null } = options; const originalUserText = (textToSend !== undefined ? textToSend : userInput.value).trim(); if (originalUserText === '' || currentAbortController) { if (currentAbortController) showCustomDialog({ title: "פעולה חסומה", message: "נא המתן לסיום התגובה." }); return; } disableInput(); if(clearInputButton) clearInputButton.style.display = 'none'; if(sendButton) sendButton.classList.remove('has-text'); let textForApi = originalUserText; const stylePrefix = (!isRegeneration && currentStyle !== 'default') ? conversationStylePrefixes[currentStyle] || '' : ''; if (stylePrefix) { textForApi = stylePrefix + originalUserText; } if (!isRegeneration) { addMessageToChat(originalUserText, 'user', { timestamp: getCurrentTimestamp(false), originalUserQueryForDisplay: originalUserText }); userInput.value = ''; adjustTextareaHeight(); instantScrollToBottom(); } else if (originalAiMsgId) { const oldWrapper = chatOutputInner.querySelector(`.message-wrapper[data-message-id="${originalAiMsgId}"]`); if (oldWrapper) oldWrapper.remove(); } if (skipResponse) { enableInput(); return; } const loadingIndicatorElement = addMessageToChat(null, 'ai', { isLoading: true }); instantScrollToBottom(); const historyArray = getChatHistory(isRegeneration, originalAiMsgId); let requestPayloadText = historyArray.map(m => `[${m.role.toUpperCase()}] ${m.content}`).join('\n'); requestPayloadText += (requestPayloadText ? '\n' : '') + `[USER] ${textForApi}`; requestPayloadText = requestPayloadText.trim(); const selectedOption = modelSelect ? (modelValueOverride ? (Array.from(modelSelect.options).find(opt => opt.value === modelValueOverride) || modelSelect.options[modelSelect.selectedIndex]) : modelSelect.options[modelSelect.selectedIndex]) : null; const modelName = modelNameOverride || selectedOption?.text || 'default'; const selectedModelFile = selectedOption?.value || 'main-ai.php'; const finalApiUrl = BASE_API_URL + selectedModelFile; const generationSettings = { temperature: parseFloat(temperatureSlider.value), topP: parseFloat(topPSlider.value), ...(maxOutputTokensInput.value && !isNaN(parseInt(maxOutputTokensInput.value)) && { maxOutputTokens: parseInt(maxOutputTokensInput.value) }), stopSequences: stopSequenceInput.value.split(',').map(s => s.trim()).filter(s => s) }; if (generationSettings.stopSequences.length === 0) delete generationSettings.stopSequences; currentAbortController = new AbortController(); const signal = currentAbortController.signal; try { const requestBody = { text: requestPayloadText, generationConfig: generationSettings }; /* console.log("API Request Body:", JSON.stringify(requestBody, null, 2)); */ const response = await fetch(finalApiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody), signal }); if (!signal.aborted) { loadingIndicatorElement?.closest('.message-wrapper')?.remove(); } else { loadingIndicatorElement?.closest('.message-wrapper')?.remove(); return; } if (!response.ok) { let errorText = `Server Error: ${response.status}`; try { const errorData = await response.json(); errorText += ` - ${errorData?.error || '?'}`; } catch (e) {} throw new Error(errorText); } const data = await response.json(); if (data?.text) { const aiMsgEl = addMessageToChat('', 'ai', { timestamp: getCurrentTimestamp(false), modelNameUsed: modelName, userQuery: originalUserText, modelValue: selectedModelFile }); if (aiMsgEl) { typeAiResponse(aiMsgEl, data.text); } else { throw new Error("Failed to create AI msg element."); } } else { throw new Error("Invalid response format."); } } catch (error) { loadingIndicatorElement?.closest('.message-wrapper')?.remove(); if (error.name === 'AbortError') { console.log('Fetch aborted.'); } else { console.error("Send Error:", error); addMessageToChat(`שגיאה: ${error.message}`, 'ai', { modelNameUsed: modelName }); enableInput(); } } finally { currentAbortController = null; if (!typingTimeout && !currentAbortController) { enableInput(); } } };
+                const sendMessage = async (textToSend, options = {}, skipResponse = false) => { if (!userInput || !chatOutputInner || !modelSelect) return; const { isRegeneration = false, originalAiMsgId = null, modelValueOverride = null, modelNameOverride = null } = options; const originalUserText = (textToSend !== undefined ? textToSend : userInput.value).trim(); if (originalUserText === '' || currentAbortController) { if (currentAbortController) showCustomDialog({ title: "פעולה חסומה", message: "נא המתן לסיום התגובה." }); return; } disableInput(); if(clearInputButton) clearInputButton.style.display = 'none'; if(sendButton) sendButton.classList.remove('has-text'); let textForApi = originalUserText; const stylePrefix = (!isRegeneration && currentStyle !== 'default') ? conversationStylePrefixes[currentStyle] || '' : ''; if (stylePrefix) { textForApi = stylePrefix + originalUserText; } if (!isRegeneration) { addMessageToChat(originalUserText, 'user', { timestamp: getCurrentTimestamp(false), originalUserQueryForDisplay: originalUserText }); userInput.value = ''; adjustTextareaHeight(); instantScrollToBottom(); } else if (originalAiMsgId) { const oldWrapper = chatOutputInner.querySelector(`.message-wrapper[data-message-id="${originalAiMsgId}"]`); if (oldWrapper) oldWrapper.remove(); } if (skipResponse) { enableInput(); return; } const loadingIndicatorElement = addMessageToChat(null, 'ai', { isLoading: true }); instantScrollToBottom(); const historyArray = getChatHistory(isRegeneration, originalAiMsgId); let requestPayloadText = historyArray.map(m => `[${m.role.toUpperCase()}] ${m.content}`).join('\n'); requestPayloadText += (requestPayloadText ? '\n' : '') + `[USER] ${textForApi}`; requestPayloadText = requestPayloadText.trim(); const selectedOption = modelSelect ? (modelValueOverride ? (Array.from(modelSelect.options).find(opt => opt.value === modelValueOverride) || modelSelect.options[modelSelect.selectedIndex]) : modelSelect.options[modelSelect.selectedIndex]) : null; const modelName = modelNameOverride || selectedOption?.text || 'default'; const selectedModelFile = selectedOption?.value || 'main-ai.php'; const finalApiUrl = BASE_API_URL + selectedModelFile; const generationSettings = { temperature: temperatureSlider ? parseFloat(temperatureSlider.value) : 0.7, topP: topPSlider ? parseFloat(topPSlider.value) : 0.95, ...(maxOutputTokensInput?.value && !isNaN(parseInt(maxOutputTokensInput.value)) && { maxOutputTokens: parseInt(maxOutputTokensInput.value) }), stopSequences: stopSequenceInput?.value.split(',').map(s => s.trim()).filter(s => s) }; if (generationSettings.stopSequences.length === 0) delete generationSettings.stopSequences; currentAbortController = new AbortController(); const signal = currentAbortController.signal; try { const requestBody = { text: requestPayloadText, generationConfig: generationSettings }; /* console.log("API Request Body:", JSON.stringify(requestBody, null, 2)); */ const response = await fetch(finalApiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody), signal }); if (!signal.aborted) { loadingIndicatorElement?.closest('.message-wrapper')?.remove(); } else { loadingIndicatorElement?.closest('.message-wrapper')?.remove(); return; } if (!response.ok) { let errorText = `Server Error: ${response.status}`; try { const errorData = await response.json(); errorText += ` - ${errorData?.error || '?'}`; } catch (e) {} throw new Error(errorText); } const data = await response.json(); if (data?.text) { const aiMsgEl = addMessageToChat('', 'ai', { timestamp: getCurrentTimestamp(false), modelNameUsed: modelName, userQuery: originalUserText, modelValue: selectedModelFile }); if (aiMsgEl) { typeAiResponse(aiMsgEl, data.text); } else { throw new Error("Failed to create AI msg element."); } } else { throw new Error("Invalid response format."); } } catch (error) { loadingIndicatorElement?.closest('.message-wrapper')?.remove(); if (error.name === 'AbortError') { console.log('Fetch aborted.'); } else { console.error("Send Error:", error); addMessageToChat(`שגיאה: ${error.message}`, 'ai', { modelNameUsed: modelName }); enableInput(); } } finally { currentAbortController = null; if (!typingTimeout && !currentAbortController) { enableInput(); } } };
 
                 // --- Download / Clear ---
-                const downloadChat = () => { let chatContent = `AI Chat History (${new Date().toLocaleString('he-IL')})\nModel: ${modelSelect?.options[modelSelect.selectedIndex]?.text || 'N/A'}\nStyle: ${conversationStyles[styleSelect?.value || 'default']?.name || 'Default'}\n====================\n\n`; const historyForDownload = []; const wrappers = chatOutputInner.querySelectorAll('.message-wrapper'); wrappers.forEach(w => { const msgDiv = w.querySelector('.message'); if (!msgDiv) return; const sender = msgDiv.dataset.sender; const ts = msgDiv.dataset.timestamp; const model = msgDiv.dataset.modelName ? ` (${msgDiv.dataset.modelName})` : ''; const contentEl = msgDiv.querySelector('.message-content'); let text = contentEl?.textContent?.trim() || ''; text = text.replace(/(העתק|הועתק!|שגיאה)$/,'').trim(); if (sender === 'user' && msgDiv.dataset.originalUserQuery) text = msgDiv.dataset.originalUserQuery; const role = sender === 'user' ? 'User' : (ts === 'התחל' ? 'System' : 'AI'); historyForDownload.push(`[${ts}] ${role}${model}: ${text}`); }); chatContent += historyForDownload.join('\n\n'); try { const blob = new Blob([chatContent], { type: 'text/plain;charset=utf-8' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); const now = new Date(); const dateString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`; const filename = `ai_chat_log_${dateString}.txt`; link.download = filename; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); } catch (e) { console.error("Download error:", e); showCustomDialog({ title: "שגיאה", message: "הורדה נכשלה." }); } };
+                const downloadChat = () => { let chatContent = `AI Chat History (${new Date().toLocaleString('he-IL')})\nModel: ${modelSelect?.options[modelSelect.selectedIndex]?.text || 'N/A'}\nStyle: ${conversationStyles[styleSelect?.value || 'default']?.name || 'Default'}\n====================\n\n`; const historyForDownload = []; const wrappers = chatOutputInner?.querySelectorAll('.message-wrapper'); wrappers?.forEach(w => { const msgDiv = w.querySelector('.message'); if (!msgDiv) return; const sender = msgDiv.dataset.sender; const ts = msgDiv.dataset.timestamp; const model = msgDiv.dataset.modelName ? ` (${msgDiv.dataset.modelName})` : ''; const contentEl = msgDiv.querySelector('.message-content'); let text = contentEl?.textContent?.trim() || ''; text = text.replace(/(העתק|הועתק!|שגיאה)$/,'').trim(); if (sender === 'user' && msgDiv.dataset.originalUserQuery) text = msgDiv.dataset.originalUserQuery; const role = sender === 'user' ? 'User' : (ts === 'התחל' ? 'System' : 'AI'); historyForDownload.push(`[${ts}] ${role}${model}: ${text}`); }); chatContent += historyForDownload.join('\n\n'); try { const blob = new Blob([chatContent], { type: 'text/plain;charset=utf-8' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); const now = new Date(); const dateString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`; const filename = `ai_chat_log_${dateString}.txt`; link.download = filename; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); } catch (e) { console.error("Download error:", e); showCustomDialog({ title: "שגיאה", message: "הורדה נכשלה." }); } };
                 const clearChat = () => { showCustomDialog({ title: "ניקוי שיחה", message: "למחוק את כל ההודעות?", confirmText: "מחק", onConfirm: () => { stopTypingAndGeneration(); if (chatOutputInner) chatOutputInner.innerHTML = ''; initializeGreeting(); messageCounterId = 0; if (scrollToBottomButton) scrollToBottomButton.classList.remove('visible'); isScrolledToBottom = true; if (userInput) { userInput.value = ''; adjustTextareaHeight(); } if(clearInputButton) clearInputButton.style.display = 'none'; if(sendButton) sendButton.classList.remove('has-text'); enableInput(); console.log("Chat cleared."); }}); };
                 const adjustTextareaHeight = () => { if (!userInput) return; const MIN_HEIGHT_PX = 48; userInput.style.height = 'auto'; const scrollH = userInput.scrollHeight; const computedStyle = window.getComputedStyle(userInput); const maxH = parseInt(computedStyle.maxHeight, 10) || 160; if (scrollH <= MIN_HEIGHT_PX) userInput.style.height = `${MIN_HEIGHT_PX}px`; else if (scrollH > maxH) userInput.style.height = `${maxH}px`; else userInput.style.height = `${scrollH}px`; userInput.style.overflowY = (scrollH > maxH) ? 'auto' : 'hidden'; };
                 const handleUrlParameter = () => { try { const params = new URLSearchParams(window.location.search); const conversationParam = params.get('conversation'); if (conversationParam) { const decodedText = decodeURIComponent(conversationParam).trim(); if (decodedText) { setTimeout(() => { addMessageToChat(decodedText, 'user', { timestamp: getCurrentTimestamp(false), originalUserQueryForDisplay: decodedText }); if(userInput) userInput.value = ''; adjustTextareaHeight(); instantScrollToBottom(); enableInput(); }, 200); const nextURL = window.location.pathname; window.history.replaceState({}, document.title, nextURL); } } } catch (e) { console.error("URL param error:", e); } };
@@ -306,22 +367,35 @@
                 if (chatOutput) chatOutput.addEventListener('scroll', debouncedUpdateScrollState);
                 if (scrollToBottomButton) scrollToBottomButton.onclick = smoothScrollToBottom;
                 if (settingsButton) settingsButton.onclick = (e) => { e.stopPropagation(); toggleSettingsPopover(); };
-                document.addEventListener('click', (e) => { userInteracted = true; if (settingsPopover && settingsPopover.classList.contains('visible') && !settingsPopover.contains(e.target) && !settingsButton.contains(e.target)) { toggleSettingsPopover(false); } });
+                document.addEventListener('click', (e) => { userInteracted = true; if (settingsPopover && settingsPopover.classList.contains('visible') && !settingsPopover.contains(e.target) && !settingsButton?.contains(e.target)) { toggleSettingsPopover(false); } }); // Added check for settingsButton existence
                 if (modelSelect) modelSelect.onchange = saveSettings;
                 if (styleSelect) { styleSelect.onchange = () => { currentStyle = styleSelect.value; saveSettings(); console.log("Style changed to:", currentStyle); }; }
                 if (sendOnEnterContainer) { sendOnEnterContainer.onclick = (e) => { userInteracted = true; if (e.target !== sendOnEnterCheckbox && sendOnEnterCheckbox) { sendOnEnterCheckbox.checked = !sendOnEnterCheckbox.checked; sendOnEnter = sendOnEnterCheckbox.checked; saveSettings(); } }; if(sendOnEnterCheckbox) sendOnEnterCheckbox.onchange = () => { sendOnEnter = sendOnEnterCheckbox.checked; saveSettings(); }; }
                 if (darkModeContainer) { darkModeContainer.onclick = (e) => { userInteracted = true; if (e.target !== darkModeCheckbox && darkModeCheckbox) { darkModeCheckbox.checked = !darkModeCheckbox.checked; applyDarkMode(darkModeCheckbox.checked); } }; if(darkModeCheckbox) darkModeCheckbox.onchange = () => { applyDarkMode(darkModeCheckbox.checked); }; }
                 if (downloadChatButtonTxt) downloadChatButtonTxt.onclick = downloadChat;
                 if (clearChatButtonSettings) clearChatButtonSettings.onclick = clearChat;
-                // --- Advanced Settings Listeners ---
-                temperatureSlider.addEventListener('input', () => { temperatureValue.value = temperatureSlider.value; saveSettings(); }); temperatureValue.addEventListener('input', () => { let val = parseFloat(temperatureValue.value); if (isNaN(val)) return; val = Math.max(0, Math.min(1, val)); temperatureValue.value = val; temperatureSlider.value = val; saveSettings(); }); topPSlider.addEventListener('input', () => { topPValue.value = topPSlider.value; saveSettings(); }); topPValue.addEventListener('input', () => { let val = parseFloat(topPValue.value); if (isNaN(val)) return; val = Math.max(0, Math.min(1, val)); topPValue.value = val; topPSlider.value = val; saveSettings(); }); maxOutputTokensInput.addEventListener('change', saveSettings); stopSequenceInput.addEventListener('change', saveSettings);
+                // --- Advanced Settings Listeners (Check for element existence) ---
+                if (temperatureSlider) temperatureSlider.addEventListener('input', () => { if (temperatureValue) temperatureValue.value = temperatureSlider.value; saveSettings(); });
+                if (temperatureValue) temperatureValue.addEventListener('input', () => { let val = parseFloat(temperatureValue.value); if (isNaN(val)) return; val = Math.max(0, Math.min(1, val)); temperatureValue.value = val; if (temperatureSlider) temperatureSlider.value = val; saveSettings(); });
+                if (topPSlider) topPSlider.addEventListener('input', () => { if (topPValue) topPValue.value = topPSlider.value; saveSettings(); });
+                if (topPValue) topPValue.addEventListener('input', () => { let val = parseFloat(topPValue.value); if (isNaN(val)) return; val = Math.max(0, Math.min(1, val)); topPValue.value = val; if (topPSlider) topPSlider.value = val; saveSettings(); });
+                if (maxOutputTokensInput) maxOutputTokensInput.addEventListener('change', saveSettings);
+                if (stopSequenceInput) stopSequenceInput.addEventListener('change', saveSettings);
                 // --- Keyboard Shortcuts ---
                  document.addEventListener('keydown', (e) => { userInteracted = true; const focusOnInput = document.activeElement === userInput; const popoverVisible = settingsPopover?.classList.contains('visible'); const isOverlayVisible = document.querySelector('#dialog-overlay.visible'); const isTextInputFocused = document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA'; if (isOverlayVisible || (isTextInputFocused && !focusOnInput)) return; if (e.altKey && e.key.toLowerCase() === 's') { e.preventDefault(); toggleSettingsPopover(); } else if (e.altKey && e.key.toLowerCase() === 'i' && !focusOnInput) { e.preventDefault(); focusElement(userInput); } else if (e.altKey && e.key.toLowerCase() === 'x' && focusOnInput) { e.preventDefault(); if (userInput?.value) { userInput.value = ''; adjustTextareaHeight(); if (clearInputButton) clearInputButton.style.display = 'none'; if (sendButton) sendButton.classList.remove('has-text'); } } else if (e.key === 'Escape' && popoverVisible) { e.preventDefault(); toggleSettingsPopover(false); } else if (e.key === 'End' && !focusOnInput) { e.preventDefault(); instantScrollToBottom(); } else if (e.key === 'Home' && !focusOnInput) { e.preventDefault(); if (chatOutput) chatOutput.scrollTo({ top: 0, behavior: 'smooth' }); } else if (e.ctrlKey && e.key === 'Enter' && focusOnInput) { e.preventDefault(); sendMessage(); } });
 
                 // --- Start Initialization ---
                 initializeChat();
 
-            } catch (error) { console.error("Fatal Error during Chat Initialization:", error); const body = document.body; if (body) { body.innerHTML = `<div style="padding: 30px; margin: 20px; border: 1px solid red; background-color: #ffebee; text-align: center; font-family: 'Rubik', sans-serif; color: #c62828;"><h2>תקלה!</h2><p>טעינת הצ'אט נכשלה.</p><p>נסה לרענן. בדוק קונסולת מפתחים (F12) לשגיאות: ${escapeHtml(error.message)}</p></div>`; } }
+            } catch (error) {
+                console.error("Fatal Error during Chat Initialization:", error);
+                // Use the globally defined escapeHtml function here
+                const escapeHtmlForError = (unsafe) => (typeof unsafe === 'string' ? unsafe.replace(/</g, "&lt;").replace(/>/g, "&gt;") : unsafe);
+                const body = document.body;
+                if (body) {
+                     body.innerHTML = `<div style="padding: 30px; margin: 20px; border: 1px solid red; background-color: #ffebee; text-align: center; font-family: 'Rubik', sans-serif; color: #c62828;"><h2>תקלה!</h2><p>טעינת הצ'אט נכשלה.</p><p>נסה לרענן. בדוק קונסולת מפתחים (F12) לשגיאות: ${escapeHtmlForError(error.message)}</p></div>`;
+                 }
+             }
         }); // End DOMContentLoaded
 
     })(); // End IIFE
