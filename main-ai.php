@@ -14,8 +14,8 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 $apiKey = 'AIzaSyAQeJqpeH-VYT5bt0tDBs8z3k8NMIcYey0'; 
-$systemInstruction = "תשתמש בקצת סמיילים כדי שיוסיף עניין וכיף בשיחה";
-
+//$systemInstruction = "תשתמש בקצת סמיילים כדי שיוסיף עניין וכיף בשיחה";
+$systemInstruction = "השתמש בסמיילים בצורה טבעית ומשעשעת לאורך כל השיחה, כדי להוסיף עניין, שמחה וחמימות לתגובות שלך. בחר סמיילים שמתאימים לתוכן השיחה ולטון שלה, והימנע משימוש יתר שעלול להיראות מלאכותי או מוגזם.";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
 
