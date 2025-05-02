@@ -263,7 +263,9 @@
     (function() {
         // --- Constants ---
         const BASE_API_URL = 'https://php-render-test.onrender.com/'; // Updated API Base URL
-const TYPING_SPEED = 2; const SCROLL_THRESHOLD = 200; const DEBOUNCE_DELAY = 33;
+//const TYPING_SPEED = 2; const SCROLL_THRESHOLD = 200; const DEBOUNCE_DELAY = 33;
+        const TYPING_SPEED = 0; const SCROLL_THRESHOLD = 200; const DEBOUNCE_DELAY = 0;
+
         const MAX_HISTORY_LENGTH = 15;
         const SPLASH_DURATION = 400; // Faster splash screen
 
