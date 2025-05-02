@@ -110,15 +110,6 @@
                   </select>
              </div>
 
-             <!-- Advanced Settings Section -->
-             <div class="popover-section advanced-settings">
-                <label style="font-weight: 600; margin-bottom: 10px; font-size: 14px;">הגדרות מתקדמות:</label>
-                <div class="advanced-setting"> <label for="temperature-slider">טמפרטורה (יצירתיות):</label> <div class="slider-container"> <input type="range" id="temperature-slider" min="0" max="1" step="0.05" title="טמפרטורה"> <input type="number" id="temperature-value" class="slider-value" min="0" max="1" step="0.05" aria-labelledby="temperature-slider"> </div> </div>
-                <div class="advanced-setting"> <label for="top-p-slider">Top-P (מיקוד):</label> <div class="slider-container"> <input type="range" id="top-p-slider" min="0" max="1" step="0.05" title="Top P"> <input type="number" id="top-p-value" class="slider-value" min="0" max="1" step="0.05" aria-labelledby="top-p-slider"> </div> </div>
-                <div class="advanced-setting"> <label for="max-output-tokens">מקסימום טוקנים לפלט:</label> <input type="number" id="max-output-tokens" min="1" max="8192" step="1" placeholder="ברירת מחדל"> </div>
-                <div class="advanced-setting"> <label for="stop-sequence">רצף עצירה (אופציונלי):</label> <input type="text" id="stop-sequence" placeholder="הפרד רצפים מרובים בפסיק"> </div>
-             </div>
-             <!-- End Advanced Settings -->
 
               <div class="popover-section"> <label>התנהגות:</label> <div class="popover-checkbox" role="menuitemcheckbox" aria-checked="true" tabindex="0" id="send-on-enter-container"> <input type="checkbox" id="send-on-enter-checkbox" tabindex="-1" checked> <label for="send-on-enter-checkbox">שלח הודעה בלחיצת Enter</label> </div> </div>
               <div class="popover-section"> <label>מראה:</label> <div class="popover-checkbox" role="menuitemcheckbox" aria-checked="false" tabindex="0" id="dark-mode-container"> <input type="checkbox" id="dark-mode-checkbox" tabindex="-1"> <label for="dark-mode-checkbox" id="theme-toggle-text">ערכת נושא כהה</label> <span id="theme-icon-placeholder" style="margin-right: auto; display: flex; align-items: center;"></span> </div> </div>
