@@ -80,7 +80,7 @@
     <div id="splash-logo">
         <span></span> <!-- Central Core -->
     </div>
-    <div id="splash-text">טוען בינה...</div>
+    <div id="splash-text">טוען AI...</div>
 </div>
 
 <!-- Chat Container -->
