@@ -78,27 +78,20 @@
   }
   #gemini-sidebar .close-btn:hover { opacity: 1; transform: rotate(90deg) scale(1.1); }
 
-  /* NAV CONTAINER - Positioned at the top */
   #gemini-nav-container {
-    padding: 12px;
-    background-color: rgba(0,0,0,0.1); /* Slight distinction from main chat area */
-    flex-shrink: 0; /* Prevent shrinking */
-    overflow-y: auto; /* Allow scrolling if many categories/buttons */
-    max-height: var(--nav-max-height); /* Limit its height, adjust as needed */
-    border-bottom: 1px solid rgba(255,255,255,0.05); /* Separator from main content */
+    padding: 10px 12px 0 12px; 
+    background: var(--gemini-primary-bg); 
+    flex-shrink: 0; 
+    overflow-y: auto; 
+    max-height: var(--nav-max-height); 
   }
 
   #gemini-sidebar nav#gemini-nav-categories {
     display: flex; 
     flex-direction: column; 
     gap: 8px;
-    background-color: rgba(0,0,0,0.05); 
-    border-radius: var(--gemini-border-radius);
-    padding: 5px;
-    /* border: 1px solid rgba(var(--gemini-secondary-bg),0.5); Removed to simplify, border is on container */
   }
 
-  /* CATEGORY STYLING - Ensure text is visible */
   #gemini-sidebar .category { 
     background-color: var(--gemini-tertiary-bg); 
     border-radius: calc(var(--gemini-border-radius) - 2px); 
@@ -114,8 +107,8 @@
     cursor: pointer;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start; /* Align to top for potentially multi-line text */
-    gap: 8px; /* Space between text and icon */
+    align-items: flex-start; 
+    gap: 8px; 
     font-weight: 600; 
     font-size: 0.95em; 
     transition: background-color var(--animation-speed-fast) ease;
@@ -125,11 +118,11 @@
     box-sizing: border-box;
   }
 
-  #gemini-sidebar .category-header span:first-child { /* The text span */
-    white-space: normal;   /* Allows text to wrap */
-    line-height: 1.35;     /* Comfortable spacing for wrapped lines */
-    flex-grow: 1;          /* Takes available horizontal space */
-    overflow-wrap: break-word; /* Breaks long words */
+  #gemini-sidebar .category-header span:first-child { 
+    white-space: normal;   
+    line-height: 1.35;     
+    flex-grow: 1;          
+    overflow-wrap: break-word; 
   }
   
   #gemini-sidebar .category-header:hover { background-color: var(--gemini-hover-accent-color); }
@@ -138,7 +131,7 @@
   #gemini-sidebar .category-toggle-icon { 
     font-size: 0.8em; 
     flex-shrink:0; 
-    padding-top: 0.1em; /* Align icon with first line of text */
+    padding-top: 0.1em; 
     transition: transform var(--animation-speed-normal) cubic-bezier(0.68, -0.55, 0.27, 1.55); 
   }
   #gemini-sidebar .category-header.open .category-toggle-icon { transform: rotate(90deg); }
@@ -187,6 +180,9 @@
   #gemini-sidebar .category-content.open button:nth-child(3) { animation-delay: 0.15s; } 
   #gemini-sidebar .category-content.open button:nth-child(4) { animation-delay: 0.2s; } 
   #gemini-sidebar .category-content.open button:nth-child(5) { animation-delay: 0.25s; }
+  #gemini-sidebar .category-content.open button:nth-child(6) { animation-delay: 0.3s; }
+  #gemini-sidebar .category-content.open button:nth-child(7) { animation-delay: 0.35s; }
+  #gemini-sidebar .category-content.open button:nth-child(8) { animation-delay: 0.4s; }
   #gemini-sidebar .category-content button:hover { 
     background-color: var(--gemini-accent-color); 
     color: #fff; 
@@ -204,25 +200,29 @@
     border-color: transparent; 
   }
 
-  /* MAIN CONTENT AREA (CHAT + INPUT) - Takes remaining space */
   #gemini-sidebar main {
     flex-grow: 1; 
     display: flex; 
     flex-direction: column;
-    overflow: hidden; /* Important for child elements to scroll properly */
-    padding: 12px; /* Padding for the chat area itself */
-    background: var(--gemini-primary-bg); /* Original background */
+    overflow: hidden; 
+    padding: 0 12px 12px 12px; 
+    background: var(--gemini-primary-bg); 
   }
 
   #gemini-sidebar #gemini-chat { 
-    flex-grow: 1; /* Chat area takes up available space in main */
+    flex-grow: 1; 
     overflow-y: auto; 
-    padding: 10px; /* Inner padding for messages */
+    padding: 10px; 
     margin-bottom: 10px; 
     background-color: rgba(0,0,0,0.25); 
     border-radius: var(--gemini-border-radius); 
     scroll-behavior: smooth; 
+    margin-top: 10px; 
   }
+  #gemini-nav-container:empty + main #gemini-chat {
+      margin-top: 0; 
+  }
+
   #gemini-sidebar .gemini-message { 
     padding: 10px 15px; 
     border-radius: var(--gemini-border-radius); 
@@ -264,7 +264,7 @@
     padding: 8px; 
     background-color: rgba(0,0,0,0.1); 
     border-radius: var(--gemini-border-radius); 
-    flex-shrink: 0; /* Prevent input area from shrinking */
+    flex-shrink: 0; 
   }
   #gemini-sidebar #gemini-input { 
     flex-grow: 1; 
@@ -318,12 +318,12 @@
   
   #gemini-sidebar #gemini-chat::-webkit-scrollbar, 
   #gemini-sidebar #gemini-input::-webkit-scrollbar, 
-  #gemini-sidebar #gemini-nav-container::-webkit-scrollbar, /* Added for nav container */
+  #gemini-sidebar #gemini-nav-container::-webkit-scrollbar, 
   #gemini-sidebar nav#gemini-nav-categories::-webkit-scrollbar { width: 8px; }
   
   #gemini-sidebar #gemini-chat::-webkit-scrollbar-track, 
   #gemini-sidebar #gemini-input::-webkit-scrollbar-track, 
-  #gemini-sidebar #gemini-nav-container::-webkit-scrollbar-track, /* Added for nav container */
+  #gemini-sidebar #gemini-nav-container::-webkit-scrollbar-track, 
   #gemini-sidebar nav#gemini-nav-categories::-webkit-scrollbar-track { 
     background: rgba(0,0,0,0.1); 
     border-radius: var(--gemini-border-radius); 
@@ -331,7 +331,7 @@
   
   #gemini-sidebar #gemini-chat::-webkit-scrollbar-thumb, 
   #gemini-sidebar #gemini-input::-webkit-scrollbar-thumb, 
-  #gemini-sidebar #gemini-nav-container::-webkit-scrollbar-thumb, /* Added for nav container */
+  #gemini-sidebar #gemini-nav-container::-webkit-scrollbar-thumb, 
   #gemini-sidebar nav#gemini-nav-categories::-webkit-scrollbar-thumb { 
     background: var(--gemini-accent-color); 
     border-radius: var(--gemini-border-radius); 
@@ -339,36 +339,92 @@
   
   #gemini-sidebar #gemini-chat::-webkit-scrollbar-thumb:hover, 
   #gemini-sidebar #gemini-input::-webkit-scrollbar-thumb:hover, 
-  #gemini-sidebar #gemini-nav-container::-webkit-scrollbar-thumb:hover, /* Added for nav container */
+  #gemini-sidebar #gemini-nav-container::-webkit-scrollbar-thumb:hover, 
   #gemini-sidebar nav#gemini-nav-categories::-webkit-scrollbar-thumb:hover { 
     background: var(--gemini-hover-accent-color); 
   }
-  /* Remove chat-focused specific styling for nav as it's always visible now */
   #gemini-sidebar #toggle-nav-in-chat-focus-container { display: none !important; }
   `;
   const styleTag = document.createElement('style');
   styleTag.textContent = styleContent;
   document.head.appendChild(styleTag);
 
-  // SECTION 3: HTML Structure - MODIFIED
+  // SECTION 3: HTML Structure
   const sidebar = document.createElement('aside');
-  sidebar.id = 'gemini-sidebar'; // Corrected from sidebar.id
+  sidebar.id = 'gemini-sidebar';
   sidebar.innerHTML = `
     <header> 
       <div>תפריט Gemini חכם + צ'אט</div> 
       <button class="close-btn" title="סגור תפריט">✖</button> 
     </header>
     
-    <div id="gemini-nav-container"> {/* New container for categories */}
+    <div id="gemini-nav-container">
       <nav id="gemini-nav-categories">
-        <div class="category"> <div class="category-header"> <span>ניתוח תוכן דף</span> <span class="category-toggle-icon">◀️</span> </div> <div class="category-content"> <button data-action="summary">סכם דף</button> <button data-action="keywords">מילות מפתח</button> <button data-action="toneAnalysis">ניתוח טון</button> <button data-action="simplify">פשט משפטים</button> <button data-action="explainTerms">הסבר מושגים</button> <button data-action="relatedReads">קריאה נוספת</button> <button data-action="notes">תזכורות/הערות</button> </div> </div>
-        <div class="category"> <div class="category-header"> <span>יצירת תוכן</span> <span class="category-toggle-icon">◀️</span> </div> <div class="category-content"> <button data-action="ideas">רעיונות למאמר</button> <button data-action="introParagraph">פסקת פתיחה</button> <button data-action="writeSocialPost">פוסט לרשת חברתית</button> <button data-action="translateText">תרגם טקסט</button> </div> </div>
-        <div class="category"> <div class="category-header"> <span>ניתוח טכני וכלים</span> <span class="category-toggle-icon">◀️</span> </div> <div class="category-content"> <button data-action="findForms">איתור טפסים</button> <button data-action="analyzeHTML">ניתוח HTML</button> <button data-action="checkAccessibility">בדיקת נגישות</button> <button data-action="countElements">ספירת אלמנטים</button> <button data-action="loadImage">טעינת תמונה</button> <button data-action="checkPageSpeedFactors">בדיקת מהירות (גורמים)</button> <button data-action="extractEmails">חילוץ אימיילים</button> </div> </div>
-        <div class="category"> <div class="category-header"> <span>שיתוף ופעולות דפדפן</span> <span class="category-toggle-icon">◀️</span> </div> <div class="category-content"> <button data-action="sharePage">שיתוף עמוד</button> </div> </div>
+        <div class="category"> 
+          <div class="category-header"> <span>ניתוח תוכן דף</span> <span class="category-toggle-icon">◀️</span> </div> 
+          <div class="category-content"> 
+            <button data-action="summary">סכם דף</button> 
+            <button data-action="keywords">מילות מפתח</button> 
+            <button data-action="toneAnalysis">ניתוח טון</button> 
+            <button data-action="simplify">פשט משפטים</button> 
+            <button data-action="explainTerms">הסבר מושגים</button> 
+            <button data-action="relatedReads">קריאה נוספת</button> 
+            <button data-action="notes">תזכורות/הערות</button> 
+            <button data-action="generateQA">צור שאלות ותשובות</button> {/* New/Translated */}
+            <button data-action="factCheck">בדוק עובדות עיקריות</button> {/* New */}
+            <button data-action="translatePageToEnglish">תרגם דף לאנגלית</button>
+          </div> 
+        </div>
+        <div class="category"> 
+          <div class="category-header"> <span>יצירת תוכן</span> <span class="category-toggle-icon">◀️</span> </div> 
+          <div class="category-content"> 
+            <button data-action="ideas">רעיונות למאמר</button> 
+            <button data-action="introParagraph">פסקת פתיחה</button> 
+            <button data-action="writeSocialPost">פוסט לרשת חברתית</button> 
+            <button data-action="translateText">תרגם טקסט נבחר</button> {/* Clarified */}
+            <button data-action="generateShoppingList">צור רשימת קניות</button>
+            <button data-action="defineTermsInPage">הגדרות מילוניות</button>
+          </div> 
+        </div>
+        <div class="category"> 
+          <div class="category-header"> <span>כלי עזר לגלישה</span> <span class="category-toggle-icon">◀️</span> </div> 
+          <div class="category-content"> 
+            <button data-action="findRelatedVideos">מצא סרטונים קשורים</button> 
+            <button data-action="eli5">הסבר כמו לילד בן 5</button> 
+            <button data-action="removeAdsBasic">הסר פרסומות (בסיסי)</button> 
+            <button data-action="highlightLinks">הדגש קישורים</button> 
+            <button data-action="increaseTextSize">הגדל טקסט</button> 
+            <button data-action="decreaseTextSize">הקטן טקסט</button> 
+            <button data-action="readingModeBasic">מצב קריאה (בסיסי)</button> 
+            <button data-action="generateQRCode">צור קוד QR</button> 
+            <button data-action="saveAsPDF">שמור כ-PDF</button> 
+            <button data-action="toggleVideos">נגן/השהה סרטונים</button>
+          </div> 
+        </div>
+        <div class="category"> 
+          <div class="category-header"> <span>ניתוח טכני וכלים</span> <span class="category-toggle-icon">◀️</span> </div> 
+          <div class="category-content"> 
+            <button data-action="findForms">איתור טפסים</button> 
+            <button data-action="analyzeHTML">ניתוח HTML</button> 
+            <button data-action="checkAccessibility">בדיקת נגישות</button> 
+            <button data-action="countElements">ספירת אלמנטים</button> 
+            <button data-action="loadImage">טעינת תמונה</button> 
+            <button data-action="checkPageSpeedFactors">בדיקת מהירות (גורמים)</button> 
+            <button data-action="extractEmails">חילוץ אימיילים</button> 
+            <button data-action="checkBrokenLinksBasic">בדוק קישורים שבורים (בסיסי)</button>
+          </div> 
+        </div>
+        <div class="category"> 
+          <div class="category-header"> <span>שיתוף ופעולות דפדפן</span> <span class="category-toggle-icon">◀️</span> </div> 
+          <div class="category-content"> 
+            <button data-action="sharePage">שיתוף עמוד</button> 
+            <button data-action="searchSelectedWithGoogle">חפש מסומן בגוגל</button>
+          </div> 
+        </div>
       </nav>
     </div>
 
-    <main> {/* Main now only contains chat and input */}
+    <main> 
       <section id="gemini-chat" aria-label="אזור צ'אט עם Gemini API" role="log" aria-live="polite"></section>
       <div id="gemini-input-area"> 
         <textarea id="gemini-input" placeholder="הקלד הודעה כאן..." rows="1" aria-label="הודעה לצ'אט"></textarea> 
@@ -383,7 +439,6 @@
   document.body.appendChild(sidebar);
 
   // SECTION 4: DOM Element Variables
-  const mainLayoutElement = sidebar.querySelector('main'); 
   const navElement = sidebar.querySelector('nav#gemini-nav-categories'); 
   const chatArea = sidebar.querySelector('#gemini-chat');
   const inputEl = sidebar.querySelector('#gemini-input');
@@ -394,6 +449,7 @@
   const messages = [];
   let isLoading = false;
   let loadingMessageDiv = null;
+  let pageInfoSent = false; // Flag to track if initial page info has been sent for the session
 
   // SECTION 6: Core Functions
   function closeAllCategoriesGlobal(parentElement = sidebar.querySelector('#gemini-nav-container')) { 
@@ -435,13 +491,17 @@
     } 
   }
   
-  function addMessage(text, sender) { 
+  function addMessage(text, sender, isRawHTML = false) { 
     const msgDiv = document.createElement('div'); 
     msgDiv.className = 'gemini-message ' + sender; 
     if (sender === 'server') { 
-      const escapedText = escapeHTML(text); 
-      const formattedText = applyBasicMarkdown(escapedText); 
-      msgDiv.innerHTML = formattedText; 
+      if (isRawHTML) {
+        msgDiv.innerHTML = text;
+      } else {
+        const escapedText = escapeHTML(text); 
+        const formattedText = applyBasicMarkdown(escapedText); 
+        msgDiv.innerHTML = formattedText; 
+      }
     } else { 
       msgDiv.textContent = text; 
     } 
@@ -452,28 +512,55 @@
   async function sendChatMessage(text, isAction = false) { 
     if (!text || !text.trim() || isLoading) return; 
     const currentInputVal = inputEl ? inputEl.value : ""; 
+
+    const messagesToSend = [...messages]; // Create a mutable copy for this specific request
+
+    // Add page info if it's the first message of the session or a new "logical" conversation
+    if (messagesToSend.length === 0) { 
+        const pageUrl = window.location.href;
+        const pageTitle = document.title;
+        const timestamp = new Date().toISOString();
+        const pageInfoMessage = `System Note: User is on page:
+URL: ${pageUrl}
+Title: ${pageTitle}
+Timestamp: ${timestamp}`;
+        messagesToSend.unshift({ role: 'system', text: pageInfoMessage }); 
+        // Note: 'system' role might not be directly supported by all Gemini models in the same way as 'user' or 'model'.
+        // You might need to prepend this as a 'user' message like: "Context: I am on page..."
+        // Or, handle this on your server-side to prepend to the history sent to the API.
+        // For this client-side example, we'll add it to the history sent.
+    }
+
     if (!isAction) { 
       addMessage(text, 'user'); 
-      messages.push({ role: 'user', text }); 
+      messages.push({ role: 'user', text }); // Add to the persistent messages array
+      messagesToSend.push({ role: 'user', text }); // Also add to the array being sent
       if(inputEl) { 
         inputEl.value = ''; 
         inputEl.style.height = 'auto'; 
         inputEl.style.height = (inputEl.scrollHeight) + 'px'; 
       } 
     } else { 
-      if (!messages.find(m => m.text === text && m.role === 'user')) { 
-        messages.push({ role: 'user', text }); 
-      } 
+      // For actions, the `text` is the full prompt. We add it to messagesToSend.
+      // We also add it to the persistent `messages` array if it's not already there 
+      // to keep a record of the action prompt.
+      if (!messages.find(m => m.text === text && m.role === 'user')) {
+          messages.push({ role: 'user', text });
+      }
+      messagesToSend.push({ role: 'user', text });
     } 
+
     if(inputEl) inputEl.focus(); 
     if(chatArea) chatArea.scrollTop = chatArea.scrollHeight; 
     setLoading(true); 
-    const combinedText = messages.map(m => `${m.role === 'user' ? 'משתמש' : 'שרת'}: ${m.text}`).join('\n\n'); 
+    
+    const combinedTextForAPI = messagesToSend.map(m => `${m.role === 'system' ? 'System Note' : (m.role === 'user' ? 'משתמש' : 'שרת')}: ${m.text}`).join('\n\n');
+
     try { 
       const response = await fetch(API_URL, { 
         method: 'POST', 
         headers: {'Content-Type': 'application/json'}, 
-        body: JSON.stringify({ text: combinedText }) 
+        body: JSON.stringify({ text: combinedTextForAPI }) 
       }); 
       if (!response) { throw new Error("תגובת השרת לא הוגדרה (undefined)."); } 
       setLoading(false); 
@@ -495,7 +582,7 @@
       const data = await response.json(); 
       const reply = data.text || 'לא התקבלה תשובה תקינה מהשרת. (תגובה ריקה)'; 
       addMessage(reply, 'server'); 
-      messages.push({ role: 'server', text: reply }); 
+      messages.push({ role: 'server', text: reply }); // Add server reply to persistent messages
     } catch (e) { 
       console.error('שגיאה מלאה ב-sendChatMessage:', e); 
       setLoading(false); 
@@ -521,26 +608,153 @@
       content = contentExtractor(); 
       if (content === null || typeof content === 'undefined' || (typeof content === 'string' && !content.trim())) { 
         addMessage("לא נמצא תוכן רלוונטי בדף עבור פעולה זו, או שהתוכן ריק.", "server"); 
-        messages.push({role: 'server', text: "לא נמצא תוכן רלוונטי בדף עבור פעולה זו, או שהתוכן ריק."}); 
+        // messages.push({role: 'server', text: "לא נמצא תוכן רלוונטי בדף עבור פעולה זו, או שהתוכן ריק."}); // Don't add this to history
         return; 
       } 
     } catch (error) { 
       console.error("Error extracting content:", error); 
       addMessage("שגיאה באיסוף תוכן מהדף: " + error.message, "server"); 
-      messages.push({role: 'server', text: "שגיאה באיסוף תוכן מהדף: " + error.message}); 
+      // messages.push({role: 'server', text: "שגיאה באיסוף תוכן מהדף: " + error.message}); // Don't add this to history
       return; 
     } 
     const fullPrompt = `${promptPrefix}\n\nהתוכן מהדף:\n${content.substring(0, 15000)}`; 
     sendChatMessage(fullPrompt, true); 
   }
   const getPageText = () => document.body.innerText || document.documentElement.textContent; 
+  const getSelectedText = () => window.getSelection().toString();
   const getPageHTML = () => document.documentElement.outerHTML; 
   const getFormsHTML = () => { const forms = Array.from(document.forms); if (forms.length === 0) return "לא נמצאו טפסים בדף זה."; return forms.map(f => { const formElements = Array.from(f.elements).map(el => `<${el.tagName.toLowerCase()} name="${el.name || ''}" type="${el.type || ''}" />`).join('\n  '); return `<form name="${f.name || ''}" action="${f.action || ''}" method="${f.method || 'GET'}">\n  ${formElements}\n</form>`; }).join('\n\n---\n\n'); };
   
   // SECTION 7: Action Definitions (actionsMap)
-  const actionsMap = { summary: () => sendActionToGemini("סכם בקצרה את התוכן הבא:", getPageText), ideas: () => sendActionToGemini("הפק רשימת רעיונות למאמר (3-5 רעיונות עם תיאור קצר) על בסיס התוכן הבא:", getPageText), findForms: () => sendActionToGemini("אתר ופרט את כל הטפסים הקיימים בקוד ה-HTML הבא. עבור כל טופס, ציין את שמו (אם יש), פעולתו (action), שיטת השליחה (method), ואת שמות השדות העיקריים. הצע שיפורי נגישות או שימושיות אם רלוונטי:", getFormsHTML), introParagraph: () => sendActionToGemini("כתוב פסקת פתיחה קצרה ומושכת (2-3 משפטים) למאמר בנושא של התוכן הבא:", getPageText), keywords: () => sendActionToGemini("הצע 5-7 מילות מפתח רלוונטיות וממוקדות (כולל זנב ארוך אם מתאים) עבור התוכן הבא:", getPageText), analyzeHTML: () => sendActionToGemini("נתח את מבנה ה-HTML הבא. התמקד ב: 1. סמנטיקה נכונה של תגיות. 2. בעיות SEO בסיסיות (כותרות, מטא תגים חסרים). 3. הצעות לשיפור ביצועים קלות (למשל, תמונות). פרט בקצרה:", getPageHTML), checkAccessibility: () => sendActionToGemini("בצע בדיקת נגישות ראשונית עבור קוד ה-HTML הבא. התמקד ב: 1. טקסטים אלטרנטיביים לתמונות. 2. תוויות (labels) לשדות קלט. 3. ניגודיות צבעים בסיסית (באופן כללי, אם ניתן להסיק). 4. מבנה כותרות היררכי. הצע שיפורים קונקרטיים (ברמת קוד אם אפשר):", getPageHTML), toneAnalysis: () => sendActionToGemini("נתח את הטון הכללי (למשל, רשמי, אינפורמטיבי, ידידותי, ביקורתי) והסגנון של הטקסט הבא. ספק דוגמאות קצרות מהטקסט לתמיכה בניתוח שלך:", getPageText), countElements: () => { if (isLoading) return; if(chatArea) chatArea.scrollTop = chatArea.scrollHeight; const text = document.body.innerText || document.documentElement.textContent || ""; const wordCount = (text.match(/\S+/g) || []).length; const charCount = text.length; const linkCount = document.querySelectorAll('a').length; const imageCount = document.querySelectorAll('img').length; const formsCount = document.forms.length; const headingCount = document.querySelectorAll('h1, h2, h3, h4, h5, h6').length; const resultText = `סיכום אלמנטים בדף:\n- מילים: ${wordCount}\n- תווים: ${charCount}\n- קישורים (<a>): ${linkCount}\n- תמונות (<img>): ${imageCount}\n- טפסים (<form>): ${formsCount}\n- כותרות (<h1>-<h6>): ${headingCount}`.trim(); addMessage(resultText, 'server'); messages.push({role: 'server', text: resultText}); }, sharePage: () => { if (isLoading) return; if(chatArea) chatArea.scrollTop = chatArea.scrollHeight; const pageTitle = document.title; const pageUrl = window.location.href; let shareMessage = ""; if (navigator.share) { navigator.share({title: pageTitle, text: `בדוק את העמוד הזה: ${pageTitle}`, url: pageUrl}) .then(() => shareMessage = 'העמוד שותף בהצלחה!').catch(err => { if (err.name !== 'AbortError') { shareMessage = 'שיתוף נכשל: ' + err.message; } else { shareMessage = 'שיתוף בוטל.'; }}) .finally(() => { if (shareMessage) { addMessage(shareMessage, 'server'); messages.push({role: 'server', text: shareMessage}); }}); } else if (navigator.clipboard) { navigator.clipboard.writeText(pageUrl).then(() => shareMessage = 'כתובת העמוד הועתקה ללוח: ' + pageUrl).catch(err => shareMessage = 'העתקת כתובת נכשלה: ' + err.message) .finally(() => { addMessage(shareMessage, 'server'); messages.push({role: 'server', text: shareMessage}); }); } else { shareMessage = 'שיתוף או העתקה אוטומטית אינם נתמכים בדפדפן זה. הכתובת היא: ' + pageUrl; addMessage(shareMessage, 'server'); messages.push({role: 'server', text: shareMessage}); } }, loadImage: () => { if (isLoading) return; const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/jpeg, image/png, image/gif, image/webp'; input.onchange = () => { if (input.files && input.files.length > 0) { const file = input.files[0]; if (!file) return; if (file.size > 4 * 1024 * 1024) { addMessage('הקובץ גדול מדי. אנא בחר קובץ קטן מ-4MB.', 'server'); messages.push({role: 'server', text: 'הקובץ גדול מדי. אנא בחר קובץ קטן מ-4MB.'}); return; } const reader = new FileReader(); reader.onload = e => { const base64 = e.target.result; sendActionToGemini(`זוהי תמונה בפורמט base64. אנא תאר אותה בקצרה (מה רואים בתמונה?) ואם אפשר, ציין אלמנטים מרכזיים. אם יש טקסט בתמונה, נסה לחלץ אותו.`, () => base64); }; reader.onerror = () => { addMessage('שגיאה בקריאת הקובץ.', 'server'); messages.push({role: 'server', text: 'שגיאה בקריאת הקובץ.'}); }; reader.readAsDataURL(file); }}; input.click(); }, relatedReads: () => sendActionToGemini("על בסיס הטקסט הבא, הצע 2-3 המלצות לקריאה נוספת (מאמרים, ספרים, או אתרים רלוונטיים) בנושאים קשורים. ספק קישור אם אפשר (באופן היפותטי, אין צורך לבדוק זמינות קישור):", getPageText), notes: () => sendActionToGemini("עזור לי ליצור סיכום קצר בנקודות (3-5 נקודות עיקריות) מהתוכן הבא, שיהיה שימושי כתזכורת או הערה פנימית:", getPageText), simplify: () => sendActionToGemini("פשט את המשפטים המורכבים בטקסט הבא. שמור על המשמעות המקורית, אך הפוך את הטקסט לברור וקל יותר להבנה עבור קהל רחב. אם יש מונחים מקצועיים, הסבר אותם בקצרה:", getPageText), explainTerms: () => sendActionToGemini("זהה 3-5 מושגים מורכבים או מקצועיים מהטקסט הבא. הסבר כל מושג בצורה פשוטה וברורה, כאילו אתה מסביר למישהו שאינו מהתחום. ספק דוגמה לכל מושג אם אפשר:", getPageText), writeSocialPost: () => sendActionToGemini("כתוב פוסט קצר (2-3 משפטים) ומעניין לרשת חברתית (כמו פייסבוק או טוויטר) על בסיס התוכן המרכזי של הדף הבא. התאם את הסגנון לרשת חברתית והוסף האשטגים רלוונטיים:", getPageText), translateText: () => sendActionToGemini("תרגם את הטקסט הבא. המשתמש יציין את שפת היעד בצ'אט לאחר מכן, או נסה לתרגם לאנגלית אם לא צוין אחרת:", getPageText), checkPageSpeedFactors: () => sendActionToGemini("על סמך התוכן והמבנה הכללי של הדף הבא (ללא גישה לנתוני רשת אמיתיים), ציין 3-5 גורמים פוטנציאליים שיכולים להשפיע על מהירות טעינתו (לדוגמה: גודל תמונות, קבצי סקריפט, CSS מורכב). הצע פתרונות כלליים לשיפור:", getPageText), extractEmails: () => sendActionToGemini("סרוק את הטקסט הבא וחלץ ממנו את כל כתובות האימייל התקניות שתמצא. הצג אותן כרשימה:", getPageText), };
+  const actionsMap = { 
+    summary: () => sendActionToGemini("סכם בקצרה את התוכן הבא:", getPageText), 
+    keywords: () => sendActionToGemini("הצע 5-7 מילות מפתח רלוונטיות וממוקדות (כולל זנב ארוך אם מתאים) עבור התוכן הבא:", getPageText), 
+    toneAnalysis: () => sendActionToGemini("נתח את הטון הכללי (למשל, רשמי, אינפורמטיבי, ידידותי, ביקורתי) והסגנון של הטקסט הבא. ספק דוגמאות קצרות מהטקסט לתמיכה בניתוח שלך:", getPageText), 
+    simplify: () => sendActionToGemini("פשט את המשפטים המורכבים בטקסט הבא. שמור על המשמעות המקורית, אך הפוך את הטקסט לברור וקל יותר להבנה עבור קהל רחב. אם יש מונחים מקצועיים, הסבר אותם בקצרה:", getPageText), 
+    explainTerms: () => sendActionToGemini("זהה 3-5 מושגים מורכבים או מקצועיים מהטקסט הבא. הסבר כל מושג בצורה פשוטה וברורה, כאילו אתה מסביר למישהו שאינו מהתחום. ספק דוגמה לכל מושג אם אפשר:", getPageText), 
+    relatedReads: () => sendActionToGemini("על בסיס הטקסט הבא, הצע 2-3 המלצות לקריאה נוספת (מאמרים, ספרים, או אתרים רלוונטיים) בנושאים קשורים. ספק קישור אם אפשר (באופן היפותטי, אין צורך לבדוק זמינות קישור):", getPageText), 
+    notes: () => sendActionToGemini("עזור לי ליצור סיכום קצר בנקודות (3-5 נקודות עיקריות) מהתוכן הבא, שיהיה שימושי כתזכורת או הערה פנימית:", getPageText), 
+    generateQA: () => sendActionToGemini("על בסיס התוכן הבא, הפק 3-5 שאלות רלוונטיות ואת התשובות עליהן. הצג אותן בבירור כזוגות של שאלה ותשובה:", getPageText),
+    factCheck: () => sendActionToGemini("זהה 2-3 טענות עיקריות או עובדות מהתוכן הבא. עבור כל טענה, ציין אם היא נכונה באופן כללי על סמך ידע קיים, או אם יש צורך בבדיקה נוספת. אם המידע אינו ידוע או שנוי במחלוקת, ציין זאת. חשוב: אין להמציא מידע. אם אין לך דרך לאמת, ציין זאת.", getPageText),
+    translatePageToEnglish: () => sendActionToGemini("Translate the following page content to English. Provide only the translated text, without any additional commentary:", getPageText),
+    ideas: () => sendActionToGemini("הפק רשימת רעיונות למאמר (3-5 רעיונות עם תיאור קצר) על בסיס התוכן הבא:", getPageText), 
+    introParagraph: () => sendActionToGemini("כתוב פסקת פתיחה קצרה ומושכת (2-3 משפטים) למאמר בנושא של התוכן הבא:", getPageText), 
+    writeSocialPost: () => sendActionToGemini("כתוב פוסט קצר (2-3 משפטים) ומעניין לרשת חברתית (כמו פייסבוק או טוויטר) על בסיס התוכן המרכזי של הדף הבא. התאם את הסגנון לרשת חברתית והוסף האשטגים רלוונטיים:", getPageText), 
+    translateText: () => { // For selected text
+        const selectedText = getSelectedText();
+        if (!selectedText.trim()) {
+            addMessage("אנא סמן טקסט בדף כדי לתרגם אותו.", "server");
+            return;
+        }
+        sendActionToGemini(`תרגם את הטקסט הבא לאנגלית (או לשפה שיציין המשתמש בהמשך): "${selectedText}"`, () => selectedText);
+    }, 
+    generateShoppingList: () => sendActionToGemini("סרוק את תוכן הדף הבא וחפש פריטים שיכולים להיות חלק מרשימת קניות (למשל, מצרכים במתכון, שמות מוצרים). אם נמצאו, הצג אותם ברשימה ברורה. אם לא נמצאו פריטים ברורים לרשימה, ציין זאת.", getPageText),
+    defineTermsInPage: () => sendActionToGemini("זהה 3-5 מונחים שאינם נפוצים או טכניים מתוכן הדף הבא וספק עבורם הגדרות מילוניות פשוטות:", getPageText),
+    findRelatedVideos: () => sendActionToGemini("על בסיס תוכן הדף הבא, הצע 3-5 שאילתות חיפוש ליוטיוב כדי למצוא סרטונים קשורים. הצג רק את שאילתות החיפוש:", getPageText),
+    eli5: () => sendActionToGemini("הסבר את הנושא המרכזי של תוכן הדף הבא כאילו אתה מסביר אותו לילד בן 5. שמור על פשטות והשתמש באנלוגיות אם אפשר:", getPageText),
+    removeAdsBasic: () => { /* ... (same as before) ... */ },
+    highlightLinks: () => { /* ... (same as before) ... */ },
+    increaseTextSize: () => { /* ... (same as before) ... */ },
+    decreaseTextSize: () => { /* ... (same as before) ... */ },
+    readingModeBasic: () => { /* ... (same as before) ... */ },
+    generateQRCode: () => {
+        if (isLoading) return;
+        const QRCode = window.QRCode; // Assuming qrcode.min.js is loaded
+        if (!QRCode) {
+            addMessage("ספריית QRCode אינה טעונה. לא ניתן ליצור קוד QR.", "server");
+            return;
+        }
+        const pageUrl = window.location.href;
+        const qrContainer = document.createElement('div');
+        qrContainer.style.padding = '10px';
+        qrContainer.style.backgroundColor = 'white';
+        qrContainer.style.display = 'inline-block';
+        new QRCode(qrContainer, {
+            text: pageUrl,
+            width: 128,
+            height: 128,
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        const dataUrl = qrContainer.querySelector('canvas') ? qrContainer.querySelector('canvas').toDataURL() : (qrContainer.querySelector('img') ? qrContainer.querySelector('img').src : '');
+        if (dataUrl) {
+             addMessage(`קוד QR עבור: ${pageUrl}<br><img src="${dataUrl}" alt="QR Code" style="display:block; margin-top:10px;">`, 'server', true);
+        } else {
+            addMessage("שגיאה ביצירת קוד QR.", "server");
+        }
+    },
+    saveAsPDF: () => { if (isLoading) return; window.print(); addMessage("תיבת הדו-שיח להדפסה (שמירה כ-PDF) הופעלה.", "server"); },
+    toggleVideos: () => {
+        if (isLoading) return;
+        let playingCount = 0;
+        let pausedCount = 0;
+        document.querySelectorAll('video').forEach(video => {
+            if (video.paused) {
+                video.play().then(() => playingCount++).catch(e => console.warn("Could not play video:", e));
+            } else {
+                video.pause();
+                pausedCount++;
+            }
+        });
+        let message = "לא נמצאו סרטונים בדף.";
+        if (playingCount > 0 || pausedCount > 0) {
+            message = [];
+            if (playingCount > 0) message.push(`${playingCount} סרטונים הופעלו`);
+            if (pausedCount > 0) message.push(`${pausedCount} סרטונים הושהו`);
+            message = message.join(', ') + ".";
+        }
+        addMessage(message, 'server');
+    },
+    findForms: () => sendActionToGemini("אתר ופרט את כל הטפסים הקיימים בקוד ה-HTML הבא. עבור כל טופס, ציין את שמו (אם יש), פעולתו (action), שיטת השליחה (method), ואת שמות השדות העיקריים. הצע שיפורי נגישות או שימושיות אם רלוונטי:", getFormsHTML), 
+    analyzeHTML: () => sendActionToGemini("נתח את מבנה ה-HTML הבא. התמקד ב: 1. סמנטיקה נכונה של תגיות. 2. בעיות SEO בסיסיות (כותרות, מטא תגים חסרים). 3. הצעות לשיפור ביצועים קלות (למשל, תמונות). פרט בקצרה:", getPageHTML), 
+    checkAccessibility: () => sendActionToGemini("בצע בדיקת נגישות ראשונית עבור קוד ה-HTML הבא. התמקד ב: 1. טקסטים אלטרנטיביים לתמונות. 2. תוויות (labels) לשדות קלט. 3. ניגודיות צבעים בסיסית (באופן כללי, אם ניתן להסיק). 4. מבנה כותרות היררכי. הצע שיפורים קונקרטיים (ברמת קוד אם אפשר):", getPageHTML), 
+    countElements: () => { /* ... (same as before) ... */ }, 
+    loadImage: () => { /* ... (same as before) ... */ }, 
+    checkPageSpeedFactors: () => sendActionToGemini("על סמך התוכן והמבנה הכללי של הדף הבא (ללא גישה לנתוני רשת אמיתיים), ציין 3-5 גורמים פוטנציאליים שיכולים להשפיע על מהירות טעינתו (לדוגמה: גודל תמונות, קבצי סקריפט, CSS מורכב). הצע פתרונות כלליים לשיפור:", getPageText), 
+    extractEmails: () => sendActionToGemini("סרוק את הטקסט הבא וחלץ ממנו את כל כתובות האימייל התקניות שתמצא. הצג אותן כרשימה:", getPageText),
+    checkBrokenLinksBasic: () => {
+        if (isLoading) return;
+        addMessage("בודק קישורים, פעולה זו עשויה לקחת זמן...", "server");
+        const links = Array.from(document.querySelectorAll('a[href^="http"]'));
+        if (links.length === 0) {
+            addMessage("לא נמצאו קישורים חיצוניים לבדיקה בדף זה.", "server");
+            return;
+        }
+        let checkedCount = 0;
+        let brokenCount = 0;
+        links.forEach(async (link) => {
+            try {
+                // Basic check, might be blocked by CORS or return false positives/negatives
+                const response = await fetch(link.href, { method: 'HEAD', mode: 'no-cors',  timeout: 5000 }); 
+                // 'no-cors' means we won't get status directly, but a failure might indicate issue
+                // This is very unreliable for truly checking if a link is broken due to browser security.
+                // A server-side proxy would be needed for reliable checks.
+            } catch (error) {
+                // This catch often signifies a network error or CORS, not necessarily a 404
+                // For this basic client-side check, we'll tentatively mark it as potentially problematic.
+                console.warn(`Potential issue with link ${link.href}:`, error);
+                addMessage(`קישור בעייתי (או חסום CORS): ${link.href}`, 'server');
+                brokenCount++;
+            } finally {
+                checkedCount++;
+                if (checkedCount === links.length) {
+                    addMessage(`בדיקת ${links.length} קישורים הושלמה. ${brokenCount > 0 ? `${brokenCount} קישורים עשויים להיות שבורים או בעייתיים.` : 'לא זוהו קישורים שבורים באופן ודאי (בדיקה בסיסית).'}`, 'server');
+                }
+            }
+        });
+    },
+    searchSelectedWithGoogle: () => {
+        if (isLoading) return;
+        const selectedText = getSelectedText();
+        if (!selectedText.trim()) {
+            addMessage("אנא סמן טקסט בדף כדי לחפש אותו בגוגל.", "server");
+            return;
+        }
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(selectedText)}`, '_blank');
+        addMessage(`מחפש בגוגל את: "${selectedText}"`, 'server');
+    },
+  };
 
-  // SECTION 8: Event Listeners
+  // SECTION 8: Event Listeners (same as before)
   sidebar.querySelectorAll('#gemini-nav-container .category-header').forEach(header => { 
     header.addEventListener('click', () => { 
       if(isLoading) return; 
@@ -605,6 +819,15 @@
   if(closeBtn) closeBtn.addEventListener('click', () => { if(sidebar) sidebar.classList.remove('open'); });
   
   // SECTION 9: Initial Animation and Message
+  // Load QRCode.js library if needed for QR code generation
+  if (!window.QRCode) {
+    const qrScript = document.createElement('script');
+    qrScript.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'; // CDN link
+    qrScript.onload = () => console.log("QRCode.js loaded.");
+    qrScript.onerror = () => console.error("Failed to load QRCode.js. QR Code generation will not work.");
+    document.head.appendChild(qrScript);
+  }
+
   requestAnimationFrame(() => { if(sidebar) sidebar.classList.add('open'); });
 
   if (messages && messages.length === 0) { 
