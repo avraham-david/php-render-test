@@ -1,353 +1,314 @@
-// bookmarklet-full.js
 (() => {
   if (window.__geminiSidebarRunning) return;
   window.__geminiSidebarRunning = true;
 
-  // --- עיצוב בסיסי + אנימציות ---
   const styleContent = `
-  /* עיצוב תפריט צד */
   #gemini-sidebar {
     direction: rtl;
     position: fixed;
-    top: 0;
-    right: 0;
-    width: 320px;
+    top: 0; right: 0;
+    width: 400px;
     height: 100vh;
-    background: #1e3a8a;
-    box-shadow: -4px 0 12px rgba(0,0,0,0.3);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: white;
+    color: #f0f4ff;
     z-index: 100000;
     display: flex;
     flex-direction: column;
     transform: translateX(100%);
     transition: transform 0.3s ease;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
   }
   #gemini-sidebar.open {
     transform: translateX(0);
   }
   #gemini-sidebar header {
-    padding: 16px;
-    font-size: 1.2rem;
+    padding: 18px 20px;
+    font-size: 1.3rem;
     font-weight: 700;
-    background: #3749a3;
+    background: rgba(255 255 255 / 0.15);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-top-left-radius: 10px;
   }
   #gemini-sidebar header button.close-btn {
     background: transparent;
     border: none;
-    color: white;
-    font-size: 1.5rem;
+    color: #f0f4ff;
+    font-size: 1.8rem;
     cursor: pointer;
     padding: 0;
+    transition: color 0.2s ease;
+  }
+  #gemini-sidebar header button.close-btn:hover {
+    color: #ffd700;
+  }
+  #gemini-sidebar main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   #gemini-sidebar nav {
-    flex-grow: 1;
+    flex-shrink: 0;
+    background: rgba(255 255 255 / 0.1);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 12px;
+    justify-content: flex-start;
     overflow-y: auto;
+    max-height: 120px;
+    border-bottom: 1px solid rgba(255 255 255 / 0.2);
   }
   #gemini-sidebar nav button {
-    width: 100%;
     border: none;
-    background: none;
-    padding: 14px 18px;
-    font-size: 1rem;
-    color: white;
-    text-align: right;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255 255 255 / 0.25);
+    color: #e0e7ff;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    border-radius: 20px;
     cursor: pointer;
-    transition: background 0.2s;
+    font-weight: 600;
+    transition: background 0.3s ease, transform 0.15s ease;
+    user-select: none;
   }
   #gemini-sidebar nav button:hover {
-    background: #3b82f6;
+    background: rgba(255 255 255 / 0.45);
+    transform: scale(1.07);
   }
-  #gemini-sidebar footer {
-    padding: 12px 16px;
-    font-size: 0.85rem;
-    background: #2c438d;
-    text-align: center;
-  }
-  /* אנימציה לכפתורים */
   #gemini-sidebar nav button:active {
     transform: scale(0.95);
-    background: #2563eb;
   }
-  /* פופאפ תוצאות */
-  #gemini-popup-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(3px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 110000;
-    animation: fadeIn 0.3s ease forwards;
-  }
-  #gemini-popup {
-    background: #E1F5FE;
-    color: #1f2937;
-    border-radius: 20px;
-    box-shadow: 0 12px 48px rgba(0,0,0,0.3);
-    max-width: 90vw;
-    max-height: 80vh;
+  #gemini-chat {
+    flex-grow: 1;
+    background: rgba(255 255 255 / 0.07);
+    padding: 14px 16px;
     overflow-y: auto;
-    padding: 24px 28px 40px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 0.92rem;
+    scrollbar-width: thin;
+    scrollbar-color: #a3bffa transparent;
+  }
+  #gemini-chat::-webkit-scrollbar {
+    width: 8px;
+  }
+  #gemini-chat::-webkit-scrollbar-thumb {
+    background-color: #a3bffa;
+    border-radius: 4px;
+  }
+  .gemini-message {
+    max-width: 75%;
+    padding: 14px 18px;
+    border-radius: 22px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    user-select: text;
+    transition: background-color 0.3s ease;
+  }
+  .gemini-message.user {
+    background: #1e40af;
+    align-self: flex-end;
+    border-bottom-right-radius: 6px;
+    color: #dbeafe;
+  }
+  .gemini-message.server {
+    background: #3b82f6;
+    align-self: flex-start;
+    border-bottom-left-radius: 6px;
+    color: #f0f9ff;
+  }
+  #gemini-input-area {
+    background: rgba(255 255 255 / 0.15);
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+  #gemini-input-area textarea {
+    resize: none;
+    flex-grow: 1;
+    border-radius: 20px;
+    border: none;
+    padding: 12px 16px;
+    font-size: 1rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    direction: rtl;
-    text-align: right;
-    position: relative;
-    animation: popupScaleIn 0.3s ease forwards;
+    min-height: 38px;
+    max-height: 120px;
+    background: rgba(255 255 255 / 0.3);
+    color: #0f172a;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;
   }
-  #gemini-popup pre {
-    background: #1f2937;
-    color: #e0e7ff;
-    padding: 12px;
-    border-radius: 12px;
-    overflow-x: auto;
-    font-size: 0.9rem;
+  #gemini-input-area textarea:focus {
+    outline: none;
+    background: #ffffff;
   }
-  #gemini-popup button.close-popup {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: none;
+  #gemini-input-area button.send-btn {
+    background: #2563eb;
     border: none;
-    font-size: 1.6rem;
+    border-radius: 20px;
+    color: white;
+    font-weight: 700;
+    padding: 0 22px;
     cursor: pointer;
-    color: #ef4444;
+    font-size: 1.1rem;
+    user-select: none;
+    transition: background-color 0.3s ease, transform 0.15s ease;
   }
-  #gemini-popup button.copy-text {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    cursor: pointer;
-    color: #2563eb;
+  #gemini-input-area button.send-btn:hover {
+    background: #1e40af;
   }
-  /* Keyframes */
-  @keyframes fadeIn {
-    from {opacity: 0;}
-    to {opacity: 1;}
+  #gemini-input-area button.send-btn:active {
+    transform: scale(0.9);
   }
-  @keyframes popupScaleIn {
-    from {opacity: 0; transform: scale(0.95);}
-    to {opacity: 1; transform: scale(1);}
+  #gemini-sidebar footer {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    background: rgba(255 255 255 / 0.12);
+    text-align: center;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    color: #dbeafe;
+    user-select: none;
   }
   `;
 
-  // --- הוספת style לדף ---
   const styleTag = document.createElement('style');
   styleTag.textContent = styleContent;
   document.head.appendChild(styleTag);
 
-  // --- יצירת אלמנטים ---
   const sidebar = document.createElement('aside');
   sidebar.id = 'gemini-sidebar';
 
   sidebar.innerHTML = `
     <header>
-      <div>תפריט Gemini חכם</div>
+      <div>תפריט Gemini חכם + צ'אט</div>
       <button class="close-btn" title="סגור תפריט">✖</button>
     </header>
-    <nav>
-      <button data-action="summary">סכם את הדף</button>
-      <button data-action="ideas">הפק רעיונות למאמר</button>
-      <button data-action="findForms">איתור טפסים בדף</button>
-      <button data-action="introParagraph">כתוב פסקת פתיחה למאמר</button>
-      <button data-action="keywords">הצעת מילות מפתח</button>
-      <button data-action="analyzeHTML">ניתוח מבנה HTML</button>
-      <button data-action="checkAccessibility">בדיקת נגישות</button>
-      <button data-action="toneAnalysis">ניתוח טון כתיבה</button>
-      <button data-action="countElements">ספירת מילים, תווים וקישורים</button>
-      <button data-action="sharePage">שיתוף עמוד</button>
-      <button data-action="loadImage">טעינת תמונה ושליחה</button>
-    </nav>
+    <main>
+      <nav>
+        <button data-action="summary">סכם את הדף</button>
+        <button data-action="ideas">הפק רעיונות למאמר</button>
+        <button data-action="findForms">איתור טפסים בדף</button>
+        <button data-action="introParagraph">כתוב פסקת פתיחה</button>
+        <button data-action="keywords">מילות מפתח</button>
+        <button data-action="analyzeHTML">ניתוח HTML</button>
+        <button data-action="checkAccessibility">בדיקת נגישות</button>
+        <button data-action="toneAnalysis">ניתוח טון</button>
+        <button data-action="countElements">מילים, תווים, קישורים</button>
+        <button data-action="sharePage">שיתוף עמוד</button>
+        <button data-action="loadImage">טעינת תמונה</button>
+        <button data-action="relatedReads">קריאה נוספת</button>
+        <button data-action="notes">תזכורות/הערות</button>
+        <button data-action="simplify">פשט משפטים</button>
+        <button data-action="explainTerms">הסבר מושגים</button>
+      </nav>
+      <section id="gemini-chat" aria-label="אזור צ'אט עם Gemini API" role="log" aria-live="polite"></section>
+      <div id="gemini-input-area">
+        <textarea id="gemini-input" placeholder="כתוב הודעה..." rows="1" aria-label="הודעה לצ'אט"></textarea>
+        <button class="send-btn" title="שלח הודעה">שלח</button>
+      </div>
+    </main>
     <footer>Powered by Gemini API</footer>
   `;
 
   document.body.appendChild(sidebar);
+  setTimeout(() => sidebar.classList.add('open'), 100);
 
-  // --- פוקוס פתיחה ואנימציה ---
-  setTimeout(() => sidebar.classList.add('open'), 10);
+  const chatArea = sidebar.querySelector('#gemini-chat');
+  const inputEl = sidebar.querySelector('#gemini-input');
+  const sendBtn = sidebar.querySelector('.send-btn');
+  const closeBtn = sidebar.querySelector('.close-btn');
 
-  // --- כפתור סגירה ---
-  sidebar.querySelector('button.close-btn').onclick = () => {
-    sidebar.classList.remove('open');
-    setTimeout(() => {
-      sidebar.remove();
-      styleTag.remove();
-      window.__geminiSidebarRunning = false;
-    }, 300);
-  };
+  // מערך שמירת ההודעות
+  const messages = [];
 
-  // --- פופאפ תוצאות ---
-  function showPopup(text) {
-    // אם כבר קיים, לא נפתח פופאפ נוסף
-    if (document.getElementById('gemini-popup-overlay')) return;
-
-    const overlay = document.createElement('div');
-    overlay.id = 'gemini-popup-overlay';
-
-    const popup = document.createElement('div');
-    popup.id = 'gemini-popup';
-
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'close-popup';
-    closeBtn.title = 'סגור';
-    closeBtn.textContent = '✖';
-    closeBtn.onclick = () => overlay.remove();
-
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'copy-text';
-    copyBtn.title = 'העתק טקסט';
-    copyBtn.textContent = '📋';
-    copyBtn.onclick = () => {
-      navigator.clipboard.writeText(text).then(() => {
-        copyBtn.textContent = '✅';
-        setTimeout(() => (copyBtn.textContent = '📋'), 1500);
-      });
-    };
-
-    const content = document.createElement('div');
-    content.style.whiteSpace = 'pre-wrap';
-    content.style.marginTop = '32px';
-    content.textContent = text;
-
-    popup.appendChild(closeBtn);
-    popup.appendChild(copyBtn);
-    popup.appendChild(content);
-    overlay.appendChild(popup);
-    document.body.appendChild(overlay);
-
-    // סגירה עם ESC
-    overlay.tabIndex = 0;
-    overlay.focus();
-    overlay.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') overlay.remove();
-    });
+  function addMessage(text, sender) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'gemini-message ' + sender;
+    msgDiv.textContent = text;
+    chatArea.appendChild(msgDiv);
+    chatArea.scrollTop = chatArea.scrollHeight;
   }
 
-  // --- שליחה ל-Gemini ---
-  async function sendToGemini(prompt) {
+  async function sendChatMessage(text) {
+    if (!text.trim()) return;
+    addMessage(text, 'user');
+    messages.push({ role: 'user', text });
+
+    // שולח את כל ההודעות בבת אחת כדי לשמור על הקשר השיחתי
+    const combinedText = messages.map(m => `${m.role === 'user' ? 'משתמש:' : 'שרת:'} ${m.text}`).join('\n\n');
+
     try {
       const response = await fetch('https://php-render-test.onrender.com/main-ai.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: prompt }),
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ prompt: combinedText })
       });
-      const json = await response.json();
-      if (json && json.text) {
-        showPopup(json.text);
-      } else {
-        showPopup('❌ לא התקבלה תשובה תקינה מהשרת.');
-      }
+      if (!response.ok) throw new Error('שרת לא הגיב כשורה');
+
+      const data = await response.json();
+      const reply = data.choices?.[0]?.message?.content || data.answer || 'אין תגובה מהשרת.';
+
+      addMessage(reply, 'server');
+      messages.push({ role: 'server', text: reply });
+
     } catch (e) {
-      showPopup('❌ שגיאה בתקשורת עם השרת.');
-      console.error(e);
+      addMessage('שגיאה בשליחת ההודעה: ' + e.message, 'server');
     }
   }
 
-  // --- פונקציות פעולה ---
+  // פעולות מתוך התפריט
+  function sendToGemini(prompt) {
+    sendChatMessage(prompt);
+  }
 
-  // סיכום דף
   function actionSummary() {
-    const prompt = `
-אתה עוזר חכם. סכם את תוכן הדף הבא בצורה מפורטת, מקצועית ונהירה:
-${document.body.innerText}
-    `;
-    sendToGemini(prompt);
+    sendToGemini(`אתה עוזר חכם. סכם בקצרה את התוכן בדף הבא:\n${document.body.innerText}`);
   }
-
-  // הפקת רעיונות למאמר
   function actionIdeas() {
-    const prompt = `
-אתה עוזר חכם. קרא את תוכן הדף הבא והפק עבורי לפחות 15 רעיונות למאמרים רלוונטיים, כולל נקודות משנה לכל רעיון:
-${document.body.innerText}
-    `;
-    sendToGemini(prompt);
+    sendToGemini(`אתה עוזר חכם. הפק רשימת רעיונות למאמר על בסיס הדף הבא:\n${document.body.innerText}`);
   }
-
-  // איתור טפסים
   function actionFindForms() {
-    // לא רק טפסים, נשלח גם את קוד ה-HTML עם הסבר
-    const prompt = `
-אתה עוזר חכם. אתר את כל הטפסים בדף הבא, פרט מה תפקיד כל שדה בטופס ומהם סוגי הקלטים. הנה הקוד:
-${document.documentElement.outerHTML}
-    `;
-    sendToGemini(prompt);
+    const formsHTML = Array.from(document.forms).map(f => f.outerHTML).join('\n\n');
+    sendToGemini(`אתה עוזר חכם. איתר ופרט את כל הטפסים הקיימים בדף הבא, והצע שיפורים אם אפשר:\n${formsHTML}`);
   }
-
-  // כתיבת פסקת פתיחה
   function actionIntroParagraph() {
-    const prompt = `
-אתה עוזר חכם. כתוב פסקת פתיחה מעניינת למאמר בנושא של הדף הבא:
-${document.body.innerText}
-    `;
-    sendToGemini(prompt);
+    sendToGemini(`אתה עוזר חכם. כתוב פסקת פתיחה מעניינת למאמר בנושא של הדף הבא:\n${document.body.innerText}`);
   }
-
-  // הצעת מילות מפתח
   function actionKeywords() {
-    const prompt = `
-אתה עוזר חכם. הצע מילות מפתח רלוונטיות וממוקדות לדף הבא:
-${document.body.innerText}
-    `;
-    sendToGemini(prompt);
+    sendToGemini(`אתה עוזר חכם. הצע מילות מפתח רלוונטיות וממוקדות לדף הבא:\n${document.body.innerText}`);
   }
-
-  // ניתוח מבנה HTML
   function actionAnalyzeHTML() {
-    const prompt = `
-אתה עוזר חכם. נתח את מבנה ה-HTML הבא, פרט בעיות אפשריות ועצות לשיפור:
-${document.documentElement.outerHTML}
-    `;
-    sendToGemini(prompt);
+    sendToGemini(`אתה עוזר חכם. נתח את מבנה ה-HTML הבא, פרט בעיות אפשריות ועצות לשיפור:\n${document.documentElement.outerHTML}`);
   }
-
-  // בדיקת נגישות
   function actionCheckAccessibility() {
-    const prompt = `
-אתה עוזר חכם. בצע בדיקת נגישות ראשונית עבור הדף הבא והצע שיפורים:
-${document.documentElement.outerHTML}
-    `;
-    sendToGemini(prompt);
+    sendToGemini(`אתה עוזר חכם. בצע בדיקת נגישות ראשונית עבור הדף הבא והצע שיפורים:\n${document.documentElement.outerHTML}`);
   }
-
-  // ניתוח טון כתיבה
   function actionToneAnalysis() {
-    const prompt = `
-אתה עוזר חכם. נתח את הטון והסגנון של הטקסט בדף הבא:
-${document.body.innerText}
-    `;
-    sendToGemini(prompt);
+    sendToGemini(`אתה עוזר חכם. נתח את הטון והסגנון של הטקסט בדף הבא:\n${document.body.innerText}`);
   }
-
-  // ספירת מילים, תווים וקישורים
   function actionCountElements() {
     const wordCount = document.body.innerText.trim().split(/\s+/).length;
     const charCount = document.body.innerText.length;
     const linkCount = document.querySelectorAll('a').length;
-    const msg = `מספר מילים בדף: ${wordCount}\nמספר תווים: ${charCount}\nמספר קישורים: ${linkCount}`;
-    showPopup(msg);
+    alert(`מספר מילים בדף: ${wordCount}\nמספר תווים: ${charCount}\nמספר קישורים: ${linkCount}`);
   }
-
-  // שיתוף עמוד
   function actionSharePage() {
     if (navigator.share) {
-      navigator.share({
-        title: document.title,
-        url: window.location.href
-      }).catch(err => alert('שיתוף נכשל: ' + err));
+      navigator.share({title: document.title, url: window.location.href}).catch(err => alert('שיתוף נכשל: ' + err));
     } else {
       prompt('העתק את כתובת העמוד:', window.location.href);
     }
   }
-
-  // טעינת תמונה ושליחה
   function actionLoadImage() {
     const input = document.createElement('input');
     input.type = 'file';
@@ -355,19 +316,30 @@ ${document.body.innerText}
     input.onchange = () => {
       const file = input.files[0];
       if (!file) return;
-
       const reader = new FileReader();
-      reader.onload = async (e) => {
+      reader.onload = e => {
         const base64 = e.target.result;
-        const prompt = `הנה תמונה בקוד בסיס64:\n${base64}\nאנא נתח את התמונה או בצע פעולות לפי בקשת המשתמש.`;
-        sendToGemini(prompt);
+        sendToGemini(`הנה תמונה בקוד בסיס64:\n${base64}\nאנא נתח את התמונה או בצע פעולות לפי בקשת המשתמש.`);
       };
       reader.readAsDataURL(file);
     };
     input.click();
   }
 
-  // --- ניהול אירועים לכפתורים ---
+  // הפונקציות החדשות שהוספנו
+  function actionRelatedReads() {
+    sendToGemini(`הצע המלצות לקריאה נוספת בנושאים קשורים לטקסט הבא:\n${document.body.innerText}`);
+  }
+  function actionNotes() {
+    sendToGemini(`עזור לי ליצור תזכורות או הערות פנימיות שימושיות מהתוכן הבא:\n${document.body.innerText}`);
+  }
+  function actionSimplify() {
+    sendToGemini(`זיהוי משפטים מסובכים ושכתוב שלהם לפשטות, על בסיס הטקסט הבא:\n${document.body.innerText}`);
+  }
+  function actionExplainTerms() {
+    sendToGemini(`הסבר בצורה פשוטה וברורה את המושגים המרכזיים בטקסט הבא:\n${document.body.innerText}`);
+  }
+
   sidebar.querySelectorAll('nav button').forEach(btn => {
     btn.addEventListener('click', e => {
       const action = btn.dataset.action;
@@ -383,8 +355,39 @@ ${document.body.innerText}
         case 'countElements': actionCountElements(); break;
         case 'sharePage': actionSharePage(); break;
         case 'loadImage': actionLoadImage(); break;
+        case 'relatedReads': actionRelatedReads(); break;
+        case 'notes': actionNotes(); break;
+        case 'simplify': actionSimplify(); break;
+        case 'explainTerms': actionExplainTerms(); break;
       }
     });
+  });
+
+  // אירועים בצ'אט
+  function resizeTextarea() {
+    inputEl.style.height = 'auto';
+    inputEl.style.height = inputEl.scrollHeight + 'px';
+  }
+  inputEl.addEventListener('input', resizeTextarea);
+  resizeTextarea();
+
+  sendBtn.addEventListener('click', () => {
+    sendChatMessage(inputEl.value);
+    inputEl.value = '';
+    resizeTextarea();
+  });
+
+  inputEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendBtn.click();
+    }
+  });
+
+  closeBtn.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    setTimeout(() => sidebar.remove(), 300);
+    window.__geminiSidebarRunning = false;
   });
 
 })();
